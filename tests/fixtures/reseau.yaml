@@ -1,0 +1,43 @@
+# Maison de démonstration (fictive) — format « fichiers de la maison ».
+# Adresses privées et plages de documentation uniquement (RFC 1918, RFC 5737).
+internet:
+  fai: FAI Démo (fibre)
+  box: Box Démo — 192.168.1.254
+  ip_publique: 198.51.100.23
+vlans:
+- {id: Admin, tag: —, reseau: 192.168.10.0/24, role: "Routeur, switch, points d'accès", acces: Total, couleur: '#607d8b'}
+- {id: Serveurs, tag: 50, reseau: 192.168.50.0/24, role: Domotique et NAS, acces: Total, couleur: '#2196f3'}
+- {id: Famille, tag: 20, reseau: 192.168.20.0/24, role: "Ordinateurs, téléphones, télévision", acces: Tout sauf Admin, couleur: '#4caf50'}
+- {id: Objets, tag: 30, reseau: 192.168.30.0/24, role: Objets connectés isolés, acces: "Joint la domotique ; Internet sur exceptions", couleur: '#ff9800'}
+- {id: Invités, tag: 40, reseau: 192.168.40.0/24, role: Wi-Fi invités, acces: Internet seul, couleur: '#9c27b0'}
+- {id: VPN, tag: —, reseau: 10.8.0.0/24, role: Accès à distance, acces: Total, couleur: '#3f51b5'}
+switch_ports:
+  1: Serveur de virtualisation
+  2: Serveur domotique
+  3: Caméra entrée
+  4: Caméra jardin
+  6: Module de mesure
+  8: Point d'accès salon
+  9: Point d'accès étage
+  10: Ordinateur bureau
+  24: Routeur
+  25: NAS (SFP+)
+equipements:
+- {nom: Routeur pare-feu, ip: 192.168.10.1, mac: '02:00:5e:10:00:01', vlan: Admin, port: 24, type: routeur}
+- {nom: Switch principal 24 ports PoE, ip: 192.168.10.2, mac: '02:00:5e:10:00:02', vlan: Admin, type: switch}
+- {nom: Serveur de virtualisation, ip: 192.168.10.5, mac: '02:00:5e:10:00:05', vlan: Admin, port: 1, type: serveur}
+- {nom: Point d'accès salon, ip: 192.168.10.11, mac: '02:00:5e:10:00:11', vlan: Admin, port: 8, type: antenne}
+- {nom: Point d'accès étage, ip: 192.168.10.12, mac: '02:00:5e:10:00:12', vlan: Admin, port: 9, type: antenne}
+- {nom: Serveur domotique, ip: 192.168.50.10, mac: '02:00:5e:50:00:10', vlan: Serveurs, port: 2, type: serveur}
+- {nom: NAS, ip: 192.168.50.20, mac: '02:00:5e:50:00:20', vlan: Serveurs, port: 25}
+- {nom: Ordinateur bureau, ip: 192.168.20.30, mac: '02:00:5e:20:00:30', vlan: Famille, port: 10, type: ordinateur}
+- {nom: Téléviseur salon, ip: 192.168.20.40, mac: '02:00:5e:20:00:40', vlan: Famille, port: 8}
+- {nom: Téléphone (Wi-Fi), ip: 192.168.20.50, mac: '02:00:5e:20:00:50', vlan: Famille, port: 8, type: téléphone}
+- {nom: Caméra entrée, ip: 192.168.30.10, mac: '02:00:5e:30:00:10', vlan: Objets, port: 3}
+- {nom: Caméra jardin, ip: 192.168.30.11, mac: '02:00:5e:30:00:11', vlan: Objets, port: 4}
+- {nom: Sonnette vidéo (hors ligne), ip: 192.168.30.12, mac: '02:00:5e:30:00:12', vlan: Objets, type: camera}
+- {nom: Thermostat connecté, ip: 192.168.30.20, mac: '02:00:5e:30:00:20', vlan: Objets, port: 8, type: iot}
+- {nom: Prise connectée cuisine, ip: 192.168.30.21, mac: '02:00:5e:30:00:21', vlan: Objets, port: 8, type: iot}
+- {nom: Module de mesure électrique, ip: 192.168.30.25, mac: '02:00:5e:30:00:25', vlan: Objets, port: 6, type: iot}
+- {nom: Station météo (Wi-Fi), ip: 192.168.30.40, mac: '02:00:5e:30:00:40', vlan: Objets, port: 9, type: iot}
+- {nom: Imprimante (Wi-Fi), ip: 192.168.30.50, mac: '02:00:5e:30:00:50', vlan: Objets, port: 8, type: imprimante}

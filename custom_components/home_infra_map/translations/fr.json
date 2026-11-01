@@ -1,0 +1,251 @@
+{
+  "title": "Home Infra Map",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Bienvenue",
+        "description": "Home Infra Map documente vos tableaux électriques et votre réseau. Le reste est facultatif.",
+        "data": {
+          "house_name": "Nom de la maison"
+        }
+      },
+      "opnsense": {
+        "title": "Source : OPNsense",
+        "description": "Facultatif. Utilisateur d'API en lecture seule (droits exacts dans le README). Accepte http://ip:port ou https://hôte.\n\nDroits manquants :\n{privileges}",
+        "data": {
+          "url": "URL d'OPNsense (vide = ignorer)",
+          "api_key": "Clé d'API",
+          "api_secret": "Secret d'API",
+          "verify_ssl": "Vérifier le certificat"
+        }
+      },
+      "snmp": {
+        "title": "Source : switch SNMP",
+        "description": "Facultatif. Accès SNMP en lecture seule à un switch (v3 recommandé). Testé en lisant sysName.",
+        "data": {
+          "host": "Hôte du switch (vide = ignorer)",
+          "port": "Port SNMP",
+          "version": "Version SNMP",
+          "community": "Communauté (v2c)",
+          "username": "Utilisateur (v3)",
+          "auth_protocol": "Protocole d'authentification (v3)",
+          "auth_key": "Mot de passe d'authentification (v3)",
+          "priv_protocol": "Protocole de chiffrement (v3)",
+          "priv_key": "Mot de passe de chiffrement (v3)"
+        }
+      },
+      "finish": {
+        "title": "Terminer",
+        "description": "C'est prêt. Droits OPNsense facultatifs manquants (fonctions désactivées) :\n{privileges}",
+        "data": {
+          "import_from_opnsense": "Importer les VLAN et les réservations DHCP depuis OPNsense"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "OPNsense injoignable. Vérifiez l'URL (http/https et port).",
+      "invalid_auth": "OPNsense refuse la clé ou le secret (401).",
+      "missing_privileges": "Il manque un droit à l'utilisateur d'API (403). Manquant : {privileges}",
+      "missing_credentials": "La clé et le secret sont obligatoires.",
+      "snmp_failed": "Pas de réponse SNMP (hôte, identifiants ou protocoles ?).",
+      "snmp_missing_user": "SNMPv3 nécessite un utilisateur.",
+      "snmp_missing_community": "SNMPv2c nécessite une communauté.",
+      "snmp_missing_host": "Indiquez l'hôte du switch.",
+      "snmp_short_key": "Les mots de passe SNMPv3 font au moins 8 caractères."
+    },
+    "abort": {
+      "already_configured": "Home Infra Map est déjà configuré.",
+      "single_instance_allowed": "Home Infra Map est déjà configuré."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "menu_options": {
+          "settings": "Intervalles et affichage",
+          "opnsense": "Source OPNsense",
+          "snmp_add": "Ajouter un switch SNMP",
+          "snmp_remove": "Retirer des switchs SNMP"
+        }
+      },
+      "settings": {
+        "title": "Intervalles et affichage",
+        "data": {
+          "ping_interval_s": "Intervalle de ping",
+          "snmp_interval_s": "Intervalle SNMP",
+          "opnsense_interval_s": "Intervalle OPNsense",
+          "default_view": "Vue par défaut de la carte",
+          "firewall_analysis": "Analyse du pare-feu"
+        }
+      },
+      "opnsense": {
+        "title": "Source : OPNsense",
+        "description": "Facultatif. Utilisateur d'API en lecture seule (droits exacts dans le README). Accepte http://ip:port ou https://hôte.\n\nDroits manquants :\n{privileges}",
+        "data": {
+          "url": "URL d'OPNsense (vide = ignorer)",
+          "api_key": "Clé d'API",
+          "api_secret": "Secret d'API",
+          "verify_ssl": "Vérifier le certificat"
+        }
+      },
+      "snmp_add": {
+        "title": "Source : switch SNMP",
+        "description": "Facultatif. Accès SNMP en lecture seule à un switch (v3 recommandé). Testé en lisant sysName.",
+        "data": {
+          "host": "Hôte du switch (vide = ignorer)",
+          "port": "Port SNMP",
+          "version": "Version SNMP",
+          "community": "Communauté (v2c)",
+          "username": "Utilisateur (v3)",
+          "auth_protocol": "Protocole d'authentification (v3)",
+          "auth_key": "Mot de passe d'authentification (v3)",
+          "priv_protocol": "Protocole de chiffrement (v3)",
+          "priv_key": "Mot de passe de chiffrement (v3)"
+        }
+      },
+      "snmp_remove": {
+        "title": "Retirer des switchs SNMP",
+        "data": {
+          "sources": "Switchs à retirer"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "OPNsense injoignable. Vérifiez l'URL (http/https et port).",
+      "invalid_auth": "OPNsense refuse la clé ou le secret (401).",
+      "missing_privileges": "Il manque un droit à l'utilisateur d'API (403). Manquant : {privileges}",
+      "missing_credentials": "La clé et le secret sont obligatoires.",
+      "snmp_failed": "Pas de réponse SNMP (hôte, identifiants ou protocoles ?).",
+      "snmp_missing_user": "SNMPv3 nécessite un utilisateur.",
+      "snmp_missing_community": "SNMPv2c nécessite une communauté.",
+      "snmp_missing_host": "Indiquez l'hôte du switch.",
+      "snmp_short_key": "Les mots de passe SNMPv3 font au moins 8 caractères."
+    }
+  },
+  "selector": {
+    "snmp_version": {
+      "options": {
+        "v2c": "v2c",
+        "v3": "v3"
+      }
+    },
+    "auth_protocol": {
+      "options": {
+        "none": "Aucun",
+        "md5": "MD5",
+        "sha": "SHA",
+        "sha224": "SHA224",
+        "sha256": "SHA256",
+        "sha384": "SHA384",
+        "sha512": "SHA512"
+      }
+    },
+    "priv_protocol": {
+      "options": {
+        "none": "Aucun",
+        "des": "DES",
+        "3des": "3DES",
+        "aes": "AES",
+        "aes192": "AES192",
+        "aes256": "AES256"
+      }
+    },
+    "default_view": {
+      "options": {
+        "electricity": "Électricité",
+        "network": "Réseau"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "online": {
+        "name": "En ligne"
+      },
+      "tcp": {
+        "name": "Port {port}"
+      }
+    },
+    "sensor": {
+      "latency": {
+        "name": "Latence"
+      },
+      "switch_port": {
+        "name": "Port switch"
+      },
+      "blocks": {
+        "name": "Blocages"
+      },
+      "port": {
+        "name": "Port {port}",
+        "state": {
+          "up": "Actif",
+          "down": "Inactif"
+        }
+      },
+      "row_power": {
+        "name": "{row} puissance"
+      },
+      "board_power": {
+        "name": "Puissance"
+      }
+    }
+  },
+  "issues": {
+    "device_offline": {
+      "title": "{name} est hors ligne",
+      "description": "{name} ({host}) ne répond plus depuis plus de {minutes} minutes."
+    }
+  },
+  "exceptions": {
+    "not_configured": {
+      "message": "Home Infra Map n'est pas configuré."
+    },
+    "path_outside_config": {
+      "message": "Le chemin {path} est en dehors du dossier de configuration."
+    },
+    "import_failed": {
+      "message": "Import impossible : {error}"
+    },
+    "file_unreadable": {
+      "message": "Impossible de lire {path}."
+    }
+  },
+  "services": {
+    "import_yaml": {
+      "name": "Importer un YAML",
+      "description": "Importe les tableaux et/ou le réseau depuis un fichier YAML de /config (export natif ou format des fichiers de la maison).",
+      "fields": {
+        "path": {
+          "name": "Chemin",
+          "description": "Chemin relatif à /config."
+        }
+      }
+    },
+    "export_yaml": {
+      "name": "Exporter en YAML",
+      "description": "Exporte toute la documentation en YAML (renvoyée, et écrite si un chemin est donné).",
+      "fields": {
+        "path": {
+          "name": "Chemin",
+          "description": "Fichier à écrire (facultatif), relatif à /config."
+        }
+      }
+    },
+    "generate_dashboard": {
+      "name": "Générer un exemple de tableau de bord",
+      "description": "Construit une vue de tableau de bord (YAML) à partir de vos tableaux, de votre réseau et des entités créées.",
+      "fields": {
+        "path": {
+          "name": "Chemin",
+          "description": "Fichier à écrire (facultatif), relatif à /config."
+        }
+      }
+    },
+    "refresh": {
+      "name": "Actualiser",
+      "description": "Actualise maintenant le ping, OPNsense et SNMP."
+    }
+  }
+}

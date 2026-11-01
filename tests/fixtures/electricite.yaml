@@ -1,0 +1,53 @@
+# Maison de démonstration (fictive) — format « fichiers de la maison ».
+# Repérage : T<tableau>-R<rangée>-<position>. « ? » = circuit à identifier.
+tableaux:
+  - id: T1
+    nom: Tableau principal
+    emplacement: Cellier
+    photo: photos/tableau_principal.jpg
+    modules_par_rangee: 13
+    rangees:
+      - id: T1-R1
+        elements:
+          - differentiel: {repere: T1-R1-ID, modele: ID 40A 30mA, calibre: 40A, sensibilite: 30mA, type: AC, largeur: 2}
+          - disjoncteur: {repere: T1-R1-1, calibre: C10, circuit: Éclairage séjour}
+          - disjoncteur: {repere: T1-R1-2, calibre: C10, circuit: Éclairage chambres}
+          - disjoncteur: {repere: T1-R1-3, calibre: C10, circuit: Éclairage extérieur}
+          - disjoncteur: {repere: T1-R1-4, calibre: C16, circuit: Prises séjour}
+          - disjoncteur: {repere: T1-R1-5, calibre: C16, circuit: Prises chambres}
+          - disjoncteur: {repere: T1-R1-6, calibre: C16, circuit: "?"}
+          - vide: 2
+          - disjoncteur: {repere: T1-R1-7, calibre: C20, circuit: Lave-linge, note: "derrière un ID type AC : à vérifier"}
+          - disjoncteur: {repere: T1-R1-8, calibre: C20, circuit: "?"}
+      - id: T1-R2
+        differentiel: {repere: T1-R2-ID, calibre: 40A, sensibilite: 30mA, type: A, largeur: 2}
+        disjoncteurs:
+          - {repere: T1-R2-1, calibre: C32, circuit: Plaque de cuisson, section: 6mm²}
+          - {repere: T1-R2-2, calibre: C20, circuit: Four, section: "2,5"}
+          - {repere: T1-R2-3, calibre: C20, circuit: Lave-vaisselle}
+          - {repere: T1-R2-4, calibre: C16, circuit: Prises cuisine, pieces: [Cuisine]}
+          - {repere: T1-R2-5, calibre: C16, circuit: "?"}
+          - {vide: 1}
+          - {repere: T1-R2-6, calibre: C20, circuit: Chauffe-eau}
+        modules:
+          - {type: Contacteur heures creuses, modele: CT 20A}
+      - id: T1-R3
+        elements:
+          - differentiel: {repere: T1-R3-ID, calibre: 63A, sensibilite: 30mA, type: A, largeur: 2}
+          - disjoncteur: {repere: T1-R3-1, calibre: C16, circuit: Prises bureau}
+          - disjoncteur: {repere: T1-R3-2, calibre: C16, circuit: "?"}
+          - module: {type: Module de mesure (compteur, 3 voies), modele: Compteur DIN, largeur: 2}
+          - module: {type: Switch réseau DIN, largeur: 3}
+          - module: {type: Parafoudre, largeur: 2}
+          - disjoncteur: {repere: T1-R3-3, calibre: C2, circuit: Sonnette}
+  - id: T2
+    nom: Tableau garage
+    emplacement: Garage
+    modules_par_rangee: 8
+    rangees:
+      - id: T2-R1
+        elements:
+          - disjoncteur: {repere: T2-R1-1, calibre: C16, sensibilite: 30mA, type: A, circuit: Prises garage}
+          - disjoncteur: {repere: T2-R1-2, calibre: C32, sensibilite: 30mA, type: A, circuit: Borne de recharge, largeur: 2}
+          - vide: 2
+          - module: {type: Prise DIN 2P+T 16A, largeur: 3}

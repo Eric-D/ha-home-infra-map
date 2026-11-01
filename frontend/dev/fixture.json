@@ -1,0 +1,2988 @@
+{
+ "get": {
+  "version": "0.1.0",
+  "revision": 3,
+  "section_revisions": {
+   "boards": 1,
+   "network": 1,
+   "house_name": 0
+  },
+  "model": {
+   "house_name": "Maison",
+   "boards": [
+    {
+     "id": "demo0000000000000000000000000001",
+     "name": "Tableau principal",
+     "location": "Cellier",
+     "modules_per_row": 13,
+     "rows": [
+      {
+       "label": "R1",
+       "capacity": null,
+       "modules": [
+        {
+         "kind": "rcd",
+         "ref": "T1-R1-ID",
+         "model": "ID 40A 30mA",
+         "rating_a": 40,
+         "sensitivity_ma": 30,
+         "rcd_type": "AC",
+         "notes": null,
+         "width_modules": 2,
+         "id": "demo0000000000000000000000000002",
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": []
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R1-1",
+         "model": null,
+         "rating_a": 10,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "Éclairage séjour",
+         "circuit_kind": "lighting",
+         "area_ids": [],
+         "power_entity_id": "sensor.eclairage_sejour_puissance",
+         "notes": null,
+         "id": "demo0000000000000000000000000003",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R1-2",
+         "model": null,
+         "rating_a": 10,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "Éclairage chambres",
+         "circuit_kind": "lighting",
+         "area_ids": [],
+         "power_entity_id": "sensor.eclairage_chambres_puissance",
+         "notes": null,
+         "id": "demo0000000000000000000000000004",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R1-3",
+         "model": null,
+         "rating_a": 10,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "Éclairage extérieur",
+         "circuit_kind": "lighting",
+         "area_ids": [],
+         "power_entity_id": "sensor.eclairage_exterieur_puissance",
+         "notes": null,
+         "id": "demo0000000000000000000000000005",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R1-4",
+         "model": null,
+         "rating_a": 16,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "Prises séjour",
+         "circuit_kind": "sockets",
+         "area_ids": [],
+         "power_entity_id": "sensor.prises_sejour_puissance",
+         "notes": null,
+         "id": "demo0000000000000000000000000006",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R1-5",
+         "model": null,
+         "rating_a": 16,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "Prises chambres",
+         "circuit_kind": "sockets",
+         "area_ids": [],
+         "power_entity_id": null,
+         "notes": null,
+         "id": "demo0000000000000000000000000007",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R1-6",
+         "model": null,
+         "rating_a": 16,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "notes": null,
+         "id": "demo0000000000000000000000000008",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "spacer",
+         "ref": "T1-R1-V1",
+         "width_modules": 2,
+         "id": "demo0000000000000000000000000009",
+         "model": null,
+         "notes": null,
+         "rating_a": null,
+         "curve": "C",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": []
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R1-7",
+         "model": null,
+         "rating_a": 20,
+         "curve": "C",
+         "cable_mm2": 2.5,
+         "circuit_name": "Lave-linge",
+         "circuit_kind": "dedicated",
+         "area_ids": [],
+         "power_entity_id": "sensor.lave_linge_puissance",
+         "notes": "derrière un ID type AC : à vérifier",
+         "id": "demo0000000000000000000000000010",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R1-8",
+         "model": null,
+         "rating_a": 20,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "notes": null,
+         "id": "demo0000000000000000000000000011",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        }
+       ],
+       "id": "demo0000000000000000000000000012"
+      },
+      {
+       "label": "R2",
+       "capacity": null,
+       "modules": [
+        {
+         "kind": "rcd",
+         "ref": "T1-R2-ID",
+         "model": null,
+         "rating_a": 40,
+         "sensitivity_ma": 30,
+         "rcd_type": "A",
+         "notes": null,
+         "width_modules": 2,
+         "id": "demo0000000000000000000000000013",
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": []
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R2-1",
+         "model": null,
+         "rating_a": 32,
+         "curve": "C",
+         "cable_mm2": 6.0,
+         "circuit_name": "Plaque de cuisson",
+         "circuit_kind": "cooking",
+         "area_ids": [],
+         "power_entity_id": "sensor.plaque_cuisson_puissance",
+         "notes": null,
+         "id": "demo0000000000000000000000000014",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R2-2",
+         "model": null,
+         "rating_a": 20,
+         "curve": "C",
+         "cable_mm2": 2.5,
+         "circuit_name": "Four",
+         "circuit_kind": "cooking",
+         "area_ids": [],
+         "power_entity_id": "sensor.four_puissance",
+         "notes": null,
+         "id": "demo0000000000000000000000000015",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R2-3",
+         "model": null,
+         "rating_a": 20,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "Lave-vaisselle",
+         "circuit_kind": "dedicated",
+         "area_ids": [],
+         "power_entity_id": "sensor.lave_vaisselle_puissance",
+         "notes": null,
+         "id": "demo0000000000000000000000000016",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R2-4",
+         "model": null,
+         "rating_a": 16,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "Prises cuisine",
+         "circuit_kind": "sockets",
+         "area_ids": [],
+         "power_entity_id": null,
+         "notes": "Pièce : Cuisine",
+         "id": "demo0000000000000000000000000017",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R2-5",
+         "model": null,
+         "rating_a": 16,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "notes": null,
+         "id": "demo0000000000000000000000000018",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "spacer",
+         "ref": "T1-R2-V1",
+         "width_modules": 1,
+         "id": "demo0000000000000000000000000019",
+         "model": null,
+         "notes": null,
+         "rating_a": null,
+         "curve": "C",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": []
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R2-6",
+         "model": null,
+         "rating_a": 20,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "Chauffe-eau",
+         "circuit_kind": "water_heater",
+         "area_ids": [],
+         "power_entity_id": null,
+         "notes": null,
+         "id": "demo0000000000000000000000000020",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "device",
+         "ref": "T1-R2-M1",
+         "label": "Contacteur heures creuses",
+         "model": "CT 20A",
+         "entity_ids": [],
+         "notes": null,
+         "id": "demo0000000000000000000000000021",
+         "rating_a": null,
+         "curve": "C",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "width_modules": 1
+        }
+       ],
+       "id": "demo0000000000000000000000000022"
+      },
+      {
+       "label": "R3",
+       "capacity": null,
+       "modules": [
+        {
+         "kind": "rcd",
+         "ref": "T1-R3-ID",
+         "model": null,
+         "rating_a": 63,
+         "sensitivity_ma": 30,
+         "rcd_type": "A",
+         "notes": null,
+         "width_modules": 2,
+         "id": "demo0000000000000000000000000023",
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": []
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R3-1",
+         "model": null,
+         "rating_a": 16,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "Prises bureau",
+         "circuit_kind": "sockets",
+         "area_ids": [],
+         "power_entity_id": null,
+         "notes": null,
+         "id": "demo0000000000000000000000000024",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R3-2",
+         "model": null,
+         "rating_a": 16,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "notes": null,
+         "id": "demo0000000000000000000000000025",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "device",
+         "ref": "T1-R3-M1",
+         "label": "Module de mesure (compteur, 3 voies)",
+         "model": "Compteur DIN",
+         "entity_ids": [],
+         "notes": null,
+         "width_modules": 2,
+         "id": "demo0000000000000000000000000026",
+         "rating_a": null,
+         "curve": "C",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": "sensor.compteur_tableau_puissance",
+         "energy_entity_id": null,
+         "switch_entity_id": null
+        },
+        {
+         "kind": "device",
+         "ref": "T1-R3-M2",
+         "label": "Switch réseau DIN",
+         "model": null,
+         "entity_ids": [],
+         "notes": null,
+         "width_modules": 3,
+         "id": "demo0000000000000000000000000027",
+         "rating_a": null,
+         "curve": "C",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "energy_entity_id": null,
+         "switch_entity_id": null
+        },
+        {
+         "kind": "device",
+         "ref": "T1-R3-M3",
+         "label": "Parafoudre",
+         "model": null,
+         "entity_ids": [],
+         "notes": null,
+         "width_modules": 2,
+         "id": "demo0000000000000000000000000028",
+         "rating_a": null,
+         "curve": "C",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "energy_entity_id": null,
+         "switch_entity_id": null
+        },
+        {
+         "kind": "breaker",
+         "ref": "T1-R3-3",
+         "model": null,
+         "rating_a": 2,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "Sonnette",
+         "circuit_kind": "other",
+         "area_ids": [],
+         "power_entity_id": null,
+         "notes": null,
+         "id": "demo0000000000000000000000000029",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        }
+       ],
+       "id": "demo0000000000000000000000000030"
+      }
+     ],
+     "area_id": null,
+     "photo_path": null
+    },
+    {
+     "id": "demo0000000000000000000000000031",
+     "name": "Tableau garage",
+     "location": "Garage",
+     "modules_per_row": 8,
+     "rows": [
+      {
+       "label": "R1",
+       "capacity": null,
+       "modules": [
+        {
+         "kind": "rcbo",
+         "ref": "T2-R1-1",
+         "model": null,
+         "rating_a": 16,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "Prises garage",
+         "circuit_kind": "sockets",
+         "area_ids": [],
+         "power_entity_id": null,
+         "notes": null,
+         "sensitivity_ma": 30,
+         "rcd_type": "A",
+         "id": "demo0000000000000000000000000032",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": [],
+         "width_modules": 1
+        },
+        {
+         "kind": "rcbo",
+         "ref": "T2-R1-2",
+         "model": null,
+         "rating_a": 32,
+         "curve": "C",
+         "cable_mm2": null,
+         "circuit_name": "Borne de recharge",
+         "circuit_kind": "other",
+         "area_ids": [],
+         "power_entity_id": "sensor.borne_recharge_puissance",
+         "notes": null,
+         "width_modules": 2,
+         "sensitivity_ma": 30,
+         "rcd_type": "A",
+         "id": "demo0000000000000000000000000033",
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": []
+        },
+        {
+         "kind": "spacer",
+         "ref": "T2-R1-V1",
+         "width_modules": 2,
+         "id": "demo0000000000000000000000000034",
+         "model": null,
+         "notes": null,
+         "rating_a": null,
+         "curve": "C",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "energy_entity_id": null,
+         "switch_entity_id": null,
+         "label": "",
+         "entity_ids": []
+        },
+        {
+         "kind": "device",
+         "ref": "T2-R1-M1",
+         "label": "Prise DIN 2P+T 16A",
+         "model": null,
+         "entity_ids": [],
+         "notes": null,
+         "width_modules": 3,
+         "id": "demo0000000000000000000000000035",
+         "rating_a": null,
+         "curve": "C",
+         "sensitivity_ma": null,
+         "rcd_type": "?",
+         "cable_mm2": null,
+         "circuit_name": "?",
+         "circuit_kind": "unknown",
+         "area_ids": [],
+         "power_entity_id": null,
+         "energy_entity_id": null,
+         "switch_entity_id": null
+        }
+       ],
+       "id": "demo0000000000000000000000000036"
+      }
+     ],
+     "area_id": null,
+     "photo_path": null
+    }
+   ],
+   "network": {
+    "uplink": {
+     "isp": "FAI Démo (fibre)",
+     "box_name": "Box Démo",
+     "box_ip": "192.168.1.254",
+     "public_ip": "198.51.100.23"
+    },
+    "vlans": [
+     {
+      "id": "demo0000000000000000000000000037",
+      "name": "Admin",
+      "tag": null,
+      "subnet": "192.168.10.0/24",
+      "color": "#607d8b",
+      "role": "Routeur, switch, points d'accès",
+      "access_summary": "Total",
+      "interface": null
+     },
+     {
+      "id": "demo0000000000000000000000000038",
+      "name": "Serveurs",
+      "tag": 50,
+      "subnet": "192.168.50.0/24",
+      "color": "#2196f3",
+      "role": "Domotique et NAS",
+      "access_summary": "Total",
+      "interface": null
+     },
+     {
+      "id": "demo0000000000000000000000000039",
+      "name": "Famille",
+      "tag": 20,
+      "subnet": "192.168.20.0/24",
+      "color": "#4caf50",
+      "role": "Ordinateurs, téléphones, télévision",
+      "access_summary": "Tout sauf Admin",
+      "interface": null
+     },
+     {
+      "id": "demo0000000000000000000000000040",
+      "name": "Objets",
+      "tag": 30,
+      "subnet": "192.168.30.0/24",
+      "color": "#ff9800",
+      "role": "Objets connectés isolés",
+      "access_summary": "Joint la domotique ; Internet sur exceptions",
+      "interface": null
+     },
+     {
+      "id": "demo0000000000000000000000000041",
+      "name": "Invités",
+      "tag": 40,
+      "subnet": "192.168.40.0/24",
+      "color": "#9c27b0",
+      "role": "Wi-Fi invités",
+      "access_summary": "Internet seul",
+      "interface": null
+     },
+     {
+      "id": "demo0000000000000000000000000042",
+      "name": "VPN",
+      "tag": null,
+      "subnet": "10.8.0.0/24",
+      "color": "#3f51b5",
+      "role": "Accès à distance",
+      "access_summary": "Total",
+      "interface": null
+     }
+    ],
+    "switches": [
+     {
+      "id": "demo0000000000000000000000000043",
+      "name": "Switch principal 24 ports PoE",
+      "host": "192.168.10.2",
+      "ports_count": 28,
+      "sfp_ports": [
+       25,
+       26,
+       27,
+       28
+      ],
+      "port_labels": {
+       "1": "Serveur de virtualisation",
+       "2": "Serveur domotique",
+       "3": "Caméra entrée",
+       "4": "Caméra jardin",
+       "6": "Module de mesure",
+       "8": "Point d'accès salon",
+       "9": "Point d'accès étage",
+       "10": "Ordinateur bureau",
+       "24": "Routeur",
+       "25": "NAS (SFP+)"
+      },
+      "model": null,
+      "snmp_source_id": "snmp1"
+     }
+    ],
+    "devices": [
+     {
+      "id": "demo0000000000000000000000000044",
+      "name": "Routeur pare-feu",
+      "host": "192.168.10.1",
+      "mac": "02:00:5e:10:00:01",
+      "vlan_id": "demo0000000000000000000000000037",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 24,
+      "port_source": "manual",
+      "kind": "router",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": true,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "last_seen_port_at": null,
+      "area_id": null,
+      "parent_device_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000045",
+      "name": "Switch principal 24 ports PoE",
+      "host": "192.168.10.2",
+      "mac": "02:00:5e:10:00:02",
+      "vlan_id": "demo0000000000000000000000000037",
+      "switch_id": null,
+      "port": null,
+      "port_source": "auto",
+      "kind": "switch",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": false,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "last_seen_port_at": null,
+      "area_id": null,
+      "parent_device_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000046",
+      "name": "Serveur de virtualisation",
+      "host": "192.168.10.5",
+      "mac": "02:00:5e:10:00:05",
+      "vlan_id": "demo0000000000000000000000000037",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 1,
+      "port_source": "manual",
+      "kind": "server",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": false,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "last_seen_port_at": null,
+      "area_id": null,
+      "parent_device_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000047",
+      "name": "Point d'accès salon",
+      "host": "192.168.10.11",
+      "mac": "02:00:5e:10:00:11",
+      "vlan_id": "demo0000000000000000000000000037",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 8,
+      "port_source": "manual",
+      "kind": "ap",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": true,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "last_seen_port_at": null,
+      "area_id": null,
+      "parent_device_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000048",
+      "name": "Point d'accès étage",
+      "host": "192.168.10.12",
+      "mac": "02:00:5e:10:00:12",
+      "vlan_id": "demo0000000000000000000000000037",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 9,
+      "port_source": "manual",
+      "kind": "ap",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": true,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "last_seen_port_at": null,
+      "area_id": null,
+      "parent_device_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000049",
+      "name": "Serveur domotique",
+      "host": "192.168.50.10",
+      "mac": "02:00:5e:50:00:10",
+      "vlan_id": "demo0000000000000000000000000038",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 2,
+      "port_source": "manual",
+      "kind": "server",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": true,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "last_seen_port_at": null,
+      "area_id": null,
+      "parent_device_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000050",
+      "name": "NAS",
+      "host": "192.168.50.20",
+      "mac": "02:00:5e:50:00:20",
+      "vlan_id": "demo0000000000000000000000000038",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 25,
+      "port_source": "manual",
+      "kind": "nas",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": true,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "last_seen_port_at": null,
+      "area_id": null,
+      "parent_device_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000051",
+      "name": "Ordinateur bureau",
+      "host": "192.168.20.30",
+      "mac": "02:00:5e:20:00:30",
+      "vlan_id": "demo0000000000000000000000000039",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 10,
+      "port_source": "manual",
+      "kind": "computer",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": false,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "last_seen_port_at": null,
+      "area_id": null,
+      "parent_device_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000052",
+      "name": "Téléviseur salon",
+      "host": "192.168.20.40",
+      "mac": "02:00:5e:20:00:40",
+      "vlan_id": "demo0000000000000000000000000039",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 8,
+      "port_source": "manual",
+      "kind": "other",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": false,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "parent_device_id": "demo0000000000000000000000000047",
+      "last_seen_port_at": null,
+      "area_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000053",
+      "name": "Téléphone (Wi-Fi)",
+      "host": "192.168.20.50",
+      "mac": "02:00:5e:20:00:50",
+      "vlan_id": "demo0000000000000000000000000039",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 8,
+      "port_source": "manual",
+      "kind": "phone",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": false,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "parent_device_id": "demo0000000000000000000000000047",
+      "last_seen_port_at": null,
+      "area_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000054",
+      "name": "Caméra entrée",
+      "host": "192.168.30.10",
+      "mac": "02:00:5e:30:00:10",
+      "vlan_id": "demo0000000000000000000000000040",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 3,
+      "port_source": "manual",
+      "kind": "camera",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": false,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "last_seen_port_at": null,
+      "area_id": null,
+      "parent_device_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000055",
+      "name": "Caméra jardin",
+      "host": "192.168.30.11",
+      "mac": "02:00:5e:30:00:11",
+      "vlan_id": "demo0000000000000000000000000040",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 4,
+      "port_source": "manual",
+      "kind": "camera",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": false,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "last_seen_port_at": null,
+      "area_id": null,
+      "parent_device_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000056",
+      "name": "Sonnette vidéo (hors ligne)",
+      "host": "192.168.30.12",
+      "mac": "02:00:5e:30:00:12",
+      "vlan_id": "demo0000000000000000000000000040",
+      "switch_id": null,
+      "port": null,
+      "port_source": "auto",
+      "kind": "camera",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": false,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "last_seen_port_at": null,
+      "area_id": null,
+      "parent_device_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000057",
+      "name": "Thermostat connecté",
+      "host": "192.168.30.20",
+      "mac": "02:00:5e:30:00:20",
+      "vlan_id": "demo0000000000000000000000000040",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 8,
+      "port_source": "manual",
+      "kind": "iot",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": false,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "parent_device_id": "demo0000000000000000000000000047",
+      "last_seen_port_at": null,
+      "area_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000058",
+      "name": "Prise connectée cuisine",
+      "host": "192.168.30.21",
+      "mac": "02:00:5e:30:00:21",
+      "vlan_id": "demo0000000000000000000000000040",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 8,
+      "port_source": "manual",
+      "kind": "iot",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": false,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "parent_device_id": "demo0000000000000000000000000047",
+      "last_seen_port_at": null,
+      "area_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000059",
+      "name": "Module de mesure électrique",
+      "host": "192.168.30.25",
+      "mac": "02:00:5e:30:00:25",
+      "vlan_id": "demo0000000000000000000000000040",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 6,
+      "port_source": "manual",
+      "kind": "iot",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": false,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "last_seen_port_at": null,
+      "area_id": null,
+      "parent_device_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000060",
+      "name": "Station météo (Wi-Fi)",
+      "host": "192.168.30.40",
+      "mac": "02:00:5e:30:00:40",
+      "vlan_id": "demo0000000000000000000000000040",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 9,
+      "port_source": "manual",
+      "kind": "iot",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": true,
+       "tcp_port": null,
+       "offline_alert_minutes": null
+      },
+      "parent_device_id": "demo0000000000000000000000000048",
+      "last_seen_port_at": null,
+      "area_id": null,
+      "model": null
+     },
+     {
+      "id": "demo0000000000000000000000000061",
+      "name": "Imprimante (Wi-Fi)",
+      "host": "192.168.30.50",
+      "mac": "02:00:5e:30:00:50",
+      "vlan_id": "demo0000000000000000000000000040",
+      "switch_id": "demo0000000000000000000000000043",
+      "port": 8,
+      "port_source": "manual",
+      "kind": "printer",
+      "notes": null,
+      "monitor": {
+       "ping": true,
+       "latency": false,
+       "tcp_port": null,
+       "offline_alert_minutes": 5
+      },
+      "parent_device_id": "demo0000000000000000000000000047",
+      "last_seen_port_at": null,
+      "area_id": null,
+      "model": null
+     }
+    ]
+   }
+  },
+  "settings": {
+   "default_view": "electricity",
+   "ping_interval_s": 60,
+   "snmp_interval_s": 300,
+   "opnsense_interval_s": 300,
+   "firewall_analysis": true,
+   "sources": {
+    "opnsense": true,
+    "snmp": [
+     {
+      "id": "snmp1",
+      "host": "192.168.10.2"
+     }
+    ]
+   }
+  },
+  "entities": {
+   "demo0000000000000000000000000044": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_routeur_pare_feu_en_ligne"
+    },
+    {
+     "key": "latency",
+     "entity_id": "sensor.home_infra_map_routeur_pare_feu_latence"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_routeur_pare_feu_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_routeur_pare_feu_blocages"
+    }
+   ],
+   "demo0000000000000000000000000045": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_switch_principal_24_ports_poe_en_ligne"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_blocages"
+    }
+   ],
+   "demo0000000000000000000000000046": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_serveur_de_virtualisation_en_ligne"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_serveur_de_virtualisation_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_serveur_de_virtualisation_blocages"
+    }
+   ],
+   "demo0000000000000000000000000047": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_point_d_acces_salon_en_ligne"
+    },
+    {
+     "key": "latency",
+     "entity_id": "sensor.home_infra_map_point_d_acces_salon_latence"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_point_d_acces_salon_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_point_d_acces_salon_blocages"
+    }
+   ],
+   "demo0000000000000000000000000048": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_point_d_acces_etage_en_ligne"
+    },
+    {
+     "key": "latency",
+     "entity_id": "sensor.home_infra_map_point_d_acces_etage_latence"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_point_d_acces_etage_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_point_d_acces_etage_blocages"
+    }
+   ],
+   "demo0000000000000000000000000049": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_serveur_domotique_en_ligne"
+    },
+    {
+     "key": "latency",
+     "entity_id": "sensor.home_infra_map_serveur_domotique_latence"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_serveur_domotique_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_serveur_domotique_blocages"
+    }
+   ],
+   "demo0000000000000000000000000050": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_nas_en_ligne"
+    },
+    {
+     "key": "latency",
+     "entity_id": "sensor.home_infra_map_nas_latence"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_nas_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_nas_blocages"
+    }
+   ],
+   "demo0000000000000000000000000051": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_ordinateur_bureau_en_ligne"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_ordinateur_bureau_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_ordinateur_bureau_blocages"
+    }
+   ],
+   "demo0000000000000000000000000052": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_televiseur_salon_en_ligne"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_televiseur_salon_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_televiseur_salon_blocages"
+    }
+   ],
+   "demo0000000000000000000000000053": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_telephone_wi_fi_en_ligne"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_telephone_wi_fi_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_telephone_wi_fi_blocages"
+    }
+   ],
+   "demo0000000000000000000000000054": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_camera_entree_en_ligne"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_camera_entree_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_camera_entree_blocages"
+    }
+   ],
+   "demo0000000000000000000000000055": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_camera_jardin_en_ligne"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_camera_jardin_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_camera_jardin_blocages"
+    }
+   ],
+   "demo0000000000000000000000000056": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_sonnette_video_hors_ligne_en_ligne"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_sonnette_video_hors_ligne_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_sonnette_video_hors_ligne_blocages"
+    }
+   ],
+   "demo0000000000000000000000000057": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_thermostat_connecte_en_ligne"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_thermostat_connecte_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_thermostat_connecte_blocages"
+    }
+   ],
+   "demo0000000000000000000000000058": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_prise_connectee_cuisine_en_ligne"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_prise_connectee_cuisine_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_prise_connectee_cuisine_blocages"
+    }
+   ],
+   "demo0000000000000000000000000059": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_module_de_mesure_electrique_en_ligne"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_module_de_mesure_electrique_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_module_de_mesure_electrique_blocages"
+    }
+   ],
+   "demo0000000000000000000000000060": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_station_meteo_wi_fi_en_ligne"
+    },
+    {
+     "key": "latency",
+     "entity_id": "sensor.home_infra_map_station_meteo_wi_fi_latence"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_station_meteo_wi_fi_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_station_meteo_wi_fi_blocages"
+    }
+   ],
+   "demo0000000000000000000000000061": [
+    {
+     "key": "online",
+     "entity_id": "binary_sensor.home_infra_map_imprimante_wi_fi_en_ligne"
+    },
+    {
+     "key": "switch_port",
+     "entity_id": "sensor.home_infra_map_imprimante_wi_fi_port_switch"
+    },
+    {
+     "key": "blocks",
+     "entity_id": "sensor.home_infra_map_imprimante_wi_fi_blocages"
+    }
+   ],
+   "demo0000000000000000000000000043": [
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_1",
+     "port": 1,
+     "used": true
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_2",
+     "port": 2,
+     "used": true
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_3",
+     "port": 3,
+     "used": true
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_4",
+     "port": 4,
+     "used": true
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_5",
+     "port": 5,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_6",
+     "port": 6,
+     "used": true
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_7",
+     "port": 7,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_8",
+     "port": 8,
+     "used": true
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_9",
+     "port": 9,
+     "used": true
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_10",
+     "port": 10,
+     "used": true
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_11",
+     "port": 11,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_12",
+     "port": 12,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_13",
+     "port": 13,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_14",
+     "port": 14,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_15",
+     "port": 15,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_16",
+     "port": 16,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_17",
+     "port": 17,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_18",
+     "port": 18,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_19",
+     "port": 19,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_20",
+     "port": 20,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_21",
+     "port": 21,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_22",
+     "port": 22,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_23",
+     "port": 23,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_24",
+     "port": 24,
+     "used": true
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_25",
+     "port": 25,
+     "used": true
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_26",
+     "port": 26,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_27",
+     "port": 27,
+     "used": false
+    },
+    {
+     "key": "port",
+     "entity_id": "sensor.home_infra_map_switch_principal_24_ports_poe_port_28",
+     "port": 28,
+     "used": false
+    }
+   ],
+   "demo0000000000000000000000000012": [
+    {
+     "key": "row_power",
+     "entity_id": "sensor.home_infra_map_t1_r1_puissance",
+     "row_id": "demo0000000000000000000000000012",
+     "label": "R1"
+    }
+   ],
+   "demo0000000000000000000000000022": [
+    {
+     "key": "row_power",
+     "entity_id": "sensor.home_infra_map_t1_r2_puissance",
+     "row_id": "demo0000000000000000000000000022",
+     "label": "R2"
+    }
+   ],
+   "demo0000000000000000000000000030": [
+    {
+     "key": "row_power",
+     "entity_id": "sensor.home_infra_map_t1_r3_puissance",
+     "row_id": "demo0000000000000000000000000030",
+     "label": "R3"
+    }
+   ],
+   "demo0000000000000000000000000001": [
+    {
+     "key": "board_power",
+     "entity_id": "sensor.home_infra_map_t1_puissance"
+    }
+   ],
+   "demo0000000000000000000000000036": [
+    {
+     "key": "row_power",
+     "entity_id": "sensor.home_infra_map_t2_r1_puissance",
+     "row_id": "demo0000000000000000000000000036",
+     "label": "R1"
+    }
+   ],
+   "demo0000000000000000000000000031": [
+    {
+     "key": "board_power",
+     "entity_id": "sensor.home_infra_map_t2_puissance"
+    }
+   ]
+  },
+  "live": {
+   "ping": {
+    "demo0000000000000000000000000044": {
+     "alive": true,
+     "rtt_ms": 1.0,
+     "tcp": null
+    },
+    "demo0000000000000000000000000045": {
+     "alive": true,
+     "rtt_ms": 5.2,
+     "tcp": null
+    },
+    "demo0000000000000000000000000046": {
+     "alive": true,
+     "rtt_ms": 1.6,
+     "tcp": null
+    },
+    "demo0000000000000000000000000047": {
+     "alive": true,
+     "rtt_ms": 5.8,
+     "tcp": null
+    },
+    "demo0000000000000000000000000048": {
+     "alive": true,
+     "rtt_ms": 2.2,
+     "tcp": null
+    },
+    "demo0000000000000000000000000049": {
+     "alive": true,
+     "rtt_ms": 6.4,
+     "tcp": null
+    },
+    "demo0000000000000000000000000050": {
+     "alive": true,
+     "rtt_ms": 2.8,
+     "tcp": null
+    },
+    "demo0000000000000000000000000051": {
+     "alive": true,
+     "rtt_ms": 7.0,
+     "tcp": null
+    },
+    "demo0000000000000000000000000052": {
+     "alive": true,
+     "rtt_ms": 3.4,
+     "tcp": null
+    },
+    "demo0000000000000000000000000053": {
+     "alive": true,
+     "rtt_ms": 7.6,
+     "tcp": null
+    },
+    "demo0000000000000000000000000054": {
+     "alive": true,
+     "rtt_ms": 4.0,
+     "tcp": null
+    },
+    "demo0000000000000000000000000055": {
+     "alive": true,
+     "rtt_ms": 8.2,
+     "tcp": null
+    },
+    "demo0000000000000000000000000056": {
+     "alive": false,
+     "rtt_ms": null,
+     "tcp": null
+    },
+    "demo0000000000000000000000000057": {
+     "alive": true,
+     "rtt_ms": 1.0,
+     "tcp": null
+    },
+    "demo0000000000000000000000000058": {
+     "alive": true,
+     "rtt_ms": 5.2,
+     "tcp": null
+    },
+    "demo0000000000000000000000000059": {
+     "alive": true,
+     "rtt_ms": 1.6,
+     "tcp": null
+    },
+    "demo0000000000000000000000000060": {
+     "alive": true,
+     "rtt_ms": 5.8,
+     "tcp": null
+    },
+    "demo0000000000000000000000000061": {
+     "alive": false,
+     "rtt_ms": null,
+     "tcp": null
+    }
+   },
+   "ping_available": true,
+   "switches": {
+    "demo0000000000000000000000000043": {
+     "available": true,
+     "sys_name": "SW-DEMO-24P",
+     "ports": {
+      "1": {
+       "port": 1,
+       "if_index": 1000001,
+       "name": "GigabitEthernet 1/1",
+       "alias": "Serveur de virtualisation",
+       "up": true,
+       "speed_mbps": 1000,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": true,
+       "macs": [
+        "02:00:5e:10:00:05"
+       ]
+      },
+      "2": {
+       "port": 2,
+       "if_index": 1000002,
+       "name": "GigabitEthernet 1/2",
+       "alias": "Serveur domotique",
+       "up": true,
+       "speed_mbps": 1000,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": true,
+       "macs": [
+        "02:00:5e:50:00:10"
+       ]
+      },
+      "3": {
+       "port": 3,
+       "if_index": 1000003,
+       "name": "GigabitEthernet 1/3",
+       "alias": "Caméra entrée",
+       "up": true,
+       "speed_mbps": 1000,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": true,
+       "macs": [
+        "02:00:5e:30:00:10"
+       ]
+      },
+      "4": {
+       "port": 4,
+       "if_index": 1000004,
+       "name": "GigabitEthernet 1/4",
+       "alias": "Caméra jardin",
+       "up": true,
+       "speed_mbps": 1000,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": true,
+       "macs": [
+        "02:00:5e:30:00:11"
+       ]
+      },
+      "5": {
+       "port": 5,
+       "if_index": 1000005,
+       "name": "GigabitEthernet 1/5",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "6": {
+       "port": 6,
+       "if_index": 1000006,
+       "name": "GigabitEthernet 1/6",
+       "alias": "Module de mesure",
+       "up": true,
+       "speed_mbps": 1000,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": true,
+       "macs": [
+        "02:00:5e:30:00:25"
+       ]
+      },
+      "7": {
+       "port": 7,
+       "if_index": 1000007,
+       "name": "GigabitEthernet 1/7",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "8": {
+       "port": 8,
+       "if_index": 1000008,
+       "name": "GigabitEthernet 1/8",
+       "alias": "Point d'accès salon",
+       "up": true,
+       "speed_mbps": 1000,
+       "pvid": 1,
+       "tagged_vlans": [
+        20,
+        30,
+        40
+       ],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": true,
+       "macs": [
+        "02:00:5e:10:00:11",
+        "02:00:5e:20:00:40",
+        "02:00:5e:20:00:50",
+        "02:00:5e:30:00:20",
+        "02:00:5e:30:00:21",
+        "02:00:5e:30:00:50"
+       ]
+      },
+      "9": {
+       "port": 9,
+       "if_index": 1000009,
+       "name": "GigabitEthernet 1/9",
+       "alias": "Point d'accès étage",
+       "up": true,
+       "speed_mbps": 1000,
+       "pvid": 1,
+       "tagged_vlans": [
+        20,
+        30,
+        40
+       ],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": {
+        "sys_name": "AP-Etage",
+        "port_id": "eth0"
+       },
+       "poe": true,
+       "macs": [
+        "02:00:5e:10:00:12",
+        "02:00:5e:30:00:40"
+       ]
+      },
+      "10": {
+       "port": 10,
+       "if_index": 1000010,
+       "name": "GigabitEthernet 1/10",
+       "alias": "Ordinateur bureau",
+       "up": true,
+       "speed_mbps": 1000,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": true,
+       "macs": [
+        "02:00:5e:20:00:30"
+       ]
+      },
+      "11": {
+       "port": 11,
+       "if_index": 1000011,
+       "name": "GigabitEthernet 1/11",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "12": {
+       "port": 12,
+       "if_index": 1000012,
+       "name": "GigabitEthernet 1/12",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "13": {
+       "port": 13,
+       "if_index": 1000013,
+       "name": "GigabitEthernet 1/13",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "14": {
+       "port": 14,
+       "if_index": 1000014,
+       "name": "GigabitEthernet 1/14",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "15": {
+       "port": 15,
+       "if_index": 1000015,
+       "name": "GigabitEthernet 1/15",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "16": {
+       "port": 16,
+       "if_index": 1000016,
+       "name": "GigabitEthernet 1/16",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "17": {
+       "port": 17,
+       "if_index": 1000017,
+       "name": "GigabitEthernet 1/17",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "18": {
+       "port": 18,
+       "if_index": 1000018,
+       "name": "GigabitEthernet 1/18",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "19": {
+       "port": 19,
+       "if_index": 1000019,
+       "name": "GigabitEthernet 1/19",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "20": {
+       "port": 20,
+       "if_index": 1000020,
+       "name": "GigabitEthernet 1/20",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "21": {
+       "port": 21,
+       "if_index": 1000021,
+       "name": "GigabitEthernet 1/21",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "22": {
+       "port": 22,
+       "if_index": 1000022,
+       "name": "GigabitEthernet 1/22",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "23": {
+       "port": 23,
+       "if_index": 1000023,
+       "name": "GigabitEthernet 1/23",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "24": {
+       "port": 24,
+       "if_index": 1000024,
+       "name": "GigabitEthernet 1/24",
+       "alias": "Routeur",
+       "up": true,
+       "speed_mbps": 1000,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": true,
+       "macs": [
+        "02:00:5e:10:00:01"
+       ]
+      },
+      "25": {
+       "port": 25,
+       "if_index": 1000025,
+       "name": "10GigabitEthernet 1/1",
+       "alias": "NAS (SFP+)",
+       "up": true,
+       "speed_mbps": 10000,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": [
+        "02:00:5e:50:00:20"
+       ]
+      },
+      "26": {
+       "port": 26,
+       "if_index": 1000026,
+       "name": "10GigabitEthernet 1/2",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "27": {
+       "port": 27,
+       "if_index": 1000027,
+       "name": "10GigabitEthernet 1/3",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      },
+      "28": {
+       "port": 28,
+       "if_index": 1000028,
+       "name": "10GigabitEthernet 1/4",
+       "alias": "",
+       "up": false,
+       "speed_mbps": null,
+       "pvid": 1,
+       "tagged_vlans": [],
+       "untagged_vlans": [
+        1
+       ],
+       "lldp": null,
+       "poe": false,
+       "macs": []
+      }
+     }
+    }
+   },
+   "opnsense": {
+    "configured": true,
+    "available": true,
+    "gateways": [
+     {
+      "name": "WAN_DHCP",
+      "status": "Online",
+      "delay": "9.8 ms",
+      "loss": "0.0 %",
+      "online": true
+     },
+     {
+      "name": "VPN_SORTANT",
+      "status": "Online",
+      "delay": "14.2 ms",
+      "loss": "0.0 %",
+      "online": true
+     }
+    ]
+   }
+  },
+  "checks": [
+   {
+    "code": "unidentified",
+    "severity": "info",
+    "board_id": "demo0000000000000000000000000001",
+    "module_id": "demo0000000000000000000000000008",
+    "ref": "T1-R1-6",
+    "params": {}
+   },
+   {
+    "code": "rcd_type_a",
+    "severity": "warning",
+    "board_id": "demo0000000000000000000000000001",
+    "module_id": "demo0000000000000000000000000010",
+    "ref": "T1-R1-7",
+    "params": {
+     "rcd_ref": "T1-R1-ID",
+     "rcd_type": "AC"
+    }
+   },
+   {
+    "code": "unidentified",
+    "severity": "info",
+    "board_id": "demo0000000000000000000000000001",
+    "module_id": "demo0000000000000000000000000011",
+    "ref": "T1-R1-8",
+    "params": {}
+   },
+   {
+    "code": "rcd_sum",
+    "severity": "info",
+    "board_id": "demo0000000000000000000000000001",
+    "module_id": "demo0000000000000000000000000002",
+    "ref": "T1-R1-ID",
+    "params": {
+     "total_a": 118,
+     "rating_a": 40
+    }
+   },
+   {
+    "code": "unidentified",
+    "severity": "info",
+    "board_id": "demo0000000000000000000000000001",
+    "module_id": "demo0000000000000000000000000018",
+    "ref": "T1-R2-5",
+    "params": {}
+   },
+   {
+    "code": "rcd_sum",
+    "severity": "info",
+    "board_id": "demo0000000000000000000000000001",
+    "module_id": "demo0000000000000000000000000013",
+    "ref": "T1-R2-ID",
+    "params": {
+     "total_a": 124,
+     "rating_a": 40
+    }
+   },
+   {
+    "code": "unidentified",
+    "severity": "info",
+    "board_id": "demo0000000000000000000000000001",
+    "module_id": "demo0000000000000000000000000025",
+    "ref": "T1-R3-2",
+    "params": {}
+   }
+  ]
+ },
+ "states": {
+  "sensor.eclairage_sejour_puissance": {
+   "state": "42",
+   "attributes": {
+    "unit_of_measurement": "W",
+    "device_class": "power",
+    "friendly_name": "Éclairage séjour"
+   }
+  },
+  "sensor.eclairage_chambres_puissance": {
+   "state": "18",
+   "attributes": {
+    "unit_of_measurement": "W",
+    "device_class": "power",
+    "friendly_name": "Éclairage chambres"
+   }
+  },
+  "sensor.eclairage_exterieur_puissance": {
+   "state": "0",
+   "attributes": {
+    "unit_of_measurement": "W",
+    "device_class": "power",
+    "friendly_name": "Éclairage extérieur"
+   }
+  },
+  "sensor.prises_sejour_puissance": {
+   "state": "96",
+   "attributes": {
+    "unit_of_measurement": "W",
+    "device_class": "power",
+    "friendly_name": "Prises séjour"
+   }
+  },
+  "sensor.lave_linge_puissance": {
+   "state": "1120",
+   "attributes": {
+    "unit_of_measurement": "W",
+    "device_class": "power",
+    "friendly_name": "Lave-linge"
+   }
+  },
+  "sensor.plaque_cuisson_puissance": {
+   "state": "0",
+   "attributes": {
+    "unit_of_measurement": "W",
+    "device_class": "power",
+    "friendly_name": "Plaque de cuisson"
+   }
+  },
+  "sensor.four_puissance": {
+   "state": "0",
+   "attributes": {
+    "unit_of_measurement": "W",
+    "device_class": "power",
+    "friendly_name": "Four"
+   }
+  },
+  "sensor.lave_vaisselle_puissance": {
+   "state": "3",
+   "attributes": {
+    "unit_of_measurement": "W",
+    "device_class": "power",
+    "friendly_name": "Lave-vaisselle"
+   }
+  },
+  "sensor.compteur_tableau_puissance": {
+   "state": "1279",
+   "attributes": {
+    "unit_of_measurement": "W",
+    "device_class": "power"
+   }
+  },
+  "sensor.borne_recharge_puissance": {
+   "state": "3700",
+   "attributes": {
+    "unit_of_measurement": "W",
+    "device_class": "power",
+    "friendly_name": "Borne de recharge"
+   }
+  },
+  "binary_sensor.home_infra_map_routeur_pare_feu_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_routeur_pare_feu_latence": {
+   "state": "1.0",
+   "attributes": {
+    "unit_of_measurement": "ms"
+   }
+  },
+  "sensor.home_infra_map_routeur_pare_feu_port_switch": {
+   "state": "24",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_routeur_pare_feu_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_switch_principal_24_ports_poe_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_switch_principal_24_ports_poe_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_serveur_de_virtualisation_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_serveur_de_virtualisation_port_switch": {
+   "state": "1",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_serveur_de_virtualisation_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_point_d_acces_salon_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_point_d_acces_salon_latence": {
+   "state": "5.8",
+   "attributes": {
+    "unit_of_measurement": "ms"
+   }
+  },
+  "sensor.home_infra_map_point_d_acces_salon_port_switch": {
+   "state": "8",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_point_d_acces_salon_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_point_d_acces_etage_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_point_d_acces_etage_latence": {
+   "state": "2.2",
+   "attributes": {
+    "unit_of_measurement": "ms"
+   }
+  },
+  "sensor.home_infra_map_point_d_acces_etage_port_switch": {
+   "state": "9",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_point_d_acces_etage_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_serveur_domotique_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_serveur_domotique_latence": {
+   "state": "6.4",
+   "attributes": {
+    "unit_of_measurement": "ms"
+   }
+  },
+  "sensor.home_infra_map_serveur_domotique_port_switch": {
+   "state": "2",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_serveur_domotique_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_nas_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_nas_latence": {
+   "state": "2.8",
+   "attributes": {
+    "unit_of_measurement": "ms"
+   }
+  },
+  "sensor.home_infra_map_nas_port_switch": {
+   "state": "25",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_nas_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_ordinateur_bureau_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_ordinateur_bureau_port_switch": {
+   "state": "10",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_ordinateur_bureau_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_televiseur_salon_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_televiseur_salon_port_switch": {
+   "state": "8",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_televiseur_salon_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_telephone_wi_fi_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_telephone_wi_fi_port_switch": {
+   "state": "8",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_telephone_wi_fi_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_camera_entree_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_camera_entree_port_switch": {
+   "state": "3",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_camera_entree_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_camera_jardin_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_camera_jardin_port_switch": {
+   "state": "4",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_camera_jardin_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_sonnette_video_hors_ligne_en_ligne": {
+   "state": "off",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_sonnette_video_hors_ligne_port_switch": {
+   "state": "unknown",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_sonnette_video_hors_ligne_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_thermostat_connecte_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_thermostat_connecte_port_switch": {
+   "state": "8",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_thermostat_connecte_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_prise_connectee_cuisine_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_prise_connectee_cuisine_port_switch": {
+   "state": "8",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_prise_connectee_cuisine_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_module_de_mesure_electrique_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_module_de_mesure_electrique_port_switch": {
+   "state": "6",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_module_de_mesure_electrique_blocages": {
+   "state": "0",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_station_meteo_wi_fi_en_ligne": {
+   "state": "on",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_station_meteo_wi_fi_latence": {
+   "state": "5.8",
+   "attributes": {
+    "unit_of_measurement": "ms"
+   }
+  },
+  "sensor.home_infra_map_station_meteo_wi_fi_port_switch": {
+   "state": "9",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_station_meteo_wi_fi_blocages": {
+   "state": "12",
+   "attributes": {}
+  },
+  "binary_sensor.home_infra_map_imprimante_wi_fi_en_ligne": {
+   "state": "off",
+   "attributes": {
+    "device_class": "connectivity"
+   }
+  },
+  "sensor.home_infra_map_imprimante_wi_fi_port_switch": {
+   "state": "8",
+   "attributes": {}
+  },
+  "sensor.home_infra_map_imprimante_wi_fi_blocages": {
+   "state": "0",
+   "attributes": {}
+  }
+ },
+ "firewall": {
+  "demo0000000000000000000000000060": {
+   "available": true,
+   "ip": "192.168.30.40",
+   "outbound": {
+    "interface": "opt3",
+    "interface_label": "Objets",
+    "rules": [
+     {
+      "uuid": "00000000-0000-4000-8000-000000001500",
+      "sequence": "1500",
+      "action": "pass",
+      "description": "Objets → routeur : DNS",
+      "floating": false,
+      "destination": {
+       "kind": "router",
+       "value": "192.168.30.1",
+       "label": "Objets",
+       "not": false
+      },
+      "ports": "53",
+      "protocol": "TCP/UDP",
+      "specific": false,
+      "probable": false,
+      "reasons": []
+     },
+     {
+      "uuid": "00000000-0000-4000-8000-000000001501",
+      "sequence": "1501",
+      "action": "pass",
+      "description": "Objets → routeur : NTP",
+      "floating": false,
+      "destination": {
+       "kind": "router",
+       "value": "192.168.30.1",
+       "label": "Objets",
+       "not": false
+      },
+      "ports": "123",
+      "protocol": "UDP",
+      "specific": false,
+      "probable": false,
+      "reasons": []
+     },
+     {
+      "uuid": "00000000-0000-4000-8000-000000001502",
+      "sequence": "1502",
+      "action": "pass",
+      "description": "Objets → domotique (192.168.50.10), tous ports",
+      "floating": false,
+      "destination": {
+       "kind": "address",
+       "value": "192.168.50.10",
+       "label": "Serveur domotique",
+       "not": false
+      },
+      "ports": "",
+      "protocol": "any",
+      "specific": false,
+      "probable": false,
+      "reasons": []
+     },
+     {
+      "uuid": "00000000-0000-4000-8000-000000001503",
+      "sequence": "1503",
+      "action": "block",
+      "description": "Objets : INTERDIT vers les réseaux internes",
+      "floating": false,
+      "destination": {
+       "kind": "private",
+       "value": "PrivateNetworks",
+       "label": "Réseaux internes (RFC 1918)",
+       "not": false
+      },
+      "ports": "",
+      "protocol": "any",
+      "specific": false,
+      "probable": false,
+      "reasons": []
+     },
+     {
+      "uuid": "00000000-0000-4000-8000-000000001509",
+      "sequence": "1509",
+      "action": "pass",
+      "description": "Station météo → service météo uniquement",
+      "floating": false,
+      "destination": {
+       "kind": "alias",
+       "value": "Meteo_Cloud",
+       "label": "Service météo",
+       "not": false
+      },
+      "ports": "",
+      "protocol": "TCP",
+      "specific": true,
+      "probable": false,
+      "reasons": []
+     },
+     {
+      "uuid": "00000000-0000-4000-8000-000000001510",
+      "sequence": "1510",
+      "action": "block",
+      "description": "Objets : tout le reste d'Internet est BLOQUÉ",
+      "floating": false,
+      "destination": {
+       "kind": "any",
+       "value": "any",
+       "label": "any",
+       "not": false
+      },
+      "ports": "",
+      "protocol": "any",
+      "specific": false,
+      "probable": false,
+      "reasons": []
+     }
+    ],
+    "redundant": [
+     {
+      "uuid": "00000000-0000-4000-8000-000000001331",
+      "description": "Accès à la domotique depuis les réseaux internes",
+      "covered": true
+     }
+    ],
+    "unreachable_count": 0,
+    "default_deny": false
+   },
+   "inbound": [
+    {
+     "interface": "lan",
+     "label": "Admin",
+     "verdict": "allowed",
+     "rule": {
+      "uuid": "00000000-0000-4000-8000-000000000100",
+      "description": "Admin : accès total"
+     },
+     "ports": "",
+     "probable": false,
+     "reasons": [],
+     "default": false
+    },
+    {
+     "interface": "opt1",
+     "label": "Serveurs",
+     "verdict": "allowed",
+     "rule": {
+      "uuid": "00000000-0000-4000-8000-000000000300",
+      "description": "Serveurs : accès total"
+     },
+     "ports": "",
+     "probable": false,
+     "reasons": [],
+     "default": false
+    },
+    {
+     "interface": "opt2",
+     "label": "Famille",
+     "verdict": "allowed",
+     "rule": {
+      "uuid": "00000000-0000-4000-8000-000000000401",
+      "description": "Famille : accès total"
+     },
+     "ports": "",
+     "probable": false,
+     "reasons": [],
+     "default": false
+    },
+    {
+     "interface": "opt3",
+     "label": "Objets",
+     "verdict": "same_network",
+     "rule": null,
+     "ports": "",
+     "probable": false,
+     "reasons": [],
+     "default": false
+    },
+    {
+     "interface": "opt4",
+     "label": "Invités",
+     "verdict": "blocked",
+     "rule": {
+      "uuid": "00000000-0000-4000-8000-000000000600",
+      "description": "Invités : interdit vers les réseaux internes"
+     },
+     "ports": "",
+     "probable": false,
+     "reasons": [],
+     "default": false
+    },
+    {
+     "interface": "wireguard",
+     "label": "VPN",
+     "verdict": "allowed",
+     "rule": {
+      "uuid": "00000000-0000-4000-8000-000000000200",
+      "description": "VPN : accès total"
+     },
+     "ports": "",
+     "probable": false,
+     "reasons": [],
+     "default": false
+    },
+    {
+     "interface": "wan",
+     "label": "WAN",
+     "verdict": "blocked",
+     "rule": null,
+     "ports": "",
+     "probable": false,
+     "reasons": [],
+     "default": true
+    }
+   ],
+   "nat": [],
+   "blocks": [
+    {
+     "time": "2026-11-01T13:42:12+01:00",
+     "destination": "203.0.113.80",
+     "port": "443",
+     "protocol": "tcp",
+     "interface": "vlan030",
+     "rule_uuid": "00000000-0000-4000-8000-000000001510",
+     "rule": "Objets : tout le reste d'Internet est BLOQUÉ",
+     "dns_name": "firmware.example.net"
+    },
+    {
+     "time": "2026-11-01T13:12:03+01:00",
+     "destination": "203.0.113.80",
+     "port": "443",
+     "protocol": "tcp",
+     "interface": "vlan030",
+     "rule_uuid": "00000000-0000-4000-8000-000000001510",
+     "rule": "Objets : tout le reste d'Internet est BLOQUÉ",
+     "dns_name": "firmware.example.net"
+    },
+    {
+     "time": "2026-11-01T09:05:44+01:00",
+     "destination": "8.8.8.8",
+     "port": "53",
+     "protocol": "udp",
+     "interface": "vlan030",
+     "rule_uuid": "00000000-0000-4000-8000-000000001510",
+     "rule": "Objets : tout le reste d'Internet est BLOQUÉ",
+     "dns_name": null
+    }
+   ],
+   "blocks_24h": 12,
+   "rule_hits": {
+    "00000000-0000-4000-8000-000000001510": 12
+   },
+   "fetched_at": "2026-11-01T13:45:00+00:00"
+  }
+ }
+}

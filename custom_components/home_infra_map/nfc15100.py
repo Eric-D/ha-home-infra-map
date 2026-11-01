@@ -1,0 +1,137 @@
+"""Electrical consistency checks inspired by NF C 15-100.
+
+These are *hints* ("à vérifier"), never blocking, and they do not replace an
+electrician: the data is often incomplete and the standard has many cases
+this module does not model. Each warning carries a `code` translated by the
+card and the parameters needed to phrase it.
+"""
+
+from __future__ import annotations
+
+import re
+from typing import Final
+
+from .models import JsonDict, row_capacity, row_used_slots
+
+MAX_BREAKERS_PER_RCD: Final = 8
+# Highest rating commonly allowed per copper cross-section (mm² -> A).
+MAX_RATING_BY_SECTION: Final[dict[float, int]] = {1.5: 16, 2.5: 20, 4.0: 25, 6.0: 32}
+MAX_RATING_BY_KIND: Final[dict[str, int]] = {"lighting": 16, "sockets": 20}
+RCD_SUM_RATIO: Final = 2.5
+TYPE_A_NAMES: Final = re.compile(r"lave[- ]linge|washing|plaque|cuisson|induction|hob|cooktop", re.IGNORECASE)
+
+
+def _warning(
+    code: str, board: JsonDict, module: JsonDict | None, severity: str = "warning", **params: object
+) -> JsonDict:
+    return {
+        "code": code,
+        "severity": severity,
+        "board_id": board["id"],
+        "module_id": module["id"] if module else None,
+        "ref": module.get("ref") if module else board["name"],
+        "params": params,
+    }
+
+
+def _is_unidentified(module: JsonDict) -> bool:
+    return str(module.get("circuit_name") or "").strip() in ("", "?")
+
+
+def check_board(board: JsonDict) -> list[JsonDict]:
+    """Return the warnings of one board."""
+    warnings: list[JsonDict] = []
+    for row in board["rows"]:
+        capacity = row_capacity(board, row)
+        used = row_used_slots(row)
+        if capacity and used > capacity:
+            warnings.append(
+                {
+                    "code": "row_overflow",
+                    "severity": "warning",
+                    "board_id": board["id"],
+                    "module_id": None,
+                    "ref": row.get("label") or "",
+                    "params": {"row": row.get("label") or "", "used": used, "capacity": capacity},
+                }
+            )
+        rcd: JsonDict | None = None
+        groups: dict[str, list[JsonDict]] = {}
+        for module in row["modules"]:
+            kind = module["kind"]
+            if kind == "rcd":
+                rcd = module
+                groups[module["id"]] = []
+                continue
+            if kind not in ("breaker", "rcbo"):
+                continue
+
+            protector = module if kind == "rcbo" else rcd
+            if protector is not None and kind == "breaker":
+                groups[protector["id"]].append(module)
+
+            sensitivity = protector.get("sensitivity_ma") if protector else None
+            if protector is None:
+                warnings.append(_warning("no_rcd", board, module))
+            elif sensitivity is None or sensitivity > 30:
+                warnings.append(_warning("no_rcd_30ma", board, module, sensitivity_ma=sensitivity))
+
+            needs_type_a = module.get("circuit_kind") == "cooking" or bool(
+                TYPE_A_NAMES.search(str(module.get("circuit_name") or ""))
+            )
+            if needs_type_a and protector is not None and protector.get("rcd_type") not in ("A", "F", "B"):
+                warnings.append(
+                    _warning(
+                        "rcd_type_a",
+                        board,
+                        module,
+                        rcd_ref=protector.get("ref"),
+                        rcd_type=protector.get("rcd_type") or "?",
+                    )
+                )
+
+            rating = module.get("rating_a")
+            section = module.get("cable_mm2")
+            if rating and section:
+                limit = MAX_RATING_BY_SECTION.get(float(section))
+                if limit is not None and rating > limit:
+                    warnings.append(
+                        _warning(
+                            "cable_rating", board, module, rating_a=rating, cable_mm2=section, max_a=limit
+                        )
+                    )
+            kind_limit = MAX_RATING_BY_KIND.get(str(module.get("circuit_kind")))
+            if rating and kind_limit and rating > kind_limit:
+                warnings.append(
+                    _warning(
+                        "kind_rating",
+                        board,
+                        module,
+                        circuit_kind=module.get("circuit_kind"),
+                        rating_a=rating,
+                        max_a=kind_limit,
+                    )
+                )
+            if _is_unidentified(module):
+                warnings.append(_warning("unidentified", board, module, severity="info"))
+
+        for rcd_id, breakers in groups.items():
+            rcd_module = next(m for m in row["modules"] if m["id"] == rcd_id)
+            if len(breakers) > MAX_BREAKERS_PER_RCD:
+                warnings.append(
+                    _warning(
+                        "too_many_breakers", board, rcd_module, count=len(breakers), max=MAX_BREAKERS_PER_RCD
+                    )
+                )
+            total = sum(b.get("rating_a") or 0 for b in breakers)
+            rating = rcd_module.get("rating_a")
+            if rating and total > rating * RCD_SUM_RATIO:
+                warnings.append(
+                    _warning("rcd_sum", board, rcd_module, severity="info", total_a=total, rating_a=rating)
+                )
+    return warnings
+
+
+def check_boards(boards: list[JsonDict]) -> list[JsonDict]:
+    """Return the warnings of every board."""
+    return [w for board in boards for w in check_board(board)]

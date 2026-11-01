@@ -1,0 +1,22 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "online": { "default": "mdi:lan-connect", "state": { "off": "mdi:lan-disconnect" } },
+      "tcp": { "default": "mdi:connection" }
+    },
+    "sensor": {
+      "latency": { "default": "mdi:timer-outline" },
+      "switch_port": { "default": "mdi:ethernet" },
+      "blocks": { "default": "mdi:wall-fire" },
+      "port": { "default": "mdi:ethernet", "state": { "down": "mdi:ethernet-off" } },
+      "row_power": { "default": "mdi:flash" },
+      "board_power": { "default": "mdi:home-lightning-bolt-outline" }
+    }
+  },
+  "services": {
+    "import_yaml": { "service": "mdi:file-import-outline" },
+    "export_yaml": { "service": "mdi:file-export-outline" },
+    "generate_dashboard": { "service": "mdi:view-dashboard-edit-outline" },
+    "refresh": { "service": "mdi:refresh" }
+  }
+}

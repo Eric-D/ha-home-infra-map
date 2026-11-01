@@ -1,0 +1,22 @@
+import_yaml:
+  fields:
+    path:
+      required: true
+      example: "home_infra_map/electricite.yaml"
+      selector:
+        text:
+export_yaml:
+  fields:
+    path:
+      required: false
+      example: "home_infra_map/export.yaml"
+      selector:
+        text:
+generate_dashboard:
+  fields:
+    path:
+      required: false
+      example: "home_infra_map/dashboard.yaml"
+      selector:
+        text:
+refresh:

@@ -1,0 +1,15 @@
+{
+  "domain": "home_infra_map",
+  "name": "Home Infra Map",
+  "codeowners": ["@Eric-D"],
+  "config_flow": true,
+  "dependencies": ["frontend", "http", "websocket_api"],
+  "documentation": "https://github.com/Eric-D/ha-home-infra-map",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/Eric-D/ha-home-infra-map/issues",
+  "loggers": ["icmplib", "pysnmp"],
+  "requirements": ["icmplib>=3.0.4", "pysnmp>=7.1.27"],
+  "single_config_entry": true,
+  "version": "0.2.0"
+}

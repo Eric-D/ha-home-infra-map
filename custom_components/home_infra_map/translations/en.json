@@ -1,0 +1,251 @@
+{
+  "title": "Home Infra Map",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Welcome",
+        "description": "Home Infra Map documents your electrical boards and your network. Everything else is optional.",
+        "data": {
+          "house_name": "House name"
+        }
+      },
+      "opnsense": {
+        "title": "Source: OPNsense",
+        "description": "Optional. Read-only API user (see README for the exact privileges). Accepts http://ip:port or https://host.\n\nMissing privileges:\n{privileges}",
+        "data": {
+          "url": "OPNsense URL (empty = skip)",
+          "api_key": "API key",
+          "api_secret": "API secret",
+          "verify_ssl": "Verify the certificate"
+        }
+      },
+      "snmp": {
+        "title": "Source: SNMP switch",
+        "description": "Optional. Read-only SNMP access to a switch (v3 recommended). Tested by reading sysName.",
+        "data": {
+          "host": "Switch host (empty = skip)",
+          "port": "SNMP port",
+          "version": "SNMP version",
+          "community": "Community (v2c)",
+          "username": "User (v3)",
+          "auth_protocol": "Authentication protocol (v3)",
+          "auth_key": "Authentication password (v3)",
+          "priv_protocol": "Privacy protocol (v3)",
+          "priv_key": "Privacy password (v3)"
+        }
+      },
+      "finish": {
+        "title": "Finish",
+        "description": "Ready. Missing optional OPNsense privileges (features disabled):\n{privileges}",
+        "data": {
+          "import_from_opnsense": "Import VLANs and DHCP reservations from OPNsense"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot reach OPNsense. Check the URL (http/https and port).",
+      "invalid_auth": "OPNsense rejected the key or secret (401).",
+      "missing_privileges": "The API user lacks a required privilege (403). Missing: {privileges}",
+      "missing_credentials": "Key and secret are required.",
+      "snmp_failed": "No SNMP answer (wrong host, credentials or protocols?).",
+      "snmp_missing_user": "SNMPv3 needs a user.",
+      "snmp_missing_community": "SNMPv2c needs a community.",
+      "snmp_missing_host": "Enter the switch host.",
+      "snmp_short_key": "SNMPv3 passwords must be at least 8 characters."
+    },
+    "abort": {
+      "already_configured": "Home Infra Map is already configured.",
+      "single_instance_allowed": "Home Infra Map is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options",
+        "menu_options": {
+          "settings": "Intervals and display",
+          "opnsense": "OPNsense source",
+          "snmp_add": "Add an SNMP switch",
+          "snmp_remove": "Remove SNMP switches"
+        }
+      },
+      "settings": {
+        "title": "Intervals and display",
+        "data": {
+          "ping_interval_s": "Ping interval",
+          "snmp_interval_s": "SNMP interval",
+          "opnsense_interval_s": "OPNsense interval",
+          "default_view": "Default view of the card",
+          "firewall_analysis": "Firewall analysis"
+        }
+      },
+      "opnsense": {
+        "title": "Source: OPNsense",
+        "description": "Optional. Read-only API user (see README for the exact privileges). Accepts http://ip:port or https://host.\n\nMissing privileges:\n{privileges}",
+        "data": {
+          "url": "OPNsense URL (empty = skip)",
+          "api_key": "API key",
+          "api_secret": "API secret",
+          "verify_ssl": "Verify the certificate"
+        }
+      },
+      "snmp_add": {
+        "title": "Source: SNMP switch",
+        "description": "Optional. Read-only SNMP access to a switch (v3 recommended). Tested by reading sysName.",
+        "data": {
+          "host": "Switch host (empty = skip)",
+          "port": "SNMP port",
+          "version": "SNMP version",
+          "community": "Community (v2c)",
+          "username": "User (v3)",
+          "auth_protocol": "Authentication protocol (v3)",
+          "auth_key": "Authentication password (v3)",
+          "priv_protocol": "Privacy protocol (v3)",
+          "priv_key": "Privacy password (v3)"
+        }
+      },
+      "snmp_remove": {
+        "title": "Remove SNMP switches",
+        "data": {
+          "sources": "Switches to remove"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot reach OPNsense. Check the URL (http/https and port).",
+      "invalid_auth": "OPNsense rejected the key or secret (401).",
+      "missing_privileges": "The API user lacks a required privilege (403). Missing: {privileges}",
+      "missing_credentials": "Key and secret are required.",
+      "snmp_failed": "No SNMP answer (wrong host, credentials or protocols?).",
+      "snmp_missing_user": "SNMPv3 needs a user.",
+      "snmp_missing_community": "SNMPv2c needs a community.",
+      "snmp_missing_host": "Enter the switch host.",
+      "snmp_short_key": "SNMPv3 passwords must be at least 8 characters."
+    }
+  },
+  "selector": {
+    "snmp_version": {
+      "options": {
+        "v2c": "v2c",
+        "v3": "v3"
+      }
+    },
+    "auth_protocol": {
+      "options": {
+        "none": "None",
+        "md5": "MD5",
+        "sha": "SHA",
+        "sha224": "SHA224",
+        "sha256": "SHA256",
+        "sha384": "SHA384",
+        "sha512": "SHA512"
+      }
+    },
+    "priv_protocol": {
+      "options": {
+        "none": "None",
+        "des": "DES",
+        "3des": "3DES",
+        "aes": "AES",
+        "aes192": "AES192",
+        "aes256": "AES256"
+      }
+    },
+    "default_view": {
+      "options": {
+        "electricity": "Electricity",
+        "network": "Network"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "online": {
+        "name": "Online"
+      },
+      "tcp": {
+        "name": "Port {port}"
+      }
+    },
+    "sensor": {
+      "latency": {
+        "name": "Latency"
+      },
+      "switch_port": {
+        "name": "Switch port"
+      },
+      "blocks": {
+        "name": "Firewall blocks"
+      },
+      "port": {
+        "name": "Port {port}",
+        "state": {
+          "up": "Up",
+          "down": "Down"
+        }
+      },
+      "row_power": {
+        "name": "{row} power"
+      },
+      "board_power": {
+        "name": "Power"
+      }
+    }
+  },
+  "issues": {
+    "device_offline": {
+      "title": "{name} is offline",
+      "description": "{name} ({host}) has not answered for more than {minutes} minutes."
+    }
+  },
+  "exceptions": {
+    "not_configured": {
+      "message": "Home Infra Map is not configured."
+    },
+    "path_outside_config": {
+      "message": "The path {path} is outside the configuration folder."
+    },
+    "import_failed": {
+      "message": "Import failed: {error}"
+    },
+    "file_unreadable": {
+      "message": "Cannot read {path}."
+    }
+  },
+  "services": {
+    "import_yaml": {
+      "name": "Import YAML",
+      "description": "Import boards and/or network from a YAML file in /config (native export or house file format).",
+      "fields": {
+        "path": {
+          "name": "Path",
+          "description": "Path relative to /config."
+        }
+      }
+    },
+    "export_yaml": {
+      "name": "Export YAML",
+      "description": "Export the whole documentation as YAML (returned, and written if a path is given).",
+      "fields": {
+        "path": {
+          "name": "Path",
+          "description": "Optional file to write, relative to /config."
+        }
+      }
+    },
+    "generate_dashboard": {
+      "name": "Generate an example dashboard",
+      "description": "Build a dashboard view (YAML) from your boards, network and created entities.",
+      "fields": {
+        "path": {
+          "name": "Path",
+          "description": "Optional file to write, relative to /config."
+        }
+      }
+    },
+    "refresh": {
+      "name": "Refresh",
+      "description": "Refresh ping, OPNsense and SNMP data now."
+    }
+  }
+}

@@ -1,0 +1,48 @@
+# Home Infra Map — exemples de configuration de la carte / card configuration examples.
+# Tout se règle aussi dans l'éditeur visuel de la carte. Everything can be set in the visual editor too.
+# Les données (tableaux, réseau) ne sont PAS dans la carte : elles viennent de l'intégration.
+
+# 1. Électricité : le tableau tel qu'il est (premier tableau par défaut)
+type: custom:home-infra-map-card
+view: electricity
+---
+# 2. Électricité : un tableau précis (id visible dans l'éditeur visuel)
+type: custom:home-infra-map-card
+view: electricity
+board: demo0000000000000000000000000001
+---
+# 3. Réseau : topologie Internet → box → routeur → switch → équipements
+type: custom:home-infra-map-card
+view: network
+network_view: topology
+---
+# 4. Réseau : une carte colorée par VLAN
+type: custom:home-infra-map-card
+view: network
+network_view: vlan
+---
+# 5. Réseau : face avant du switch
+type: custom:home-infra-map-card
+view: network
+network_view: switch
+---
+# 6. Pleine largeur en vue « sections »
+type: custom:home-infra-map-card
+view: network
+network_view: topology
+grid_options:
+  columns: full
+---
+# 7. Automatisation : notification quand un équipement surveillé est hors ligne
+#    (événement émis après « offline_alert_minutes »)
+alias: Équipement hors ligne
+triggers:
+  - trigger: event
+    event_type: home_infra_map_device_offline
+actions:
+  - action: notify.notify
+    data:
+      title: "{{ trigger.event.data.name }} hors ligne"
+      message: >-
+        {{ trigger.event.data.name }} ({{ trigger.event.data.host }}) ne répond plus
+        depuis {{ trigger.event.data.offline_minutes }} min.

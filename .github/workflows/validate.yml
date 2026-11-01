@@ -1,0 +1,121 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hacs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: HACS validation
+        uses: hacs/action@main
+        with:
+          category: integration
+
+  hassfest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Hassfest validation
+        uses: home-assistant/actions/hassfest@master
+
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: |
+            requirements_test.txt
+            custom_components/home_infra_map/manifest.json
+      - name: Install
+        run: |
+          python -m pip install -r requirements_test.txt
+          python scripts/manifest_requirements.py
+          python -m pip install -r manifest-requirements.txt
+      - name: Tests (coverage >= 85 %)
+        run: pytest -q --cov --cov-report=term --cov-report=xml
+      - name: Ruff
+        run: |
+          ruff check . --output-format=github
+          ruff format --check .
+      - name: Mypy (strict)
+        run: mypy custom_components/home_infra_map
+      - name: Translations are generated
+        run: |
+          python scripts/gen_translations.py
+          git diff --exit-code --stat custom_components/home_infra_map/strings.json custom_components/home_infra_map/translations
+
+  # The suite runs on one HA version; this job imports every module on the
+  # declared floor and on the latest release, so an upstream change is seen.
+  import-check:
+    name: import-check (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: floor
+            homeassistant: homeassistant==2026.10.0
+          - name: latest
+            homeassistant: homeassistant
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Install
+        run: |
+          python -m pip install "${{ matrix.homeassistant }}"
+          python scripts/manifest_requirements.py
+          python -m pip install -r manifest-requirements.txt
+      - name: Import every module
+        run: |
+          python - <<'PY'
+          import importlib, pkgutil
+          import custom_components.home_infra_map as pkg
+          for mod in pkgutil.iter_modules(pkg.__path__):
+              importlib.import_module(f"{pkg.__name__}.{mod.name}")
+              print("ok", mod.name)
+          from custom_components.home_infra_map.config_flow import HomeInfraMapConfigFlow
+          HomeInfraMapConfigFlow.async_get_options_flow(None)
+          from homeassistant.const import __version__
+          print("HA", __version__)
+          major, minor = (int(x) for x in __version__.split(".")[:2])
+          assert (major, minor) >= (2026, 10), __version__
+          PY
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - name: Committed bundle matches the sources
+        working-directory: .
+        run: |
+          if ! git diff --exit-code --stat custom_components/home_infra_map/www/home-infra-map-card.js; then
+            echo "::error::Run 'cd frontend && npm run build' and commit the bundle."
+            exit 1
+          fi

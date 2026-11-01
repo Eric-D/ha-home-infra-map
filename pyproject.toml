@@ -1,0 +1,58 @@
+[project]
+name = "ha-home-infra-map"
+version = "0.2.0"
+description = "Home Assistant integration documenting electrical boards and the home network"
+requires-python = ">=3.14"
+license = "MIT"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = ["ignore::DeprecationWarning:pysnmp.*", "ignore::DeprecationWarning:pyasn1.*"]
+
+[tool.coverage.run]
+source = ["custom_components/home_infra_map"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 85
+
+[tool.ruff]
+line-length = 110
+# Home Assistant 2026.10 requires Python 3.14.
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC", "G", "LOG", "RUF", "DTZ", "PL", "N", "S"]
+ignore = [
+  "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PLR2004", # complexity metrics, judged in review
+  "PLC0415", # local imports avoid import cycles / heavy imports at startup
+  "S101",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "PLR", "PLC", "N802", "DTZ", "ASYNC109", "ASYNC240"]  # blocking file checks are fine in tests
+"scripts/*" = ["S", "E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["custom_components"]
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+warn_unreachable = true
+ignore_missing_imports = true
+plugins = []
+exclude = ["tests/", "scripts/", "frontend/"]
+
+[[tool.mypy.overrides]]
+module = ["icmplib.*", "pysnmp.*"]
+ignore_missing_imports = true
+
+# Home Assistant re-exports names from component packages without __all__.
+[[tool.mypy.overrides]]
+module = ["homeassistant.*"]
+implicit_reexport = true

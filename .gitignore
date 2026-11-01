@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+frontend/node_modules/
+frontend/coverage/
+scripts/screenshots/node_modules/
+*.log
+.env
+manifest-requirements.txt
+scripts/screenshots/package-lock.json

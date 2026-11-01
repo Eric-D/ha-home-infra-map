@@ -1,0 +1,12 @@
+# Test tooling. Runtime requirements (icmplib, pysnmp) come from manifest.json
+# through scripts/manifest_requirements.py, so a bump of the manifest is tested.
+# pytest-homeassistant-custom-component pins the Home Assistant version used by
+# the suite (0.13.375 -> HA 2026.10.4, the supported floor series).
+pytest-homeassistant-custom-component==0.13.375
+pytest-cov==7.1.0
+# home-assistant-frontend is needed to set up the `frontend` dependency in tests;
+# keep it equal to the requirement of homeassistant/components/frontend/manifest.json.
+home-assistant-frontend==20260930.5
+# Pinned: a new ruff/mypy opinion must not turn a daily CI run red.
+ruff==0.17.3
+mypy==2.4.1

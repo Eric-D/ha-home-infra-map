@@ -1,0 +1,939 @@
+{
+ "interfaces_info": {
+  "rows": [
+   {
+    "identifier": "lan",
+    "description": "Admin",
+    "ipv4": [
+     {
+      "ipaddr": "192.168.10.1/24"
+     }
+    ]
+   },
+   {
+    "identifier": "opt1",
+    "description": "Serveurs",
+    "ipv4": [
+     {
+      "ipaddr": "192.168.50.1/24"
+     }
+    ]
+   },
+   {
+    "identifier": "opt2",
+    "description": "Famille",
+    "ipv4": [
+     {
+      "ipaddr": "192.168.20.1/24"
+     }
+    ]
+   },
+   {
+    "identifier": "opt3",
+    "description": "Objets",
+    "ipv4": [
+     {
+      "ipaddr": "192.168.30.1/24"
+     }
+    ]
+   },
+   {
+    "identifier": "opt4",
+    "description": "Invités",
+    "ipv4": [
+     {
+      "ipaddr": "192.168.40.1/24"
+     }
+    ]
+   },
+   {
+    "identifier": "wireguard",
+    "description": "VPN",
+    "ipv4": [
+     {
+      "ipaddr": "10.8.0.1/24"
+     }
+    ]
+   },
+   {
+    "identifier": "wan",
+    "description": "WAN",
+    "ipv4": [
+     {
+      "ipaddr": "192.168.1.2/24"
+     }
+    ]
+   }
+  ],
+  "total": 7
+ },
+ "filter_rules": {
+  "rows": [
+   {
+    "uuid": "00000000-0000-4000-8000-000000000100",
+    "enabled": "1",
+    "sequence": "100",
+    "action": "pass",
+    "quick": "1",
+    "interface": "lan",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "any",
+    "source_net": "lan",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "any",
+    "destination_not": "0",
+    "destination_port": "",
+    "description": "Admin : accès total",
+    "log": "0"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000000200",
+    "enabled": "1",
+    "sequence": "200",
+    "action": "pass",
+    "quick": "1",
+    "interface": "wireguard",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "any",
+    "source_net": "wireguard",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "any",
+    "destination_not": "0",
+    "destination_port": "",
+    "description": "VPN : accès total",
+    "log": "0"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000000300",
+    "enabled": "1",
+    "sequence": "300",
+    "action": "pass",
+    "quick": "1",
+    "interface": "opt1",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "any",
+    "source_net": "opt1",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "any",
+    "destination_not": "0",
+    "destination_port": "",
+    "description": "Serveurs : accès total",
+    "log": "0"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000000400",
+    "enabled": "1",
+    "sequence": "400",
+    "action": "block",
+    "quick": "1",
+    "interface": "opt2",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "any",
+    "source_net": "opt2",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "lan",
+    "destination_not": "0",
+    "destination_port": "",
+    "description": "Famille : pas d'accès au réseau Admin",
+    "log": "1"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000000401",
+    "enabled": "1",
+    "sequence": "401",
+    "action": "pass",
+    "quick": "1",
+    "interface": "opt2",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "any",
+    "source_net": "opt2",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "any",
+    "destination_not": "0",
+    "destination_port": "",
+    "description": "Famille : accès total",
+    "log": "0"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000000600",
+    "enabled": "1",
+    "sequence": "600",
+    "action": "block",
+    "quick": "1",
+    "interface": "opt4",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "any",
+    "source_net": "opt4",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "PrivateNetworks",
+    "destination_not": "0",
+    "destination_port": "",
+    "description": "Invités : interdit vers les réseaux internes",
+    "log": "1"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000000601",
+    "enabled": "1",
+    "sequence": "601",
+    "action": "pass",
+    "quick": "1",
+    "interface": "opt4",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "any",
+    "source_net": "opt4",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "any",
+    "destination_not": "0",
+    "destination_port": "",
+    "description": "Invités : Internet",
+    "log": "0"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000001331",
+    "enabled": "1",
+    "sequence": "1331",
+    "action": "pass",
+    "quick": "1",
+    "interface": "lan,opt1,opt2,opt3,wireguard",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "TCP",
+    "source_net": "any",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "192.168.50.10",
+    "destination_not": "0",
+    "destination_port": "",
+    "description": "Accès à la domotique depuis les réseaux internes",
+    "log": "0"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000001500",
+    "enabled": "1",
+    "sequence": "1500",
+    "action": "pass",
+    "quick": "1",
+    "interface": "opt3",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "TCP/UDP",
+    "source_net": "opt3",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "opt3ip",
+    "destination_not": "0",
+    "destination_port": "53",
+    "description": "Objets → routeur : DNS",
+    "log": "0"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000001501",
+    "enabled": "1",
+    "sequence": "1501",
+    "action": "pass",
+    "quick": "1",
+    "interface": "opt3",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "UDP",
+    "source_net": "opt3",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "opt3ip",
+    "destination_not": "0",
+    "destination_port": "123",
+    "description": "Objets → routeur : NTP",
+    "log": "0"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000001502",
+    "enabled": "1",
+    "sequence": "1502",
+    "action": "pass",
+    "quick": "1",
+    "interface": "opt3",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "any",
+    "source_net": "opt3",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "192.168.50.10",
+    "destination_not": "0",
+    "destination_port": "",
+    "description": "Objets → domotique (192.168.50.10), tous ports",
+    "log": "0"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000001503",
+    "enabled": "1",
+    "sequence": "1503",
+    "action": "block",
+    "quick": "1",
+    "interface": "opt3",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "any",
+    "source_net": "opt3",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "PrivateNetworks",
+    "destination_not": "0",
+    "destination_port": "",
+    "description": "Objets : INTERDIT vers les réseaux internes",
+    "log": "1"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000001504",
+    "enabled": "1",
+    "sequence": "1504",
+    "action": "pass",
+    "quick": "1",
+    "interface": "opt3",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "TCP",
+    "source_net": "Objets_Cameras",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "Cameras_Cloud",
+    "destination_not": "0",
+    "destination_port": "Web_Ports",
+    "description": "Caméras → mises à jour du fabricant uniquement",
+    "log": "0"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000001509",
+    "enabled": "1",
+    "sequence": "1509",
+    "action": "pass",
+    "quick": "1",
+    "interface": "opt3",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "TCP",
+    "source_net": "Objets_Meteo",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "Meteo_Cloud",
+    "destination_not": "0",
+    "destination_port": "",
+    "description": "Station météo → service météo uniquement",
+    "log": "0"
+   },
+   {
+    "uuid": "00000000-0000-4000-8000-000000001510",
+    "enabled": "1",
+    "sequence": "1510",
+    "action": "block",
+    "quick": "1",
+    "interface": "opt3",
+    "direction": "in",
+    "ipprotocol": "inet",
+    "protocol": "any",
+    "source_net": "opt3",
+    "source_not": "0",
+    "source_port": "",
+    "destination_net": "any",
+    "destination_not": "0",
+    "destination_port": "",
+    "description": "Objets : tout le reste d'Internet est BLOQUÉ",
+    "log": "1"
+   }
+  ],
+  "total": 15
+ },
+ "aliases": {
+  "rows": [
+   {
+    "name": "PrivateNetworks",
+    "type": "network",
+    "content": "10.0.0.0/8\n172.16.0.0/12\n192.168.0.0/16",
+    "description": "Réseaux internes (RFC 1918)"
+   },
+   {
+    "name": "Objets_Cameras",
+    "type": "host",
+    "content": "192.168.30.10\n192.168.30.11\n192.168.30.12",
+    "description": "Caméras"
+   },
+   {
+    "name": "Cameras_Cloud",
+    "type": "host",
+    "content": "updates.cameras.example.com",
+    "description": "Mises à jour caméras"
+   },
+   {
+    "name": "Web_Ports",
+    "type": "port",
+    "content": "80\n443",
+    "description": "HTTP/HTTPS"
+   },
+   {
+    "name": "Objets_Meteo",
+    "type": "host",
+    "content": "192.168.30.40",
+    "description": "Station météo"
+   },
+   {
+    "name": "Meteo_Cloud",
+    "type": "host",
+    "content": "api.weather.example.com\nmqtt.weather.example.com",
+    "description": "Service météo"
+   }
+  ]
+ },
+ "alias_resolved": {
+  "PrivateNetworks": [
+   "10.0.0.0/8",
+   "172.16.0.0/12",
+   "192.168.0.0/16"
+  ],
+  "Objets_Cameras": [
+   "192.168.30.10",
+   "192.168.30.11",
+   "192.168.30.12"
+  ],
+  "Cameras_Cloud": [
+   "198.51.100.40"
+  ],
+  "Web_Ports": [
+   "80",
+   "443"
+  ],
+  "Objets_Meteo": [
+   "192.168.30.40"
+  ],
+  "Meteo_Cloud": [
+   "198.51.100.60",
+   "198.51.100.61"
+  ]
+ },
+ "d_nat": {
+  "rows": [
+   {
+    "uuid": "nat-0001",
+    "enabled": "1",
+    "interface": "wan",
+    "protocol": "tcp",
+    "destination_port": "443",
+    "target": "192.168.50.10",
+    "local_port": "443",
+    "description": "HTTPS → proxy de la domotique"
+   }
+  ]
+ },
+ "arp": [
+  {
+   "ip": "192.168.10.1",
+   "mac": "02:00:5e:10:00:01",
+   "intf": "",
+   "intf_description": "Admin",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.10.2",
+   "mac": "02:00:5e:10:00:02",
+   "intf": "",
+   "intf_description": "Admin",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.10.5",
+   "mac": "02:00:5e:10:00:05",
+   "intf": "",
+   "intf_description": "Admin",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.10.11",
+   "mac": "02:00:5e:10:00:11",
+   "intf": "",
+   "intf_description": "Admin",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.10.12",
+   "mac": "02:00:5e:10:00:12",
+   "intf": "",
+   "intf_description": "Admin",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.50.10",
+   "mac": "02:00:5e:50:00:10",
+   "intf": "",
+   "intf_description": "Serveurs",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.50.20",
+   "mac": "02:00:5e:50:00:20",
+   "intf": "",
+   "intf_description": "Serveurs",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.20.30",
+   "mac": "02:00:5e:20:00:30",
+   "intf": "",
+   "intf_description": "Famille",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.20.40",
+   "mac": "02:00:5e:20:00:40",
+   "intf": "",
+   "intf_description": "Famille",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.20.50",
+   "mac": "02:00:5e:20:00:50",
+   "intf": "",
+   "intf_description": "Famille",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.30.10",
+   "mac": "02:00:5e:30:00:10",
+   "intf": "",
+   "intf_description": "Objets",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.30.11",
+   "mac": "02:00:5e:30:00:11",
+   "intf": "",
+   "intf_description": "Objets",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.30.12",
+   "mac": "02:00:5e:30:00:12",
+   "intf": "",
+   "intf_description": "Objets",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.30.20",
+   "mac": "02:00:5e:30:00:20",
+   "intf": "",
+   "intf_description": "Objets",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.30.21",
+   "mac": "02:00:5e:30:00:21",
+   "intf": "",
+   "intf_description": "Objets",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.30.25",
+   "mac": "02:00:5e:30:00:25",
+   "intf": "",
+   "intf_description": "Objets",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.30.40",
+   "mac": "02:00:5e:30:00:40",
+   "intf": "",
+   "intf_description": "Objets",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  },
+  {
+   "ip": "192.168.30.50",
+   "mac": "02:00:5e:30:00:50",
+   "intf": "",
+   "intf_description": "Objets",
+   "manufacturer": "",
+   "hostname": "",
+   "expired": false,
+   "expires": 1200
+  }
+ ],
+ "reservations": {
+  "rows": [
+   {
+    "uuid": "res-005",
+    "ip_address": "192.168.50.10",
+    "hw_address": "02:00:5e:50:00:10",
+    "hostname": "",
+    "description": "Serveur domotique",
+    "subnet": ""
+   },
+   {
+    "uuid": "res-006",
+    "ip_address": "192.168.50.20",
+    "hw_address": "02:00:5e:50:00:20",
+    "hostname": "",
+    "description": "NAS",
+    "subnet": ""
+   },
+   {
+    "uuid": "res-007",
+    "ip_address": "192.168.20.30",
+    "hw_address": "02:00:5e:20:00:30",
+    "hostname": "",
+    "description": "Ordinateur bureau",
+    "subnet": ""
+   },
+   {
+    "uuid": "res-008",
+    "ip_address": "192.168.20.40",
+    "hw_address": "02:00:5e:20:00:40",
+    "hostname": "",
+    "description": "Téléviseur salon",
+    "subnet": ""
+   },
+   {
+    "uuid": "res-009",
+    "ip_address": "192.168.20.50",
+    "hw_address": "02:00:5e:20:00:50",
+    "hostname": "",
+    "description": "Téléphone (Wi-Fi)",
+    "subnet": ""
+   },
+   {
+    "uuid": "res-010",
+    "ip_address": "192.168.30.10",
+    "hw_address": "02:00:5e:30:00:10",
+    "hostname": "",
+    "description": "Caméra entrée",
+    "subnet": ""
+   },
+   {
+    "uuid": "res-011",
+    "ip_address": "192.168.30.11",
+    "hw_address": "02:00:5e:30:00:11",
+    "hostname": "",
+    "description": "Caméra jardin",
+    "subnet": ""
+   },
+   {
+    "uuid": "res-012",
+    "ip_address": "192.168.30.12",
+    "hw_address": "02:00:5e:30:00:12",
+    "hostname": "",
+    "description": "Sonnette vidéo (hors ligne)",
+    "subnet": ""
+   },
+   {
+    "uuid": "res-013",
+    "ip_address": "192.168.30.20",
+    "hw_address": "02:00:5e:30:00:20",
+    "hostname": "",
+    "description": "Thermostat connecté",
+    "subnet": ""
+   },
+   {
+    "uuid": "res-014",
+    "ip_address": "192.168.30.21",
+    "hw_address": "02:00:5e:30:00:21",
+    "hostname": "",
+    "description": "Prise connectée cuisine",
+    "subnet": ""
+   },
+   {
+    "uuid": "res-015",
+    "ip_address": "192.168.30.25",
+    "hw_address": "02:00:5e:30:00:25",
+    "hostname": "",
+    "description": "Module de mesure électrique",
+    "subnet": ""
+   },
+   {
+    "uuid": "res-016",
+    "ip_address": "192.168.30.40",
+    "hw_address": "02:00:5e:30:00:40",
+    "hostname": "",
+    "description": "Station météo (Wi-Fi)",
+    "subnet": ""
+   },
+   {
+    "uuid": "res-017",
+    "ip_address": "192.168.30.50",
+    "hw_address": "02:00:5e:30:00:50",
+    "hostname": "",
+    "description": "Imprimante (Wi-Fi)",
+    "subnet": ""
+   }
+  ]
+ },
+ "leases": {
+  "rows": [
+   {
+    "address": "192.168.10.1",
+    "hwaddr": "02:00:5e:10:00:01",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.10.2",
+    "hwaddr": "02:00:5e:10:00:02",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.10.5",
+    "hwaddr": "02:00:5e:10:00:05",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.10.11",
+    "hwaddr": "02:00:5e:10:00:11",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.10.12",
+    "hwaddr": "02:00:5e:10:00:12",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.50.10",
+    "hwaddr": "02:00:5e:50:00:10",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.50.20",
+    "hwaddr": "02:00:5e:50:00:20",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.20.30",
+    "hwaddr": "02:00:5e:20:00:30",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.20.40",
+    "hwaddr": "02:00:5e:20:00:40",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.20.50",
+    "hwaddr": "02:00:5e:20:00:50",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.30.10",
+    "hwaddr": "02:00:5e:30:00:10",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.30.11",
+    "hwaddr": "02:00:5e:30:00:11",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.30.12",
+    "hwaddr": "02:00:5e:30:00:12",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.30.20",
+    "hwaddr": "02:00:5e:30:00:20",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.30.21",
+    "hwaddr": "02:00:5e:30:00:21",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.30.25",
+    "hwaddr": "02:00:5e:30:00:25",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.30.40",
+    "hwaddr": "02:00:5e:30:00:40",
+    "hostname": ""
+   },
+   {
+    "address": "192.168.30.50",
+    "hwaddr": "02:00:5e:30:00:50",
+    "hostname": ""
+   }
+  ]
+ },
+ "vlans": {
+  "rows": [
+   {
+    "vlanif": "vlan050",
+    "if": "ix0",
+    "tag": "50",
+    "descr": "Serveurs"
+   },
+   {
+    "vlanif": "vlan020",
+    "if": "ix0",
+    "tag": "20",
+    "descr": "Famille"
+   },
+   {
+    "vlanif": "vlan030",
+    "if": "ix0",
+    "tag": "30",
+    "descr": "Objets"
+   },
+   {
+    "vlanif": "vlan040",
+    "if": "ix0",
+    "tag": "40",
+    "descr": "Invités"
+   }
+  ]
+ },
+ "firewall_log": {
+  "rows": [
+   {
+    "__timestamp__": "2026-11-01T13:42:12+01:00",
+    "action": "block",
+    "interface": "vlan030",
+    "src": "192.168.30.40",
+    "dst": "203.0.113.80",
+    "dstport": "443",
+    "protoname": "tcp",
+    "label": "00000000-0000-4000-8000-000000001510"
+   },
+   {
+    "__timestamp__": "2026-11-01T13:12:03+01:00",
+    "action": "block",
+    "interface": "vlan030",
+    "src": "192.168.30.40",
+    "dst": "203.0.113.80",
+    "dstport": "443",
+    "protoname": "tcp",
+    "label": "00000000-0000-4000-8000-000000001510"
+   },
+   {
+    "__timestamp__": "2026-11-01T09:05:44+01:00",
+    "action": "block",
+    "interface": "vlan030",
+    "src": "192.168.30.40",
+    "dst": "8.8.8.8",
+    "dstport": "53",
+    "protoname": "udp",
+    "label": "00000000-0000-4000-8000-000000001510"
+   },
+   {
+    "__timestamp__": "2026-11-01T12:00:00+01:00",
+    "action": "block",
+    "interface": "vlan030",
+    "src": "192.168.30.10",
+    "dst": "203.0.113.9",
+    "dstport": "80",
+    "protoname": "tcp",
+    "label": "00000000-0000-4000-8000-000000001510"
+   },
+   {
+    "__timestamp__": "2026-11-01T12:00:01+01:00",
+    "action": "pass",
+    "interface": "vlan030",
+    "src": "192.168.30.40",
+    "dst": "192.168.30.1",
+    "dstport": "53",
+    "protoname": "udp",
+    "label": "00000000-0000-4000-8000-000000001500"
+   }
+  ]
+ },
+ "resolver_log": {
+  "rows": [
+   {
+    "timestamp": "2026-11-01T13:42:11+01:00",
+    "line": "info: 192.168.30.40 firmware.example.net. A IN"
+   },
+   {
+    "timestamp": "2026-11-01T13:12:02+01:00",
+    "line": "info: 192.168.30.40 firmware.example.net. A IN"
+   }
+  ]
+ },
+ "gateways": {
+  "items": [
+   {
+    "name": "WAN_DHCP",
+    "status_translated": "Online",
+    "delay": "9.8 ms",
+    "loss": "0.0 %",
+    "address": "192.168.1.254"
+   },
+   {
+    "name": "VPN_SORTANT",
+    "status_translated": "Online",
+    "delay": "14.2 ms",
+    "loss": "0.0 %",
+    "address": "10.9.0.1"
+   }
+  ]
+ },
+ "kea_subnets": {
+  "rows": []
+ }
+}

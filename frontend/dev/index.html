@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Home Infra Map — card harness</title>
+    <style>
+      :root {
+        --primary-color: #03a9f4;
+        --card-background-color: #ffffff;
+        --primary-text-color: #212121;
+        --secondary-text-color: #727272;
+        --divider-color: #e0e0e0;
+        --success-color: #43a047;
+        --warning-color: #ffa600;
+        --error-color: #db4437;
+        --text-primary-color: #ffffff;
+        --lovelace-background: #fafafa;
+        font-family: Roboto, system-ui, sans-serif;
+      }
+      :root[data-theme='dark'] {
+        --primary-color: #03a9f4;
+        --card-background-color: #1c1c1c;
+        --primary-text-color: #e1e1e1;
+        --secondary-text-color: #9b9b9b;
+        --divider-color: #3a3a3a;
+        --lovelace-background: #111111;
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        background: var(--lovelace-background);
+        color: var(--primary-text-color);
+      }
+      #bar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding: 8px 16px;
+        font-size: 13px;
+      }
+      #root {
+        padding: 16px;
+        margin: 0 auto;
+      }
+      body.shot #bar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="bar"></div>
+    <div id="root"></div>
+    <script type="module" src="./harness.ts"></script>
+  </body>
+</html>
