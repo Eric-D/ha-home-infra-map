@@ -177,3 +177,39 @@ async def test_listener_errors_are_contained(hass: HomeAssistant) -> None:
     store.async_add_listener(boom)
     await store.async_replace({"boards": [], "network": {}})
     assert store.revision == 1
+
+
+def test_feeds_are_cleaned() -> None:
+    from custom_components.home_infra_map.models import ModuleIndex
+
+    boards = validate_boards(
+        [
+            {
+                "name": "A",
+                "supply": [
+                    {"id": "m", "kind": "meter"},
+                    {"id": "h", "kind": "main_breaker", "fed_by": "nope"},
+                ],
+                "rows": [
+                    {
+                        "modules": [
+                            {"id": "r", "kind": "rcd", "fed_by": "b"},
+                            {"id": "b", "kind": "breaker"},
+                            {"id": "s", "kind": "breaker", "fed_by": "s"},
+                            {"id": "f", "kind": "breaker", "fed_by": "h"},
+                        ]
+                    }
+                ],
+            },
+            {"name": "B", "fed_by": "f", "rows": [{"modules": [{"id": "x", "kind": "breaker"}]}]},
+            {"name": "C", "fed_by": "y", "rows": [{"modules": [{"id": "y", "kind": "breaker"}]}]},
+        ]
+    )
+    a, b, c = boards
+    assert [m["fed_by"] for m in a["rows"][0]["modules"]] == [None, None, None, "h"]
+    assert a["supply"][1]["fed_by"] is None and a["supply"][0]["width_modules"] == 4
+    assert b["fed_by"] == "f" and c["fed_by"] is None
+    index = ModuleIndex(boards)
+    assert [m["id"] for m in index.chain(b["rows"][0]["modules"][0])] == ["f", "h", "m"]
+    assert index.feeder(a["supply"][0]) is None
+    assert index.protector(a["rows"][0]["modules"][1])["id"] == "r"  # type: ignore[index]

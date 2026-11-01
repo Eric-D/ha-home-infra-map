@@ -1,6 +1,8 @@
 /** Shapes of the websocket payloads (see custom_components/home_infra_map/websocket.py). */
 
-export type ModuleKind = 'rcd' | 'breaker' | 'rcbo' | 'device' | 'spacer';
+export type ModuleKind = 'rcd' | 'breaker' | 'rcbo' | 'device' | 'spacer' | 'meter' | 'main_breaker';
+/** active = in service; off = switched off / tripped; spare = installed for future works, not wired. */
+export type ModuleStatus = 'active' | 'off' | 'spare';
 export type RcdType = 'AC' | 'A' | 'F' | 'B' | '?';
 export type Curve = 'B' | 'C' | 'D' | '?';
 export type CircuitKind =
@@ -33,6 +35,11 @@ export interface Module {
   width_modules: number;
   model: string | null;
   notes: string | null;
+  status?: ModuleStatus;
+  /** Module feeding this one; null = automatic (RCD on the left, else the service entrance). */
+  fed_by?: string | null;
+  /** Meter: subscribed power (kVA). */
+  subscribed_kva?: number | null;
   rating_a: number | null;
   curve: Curve;
   sensitivity_ma: number | null;
@@ -64,6 +71,10 @@ export interface Board {
   photo_path: string | null;
   /** DIN slots per rail (13, 18, 24…); null = not documented. */
   modules_per_row?: number | null;
+  /** Service entrance, upstream first: utility meter, main breaker. */
+  supply?: Module[];
+  /** Module of another board feeding this one (sub-board). */
+  fed_by?: string | null;
   rows: Row[];
 }
 

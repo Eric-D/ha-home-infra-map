@@ -4,6 +4,19 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnement
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-01
+
+### Ajouté
+- **Arrivée** du tableau : compteur (Linky…, puissance souscrite, capteur de puissance) et disjoncteur de branchement (calibre, sensibilité), dessinés au-dessus des rails avec la charge en % du calibre.
+- **Alimenté par** : chaque module peut être relié explicitement à l'élément qui l'alimente (par défaut, le différentiel à sa gauche sur la rangée, sinon l'arrivée) — par exemple un disjoncteur câblé directement sous le disjoncteur de branchement, hors différentiel. Un tableau peut être alimenté par un départ d'un autre tableau. Les liens qui bouclent ou pointent dans le vide sont retirés à l'enregistrement.
+- Sélection d'un module : sa chaîne d'alimentation et tout ce qu'il alimente sont mis en évidence ; le détail affiche « Alimenté par », « Protégé par » et « Alimente ».
+- **État** d'un module : en service, **coupé / disjoncté** (ou relais lié éteint), **en réserve** (posé pour de futurs travaux, non raccordé : hachuré, exclu des contrôles).
+- Fichiers de la maison : `arrivee: {compteur: …, disjoncteur: …}`, `alimente_par: <repère | arrivee>` (sur un élément ou un tableau), `etat: réserve | coupé`.
+- Contrôle « départ sans 30 mA en amont » (information) pour les départs vers un tableau divisionnaire.
+
+### Modifié
+- Les contrôles NF C 15-100 suivent les liens d'alimentation (différentiel réel en amont, même sur une autre rangée ou un autre tableau).
+
 ## [0.2.0] - 2026-11-01
 
 ### Ajouté

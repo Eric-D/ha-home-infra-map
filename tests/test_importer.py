@@ -16,7 +16,7 @@ from custom_components.home_infra_map.importer import (
     parse_ma,
     parse_rating,
 )
-from custom_components.home_infra_map.models import upstream_rcd
+from custom_components.home_infra_map.models import ModuleIndex, upstream_rcd
 
 from .conftest import fixture_text
 
@@ -29,7 +29,7 @@ def test_electricity_example_counts() -> None:
     assert [len(b["rows"]) for b in result.boards] == [3, 1]
     assert (main["modules_per_row"], garage["modules_per_row"]) == (13, 8)
     kinds = Counter(m["kind"] for b in result.boards for row in b["rows"] for m in row["modules"])
-    assert kinds == {"breaker": 17, "rcbo": 2, "rcd": 3, "device": 5, "spacer": 3}
+    assert kinds == {"breaker": 18, "rcbo": 2, "rcd": 3, "device": 5, "spacer": 3}
     assert [r["label"] for r in main["rows"]] == ["R1", "R2", "R3"]
     assert result.photos == {main["id"]: "photos/tableau_principal.jpg"}
 
@@ -62,6 +62,63 @@ def test_electricity_values() -> None:
     rcbo = garage["rows"][0]["modules"][1]
     assert (rcbo["kind"], rcbo["width_modules"], rcbo["rcd_type"]) == ("rcbo", 2, "A")
     assert upstream_rcd(garage["rows"][0], rcbo["id"]) is rcbo
+
+
+def test_supply_feeds_and_status() -> None:
+    result = parse_document(fixture_text("electricite.yaml"))
+    main, garage = result.boards  # type: ignore[misc]
+    assert result.warnings == []
+    meter, head = main["supply"]
+    assert (meter["kind"], meter["subscribed_kva"], meter["power_entity_id"]) == (
+        "meter",
+        9.0,
+        "sensor.compteur_puissance_apparente",
+    )
+    assert (head["kind"], head["ref"], head["rating_a"], head["sensitivity_ma"]) == (
+        "main_breaker",
+        "T1-AGCP",
+        45,
+        500,
+    )
+    r1 = main["rows"][0]["modules"]
+    assert [m["status"] for m in r1 if m["ref"] in ("T1-R1-3", "T1-R1-8", "T1-R1-1")] == [
+        "active",
+        "off",
+        "spare",
+    ]
+    feeder = main["rows"][2]["modules"][-1]
+    assert (feeder["ref"], feeder["fed_by"], feeder["circuit_kind"]) == ("T1-R3-4", head["id"], "feeder")
+    assert garage["fed_by"] == feeder["id"]
+    index = ModuleIndex(result.boards)  # type: ignore[arg-type]
+    # the feeder skips the RCD on its left: only the 500 mA main breaker upstream
+    assert index.protector(feeder) is head
+    assert [m["ref"] for m in index.chain(garage["rows"][0]["modules"][0])] == [
+        "T1-R3-4",
+        "T1-AGCP",
+        "T1-CPT",
+    ]
+    assert index.protector(main["rows"][2]["modules"][1])["ref"] == "T1-R3-ID"  # type: ignore[index]
+    assert {m["ref"] for m in index.fed(head["id"])} == {"T1-R1-ID", "T1-R2-ID", "T1-R3-ID", "T1-R3-4"}
+
+
+def test_unknown_feed_reference_is_reported() -> None:
+    doc = """
+tableaux:
+  - id: T9
+    nom: Seul
+    rangees:
+      - id: T9-R1
+        elements:
+          - disjoncteur: {repere: T9-R1-1, calibre: C16, alimente_par: T9-R1-42}
+          - disjoncteur: {repere: T9-R1-2, calibre: C16, alimente_par: arrivee}
+          - disjoncteur: {repere: T9-R1-3, calibre: C16, reserve: true, etat: "?"}
+          - disjoncteur: {repere: T9-R1-4, calibre: C16, etat: disjoncté}
+"""
+    result = parse_document(doc)
+    assert len(result.warnings) == 2
+    modules = result.boards[0]["rows"][0]["modules"]  # type: ignore[index]
+    assert [m["fed_by"] for m in modules] == [None, None, None, None]
+    assert [m["status"] for m in modules] == ["active", "active", "spare", "off"]
 
 
 def test_network_example_counts() -> None:

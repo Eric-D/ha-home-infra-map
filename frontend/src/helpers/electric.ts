@@ -13,6 +13,7 @@ export function upstreamRcd(row: Row, moduleId: string): Module | null {
 
 export function isUnidentified(module: Module): boolean {
   if (module.kind !== 'breaker' && module.kind !== 'rcbo') return false;
+  if (module.status === 'spare') return false;
   const name = (module.circuit_name ?? '').trim();
   return name === '' || name === '?';
 }
@@ -50,20 +51,134 @@ export function boardPowerEntities(board: Board): string[] {
   return board.rows.flatMap((r) => r.modules.map((m) => m.power_entity_id).filter((e): e is string => !!e));
 }
 
-export function boardStats(board: Board): { rcds: number; breakers: number; devices: number; unidentified: number } {
-  let rcds = 0;
-  let breakers = 0;
-  let devices = 0;
-  let unidentified = 0;
+export interface BoardStats {
+  rcds: number;
+  breakers: number;
+  devices: number;
+  unidentified: number;
+  spare: number;
+  off: number;
+}
+
+export function boardStats(board: Board, hass?: Hass): BoardStats {
+  const stats: BoardStats = { rcds: 0, breakers: 0, devices: 0, unidentified: 0, spare: 0, off: 0 };
   for (const row of board.rows) {
     for (const m of row.modules) {
-      if (m.kind === 'rcd') rcds += 1;
-      if (m.kind === 'breaker' || m.kind === 'rcbo') breakers += 1;
-      if (m.kind === 'device') devices += 1;
-      if (isUnidentified(m)) unidentified += 1;
+      if (m.kind === 'rcd') stats.rcds += 1;
+      if (m.kind === 'breaker' || m.kind === 'rcbo') stats.breakers += 1;
+      if (m.kind === 'device') stats.devices += 1;
+      if (isUnidentified(m)) stats.unidentified += 1;
+      if (m.status === 'spare') stats.spare += 1;
+      else if (isOff(m, hass)) stats.off += 1;
     }
   }
-  return { rcds, breakers, devices, unidentified };
+  return stats;
+}
+
+/** Switched off / tripped: written in the model, or its linked switch entity is off. */
+export function isOff(module: Module, hass?: Hass): boolean {
+  if (module.status === 'off') return true;
+  const id = module.switch_entity_id;
+  return !!(id && hass?.states[id]?.state === 'off');
+}
+
+/**
+ * Who feeds whom, across every board (mirror of models.ModuleIndex).
+ *
+ * A module is fed by its explicit `fed_by`, else (on a rail) by the last RCD to
+ * its left, else by the last element of its board's service entrance, else by
+ * the module feeding the board.
+ */
+export class FeedIndex {
+  readonly modules = new Map<string, Module>();
+  readonly boardOf = new Map<string, Board>();
+  private readonly defaults = new Map<string, string | null>();
+
+  constructor(boards: Board[]) {
+    for (const board of boards) {
+      let head: string | null = board.fed_by ?? null;
+      for (const m of board.supply ?? []) {
+        this.add(m, board, head);
+        head = m.id;
+      }
+      for (const row of board.rows) {
+        let rcd: string | null = null;
+        for (const m of row.modules) {
+          if (m.kind === 'rcd' || m.kind === 'meter' || m.kind === 'main_breaker') {
+            this.add(m, board, head);
+            if (m.kind === 'rcd') rcd = m.id;
+          } else this.add(m, board, rcd ?? head);
+        }
+      }
+    }
+  }
+
+  private add(m: Module, board: Board, fallback: string | null): void {
+    this.modules.set(m.id, m);
+    this.boardOf.set(m.id, board);
+    this.defaults.set(m.id, fallback);
+  }
+
+  /** Module the automatic rule would pick (ignoring `fed_by`). */
+  defaultFeeder(module: Module): Module | null {
+    const id = this.defaults.get(module.id);
+    return id ? this.modules.get(id) ?? null : null;
+  }
+
+  feeder(module: Module): Module | null {
+    const id = (module.fed_by && this.modules.has(module.fed_by) ? module.fed_by : null) ?? this.defaults.get(module.id);
+    return id ? this.modules.get(id) ?? null : null;
+  }
+
+  /** Upstream modules, nearest first. */
+  chain(module: Module): Module[] {
+    const out: Module[] = [];
+    const seen = new Set([module.id]);
+    let current = this.feeder(module);
+    while (current && !seen.has(current.id)) {
+      out.push(current);
+      seen.add(current.id);
+      current = this.feeder(current);
+    }
+    return out;
+  }
+
+  /** Residual-current device protecting a module (an RCBO protects itself; a main breaker with a sensitivity counts). */
+  protector(module: Module): Module | null {
+    if (module.kind === 'rcbo') return module;
+    for (const up of this.chain(module)) {
+      if (up.kind === 'rcd' || up.kind === 'rcbo') return up;
+      if (up.kind === 'main_breaker' && up.sensitivity_ma) return up;
+    }
+    return null;
+  }
+
+  /** Modules directly fed by `id`. */
+  fed(id: string): Module[] {
+    return [...this.modules.values()].filter((m) => this.feeder(m)?.id === id);
+  }
+
+  /** Every module downstream of `id` (direct or not). */
+  downstream(id: string): Set<string> {
+    const out = new Set<string>();
+    const todo = [id];
+    while (todo.length) {
+      for (const m of this.fed(todo.pop()!)) {
+        if (out.has(m.id) || m.id === id) continue;
+        out.add(m.id);
+        todo.push(m.id);
+      }
+    }
+    return out;
+  }
+
+  /** Candidates for the "fed by" field of `module`: anything that does not sit downstream of it. */
+  candidates(module: Module): Module[] {
+    const below = this.downstream(module.id);
+    return [...this.modules.values()].filter(
+      (m) => m.id !== module.id && !below.has(m.id) && m.kind !== 'spacer',
+    );
+  }
 }
 
 export function checksFor(checks: Check[], moduleId: string): Check[] {
@@ -78,6 +193,10 @@ export function moduleTitle(module: Module): string {
     case 'breaker':
     case 'rcbo':
       return module.rating_a ? `${module.curve !== '?' ? module.curve : ''}${module.rating_a}` : '?';
+    case 'meter':
+      return module.subscribed_kva ? `${String(module.subscribed_kva).replace('.', ',')} kVA` : 'kVA ?';
+    case 'main_breaker':
+      return module.rating_a ? `${module.rating_a} A` : '? A';
     case 'device': {
       // Short title like the mockup ("Pro 4PM"). A known model
       // loses its brand prefix; a free label keeps its first word only
@@ -119,12 +238,15 @@ export function blankModule(kind: Module['kind'], ref: string): Module {
     id: newId(),
     kind,
     ref,
-    width_modules: kind === 'rcd' ? 2 : 1,
-    model: null,
+    width_modules: kind === 'meter' ? 4 : kind === 'rcd' || kind === 'main_breaker' ? 2 : 1,
+    model: kind === 'meter' ? 'Linky' : null,
     notes: null,
-    rating_a: kind === 'rcd' ? 40 : kind === 'breaker' || kind === 'rcbo' ? 16 : null,
+    status: 'active',
+    fed_by: null,
+    subscribed_kva: null,
+    rating_a: kind === 'rcd' ? 40 : kind === 'breaker' || kind === 'rcbo' ? 16 : kind === 'main_breaker' ? 60 : null,
     curve: 'C',
-    sensitivity_ma: kind === 'rcd' || kind === 'rcbo' ? 30 : null,
+    sensitivity_ma: kind === 'rcd' || kind === 'rcbo' ? 30 : kind === 'main_breaker' ? 500 : null,
     rcd_type: kind === 'rcd' || kind === 'rcbo' ? 'A' : '?',
     cable_mm2: null,
     circuit_name: '?',

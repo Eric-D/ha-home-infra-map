@@ -43,7 +43,7 @@ describe('electricity view', () => {
     expect(el.querySelectorAll('.m.sp')).toHaveLength(2);
     const dashed = el.querySelectorAll('.m.u');
     expect(dashed.length).toBe(modules.filter((m) => isUnidentified(m)).length);
-    expect(dashed.length).toBe(4);
+    expect(dashed.length).toBe(3);
     expect(el.querySelector('.rail')!.querySelectorAll('.m')[0].getAttribute('data-kind')).toBe('rcd');
   });
 
@@ -70,12 +70,51 @@ describe('electricity view', () => {
     expect(detail.textContent).toContain('sensor.lave_linge_puissance');
   });
 
+  it('draws the service entrance, off and spare breakers', () => {
+    const el = mount();
+    render(renderElectricity(ctx), el);
+    const sups = [...el.querySelectorAll<HTMLElement>('.supply .sup')];
+    expect(sups.map((s) => s.classList.contains('meter') || s.classList.contains('main_breaker'))).toEqual([true, true]);
+    expect(sups[0].textContent).toContain('9 kVA');
+    expect(sups[1].textContent).toContain('45 A');
+    expect(sups[1].textContent).toContain('500 mA');
+    expect(el.querySelector('.supply')!.textContent).toContain('4 départ(s)');
+    const off = [...el.querySelectorAll<HTMLElement>('.m.off')];
+    expect(off.map((m) => m.dataset.moduleId)).toEqual([board.rows[0].modules.find((m) => m.ref === 'T1-R1-3')!.id]);
+    expect(off[0].querySelector('.tag')!.textContent).toBe('Coupé');
+    expect(el.querySelector('.m.spare .tag')!.textContent).toBe('Réserve');
+    const fx = el.querySelector<HTMLElement>('.m.fx')!;
+    expect(fx.title).toContain('alimenté par T1-AGCP');
+    expect(el.textContent).toContain('1 coupé(s)');
+    expect(el.textContent).toContain('1 en réserve');
+  });
+
+  it('highlights the feed links of the selected module', () => {
+    const feeder = board.rows[2].modules.find((m) => m.ref === 'T1-R3-4')!;
+    const el = mount();
+    render(renderElectricity({ ...ctx, selectedModuleId: feeder.id }), el);
+    expect(el.querySelector('.board')!.classList.contains('linking')).toBe(true);
+    expect([...el.querySelectorAll('.up')].map((m) => m.getAttribute('data-module-id'))).toEqual(board.supply!.map((m) => m.id));
+    // the RCD on its left is not upstream
+    expect(el.querySelector(`[data-module-id="${board.rows[2].modules[0].id}"]`)!.classList.contains('up')).toBe(false);
+    const detail = el.querySelector('dl.detail')!.textContent!.replace(/\s+/g, ' ');
+    expect(detail).toContain('T1-AGCP ← T1-CPT · lien manuel');
+    expect(detail).toContain('Tableau garage');
+
+    const head = board.supply![1];
+    render(renderElectricity({ ...ctx, selectedModuleId: head.id }), el);
+    const text = el.querySelector('dl.detail')!.textContent!;
+    expect(text).toContain('T1-R1-ID');
+    expect(text).toContain('T1-R3-4');
+    expect(el.querySelectorAll('.down').length).toBeGreaterThan(20);
+  });
+
   it('draws free slots up to the rail width, and flags an overfull rail', () => {
     const el = mount();
     render(renderElectricity(ctx), el);
     let rails = [...el.querySelectorAll<HTMLElement>('.rail')];
-    // 13-slot rails using 12 / 10 / 12 slots
-    expect(rails.map((r) => r.querySelectorAll('.m.free').length)).toEqual([1, 3, 1]);
+    // 13-slot rails using 12 / 10 / 13 slots
+    expect(rails.map((r) => r.querySelectorAll('.m.free').length)).toEqual([1, 3, 0]);
     expect(rails[0].title).toBe('12 / 13 modules');
     expect(rails.some((r) => r.classList.contains('over'))).toBe(false);
     // a 2-slot hole is twice as wide as a 1-slot breaker (plus the gap)
@@ -91,7 +130,7 @@ describe('electricity view', () => {
     render(renderElectricity({ ...ctx, board: narrow }), el);
     rails = [...el.querySelectorAll<HTMLElement>('.rail')];
     expect(rails[2].classList.contains('over')).toBe(true);
-    expect(rails[2].title).toBe('12 / 10 modules');
+    expect(rails[2].title).toBe('13 / 10 modules');
 
     // unknown rail width: nothing invented
     render(renderElectricity({ ...ctx, board: { ...board, modules_per_row: null } }), el);

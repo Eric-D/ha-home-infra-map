@@ -47,9 +47,10 @@ export function entityField(
   value: string | null,
   deviceClass: string | null,
   onChange: (value: string | null) => void,
+  domains?: string[],
 ): TemplateResult {
   if (hasHaSelector()) {
-    const filter = deviceClass ? { domain: 'sensor', device_class: deviceClass } : undefined;
+    const filter = deviceClass ? { domain: 'sensor', device_class: deviceClass } : domains ? { domain: domains } : undefined;
     return html`<div class="f">
       <ha-selector
         .hass=${hass}
@@ -62,6 +63,7 @@ export function entityField(
   }
   const options = Object.keys(hass.states)
     .filter((eid) => !deviceClass || hass.states[eid]?.attributes?.device_class === deviceClass)
+    .filter((eid) => !domains || domains.includes(eid.split('.')[0]))
     .sort();
   return html`<div class="f">
     <label for=${id}>${label}</label>

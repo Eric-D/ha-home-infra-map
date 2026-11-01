@@ -186,7 +186,37 @@ def _entity_or_none(value: Any) -> str | None:
     return None
 
 
-_MODULE_KEYS = frozenset({"type", "modele", "entite_ha", "note", "repere", "largeur", "modules"})
+_MODULE_KEYS = frozenset(
+    {"type", "modele", "entite_ha", "note", "repere", "largeur", "modules", "etat", "alimente_par", "reserve"}
+)
+
+_SPARE_WORDS = ("reserve", "réserve", "spare", "non raccorde", "non raccordé", "futur")
+_OFF_WORDS = ("coupe", "coupé", "ouvert", "off", "disjoncte", "disjoncté", "hors service", "hs")
+# `alimente_par:` values meaning "straight from the service entrance"
+_HEAD_REFS = ("arrivee", "arrivée", "branchement", "agcp", "tete", "tête", "disjoncteur de branchement")
+_FED_REF = "_fed_ref"
+
+
+def parse_status(item: JsonDict, circuit: Any = None) -> str:
+    """`etat: réserve` / `etat: coupé` (or `reserve: true`) -> spare / off / active."""
+    if item.get("reserve") is True:
+        return "spare"
+    text = (_clean(item.get("etat")) or "").lower()
+    if text and any(text.startswith(w) for w in _SPARE_WORDS):
+        return "spare"
+    if text and any(text.startswith(w) for w in _OFF_WORDS):
+        return "off"
+    if (_clean(circuit) or "").lower().startswith(("réserve", "reserve")):
+        return "spare"
+    return "active"
+
+
+def _common(item: JsonDict, circuit: Any = None) -> JsonDict:
+    """Fields shared by every element: state, `alimente_par`, width."""
+    extra: JsonDict = {"status": parse_status(item, circuit), **_width(item)}
+    if fed := _clean(item.get("alimente_par")):
+        extra[_FED_REF] = fed
+    return extra
 
 
 def _rejoin_flow_commas(mod: JsonDict) -> JsonDict:
@@ -245,7 +275,7 @@ def _legacy_rcd(diff: JsonDict, ref: str) -> JsonDict:
         "sensitivity_ma": parse_ma(diff.get("sensibilite")),
         "rcd_type": rcd_type.upper() if rcd_type else "?",
         "notes": _clean(diff.get("note")),
-        **_width(diff),
+        **_common(diff),
     }
 
 
@@ -278,7 +308,7 @@ def _legacy_breaker(disj: JsonDict, ref: str, resolve_area: AreaResolver | None)
         "area_ids": area_ids,
         "power_entity_id": _entity_or_none(disj.get("entite_puissance")),
         "notes": "\n".join(notes) or None,
-        **_width(disj),
+        **_common(disj, circuit),
     }
     if is_rcbo:
         rcd_type = _clean(disj.get("type"))
@@ -305,7 +335,7 @@ def _legacy_device(raw: JsonDict, ref: str) -> JsonDict:
         "model": str(model).strip() if model else None,
         "entity_ids": [entity] if entity else [],
         "notes": "\n".join(notes) or None,
-        **_width(mod),
+        **_common(mod),
     }
 
 
@@ -367,10 +397,86 @@ def _legacy_row(rangee: JsonDict, row_ref: str, resolve_area: AreaResolver | Non
     return modules
 
 
+def _parse_kva(value: Any) -> float | None:
+    if _unknown(value):
+        return None
+    match = re.match(r"^\s*(\d+(?:[.,]\d+)?)", str(value))
+    return float(match.group(1).replace(",", ".")) if match else None
+
+
+def _legacy_supply(arrivee: Any, code: str) -> list[JsonDict]:
+    """`arrivee: {compteur: {...}, disjoncteur: {...}}` -> service entrance.
+
+    The meter comes first (upstream), then the main breaker.
+    """
+    if not isinstance(arrivee, dict):
+        return []
+    supply: list[JsonDict] = []
+    meter = arrivee.get("compteur")
+    if isinstance(meter, dict):
+        supply.append(
+            {
+                "kind": "meter",
+                "ref": _clean(meter.get("repere")) or f"{code}-CPT",
+                "model": _clean(meter.get("modele")),
+                "subscribed_kva": _parse_kva(meter.get("puissance_souscrite") or meter.get("puissance")),
+                "power_entity_id": _entity_or_none(meter.get("entite_puissance")),
+                "energy_entity_id": _entity_or_none(meter.get("entite_energie")),
+                "notes": _clean(meter.get("note")),
+                "status": parse_status(meter),
+            }
+        )
+    breaker = arrivee.get("disjoncteur") or arrivee.get("disjoncteur_branchement")
+    if isinstance(breaker, dict):
+        _curve, amps = parse_rating(breaker.get("calibre"))
+        supply.append(
+            {
+                "kind": "main_breaker",
+                "ref": _clean(breaker.get("repere")) or f"{code}-AGCP",
+                "model": _clean(breaker.get("modele")),
+                "rating_a": amps,
+                "sensitivity_ma": parse_ma(breaker.get("sensibilite")),
+                "notes": _clean(breaker.get("note")),
+                "status": parse_status(breaker),
+            }
+        )
+    return supply
+
+
+def _resolve_feeds(boards: list[JsonDict], board_refs: dict[str, str], result: ImportResult) -> None:
+    """Turn the `alimente_par:` references (repères) into module ids."""
+    by_ref: dict[str, str] = {}
+    for board in boards:
+        for module in [*board["supply"], *(m for row in board["rows"] for m in row["modules"])]:
+            module.setdefault("id", new_id())
+            if module.get("ref"):
+                by_ref.setdefault(str(module["ref"]).lower(), module["id"])
+
+    def resolve(ref: str, board: JsonDict) -> str | None:
+        key = ref.strip().lower()
+        if key in _HEAD_REFS:
+            if board["supply"]:
+                return str(board["supply"][-1]["id"])
+            result.warnings.append(f"{ref}: no service entrance (arrivee:) on board {board['name']}")
+            return None
+        if key in by_ref:
+            return by_ref[key]
+        result.warnings.append(f"alimente_par: unknown reference {ref!r}")
+        return None
+
+    for board in boards:
+        if ref := board_refs.get(board["id"]):
+            board["fed_by"] = resolve(ref, board)
+        for module in [*board["supply"], *(m for row in board["rows"] for m in row["modules"])]:
+            if ref := module.pop(_FED_REF, None):
+                module["fed_by"] = resolve(ref, board)
+
+
 def _legacy_boards(
     tableaux: list[Any], resolve_area: AreaResolver | None, result: ImportResult
 ) -> list[JsonDict]:
     boards: list[JsonDict] = []
+    board_refs: dict[str, str] = {}
     for t_index, tableau in enumerate(tableaux, start=1):
         if not isinstance(tableau, dict):
             raise ImportError_(f"tableaux[{t_index}] must be a mapping")
@@ -381,8 +487,13 @@ def _legacy_boards(
             "location": _clean(tableau.get("emplacement")),
             # slots per DIN rail (13, 18, 24…); a row may override it
             "modules_per_row": _int_or_none(tableau.get("modules_par_rangee")),
+            "supply": _legacy_supply(
+                tableau.get("arrivee") or tableau.get("branchement"), str(tableau.get("id") or f"T{t_index}")
+            ),
             "rows": [],
         }
+        if fed := _clean(tableau.get("alimente_par")):
+            board_refs[board_id] = fed
         if photo := _clean(tableau.get("photo")):
             result.photos[board_id] = photo
         for r_index, rangee in enumerate(tableau.get("rangees") or [], start=1):
@@ -396,6 +507,7 @@ def _legacy_boards(
                 }
             )
         boards.append(board)
+    _resolve_feeds(boards, board_refs, result)
     return validate_boards(boards)
 
 

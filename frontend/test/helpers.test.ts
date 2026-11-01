@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { boardStats, moduleTitle, moveItem, rowCapacity, rowUsed, sumPower, upstreamRcd } from '../src/helpers/electric.js';
+import { boardStats, FeedIndex, isOff, moduleTitle, moveItem, rowCapacity, rowUsed, sumPower, upstreamRcd } from '../src/helpers/electric.js';
 import { gridOptions } from '../src/helpers/grid.js';
 import { childrenOf, counts, groupByPort, unplaced } from '../src/helpers/network.js';
 import { parseHistory, presenceSegments, sparkPath } from '../src/helpers/sparkline.js';
@@ -15,12 +15,12 @@ describe('electric helpers', () => {
     // demo data: docs/examples/tableau-largeurs.yaml (brief counts + a terminal block)
     // demo data: tests/fixtures/electricite.yaml (fictional), main board
     expect(board.rows).toHaveLength(3);
-    expect(boardStats(board)).toMatchObject({ rcds: 3, breakers: 17, devices: 4 });
+    expect(boardStats(board)).toMatchObject({ rcds: 3, breakers: 18, devices: 4, spare: 1, off: 1 });
   });
 
   it('measures rails in DIN slots, holes included', () => {
     expect(board.modules_per_row).toBe(13);
-    expect(board.rows.map((r) => rowUsed(r))).toEqual([12, 10, 12]);
+    expect(board.rows.map((r) => rowUsed(r))).toEqual([12, 10, 13]);
     expect(rowCapacity(board, board.rows[0])).toBe(13);
     expect(rowCapacity(board, { ...board.rows[0], capacity: 12 })).toBe(12);
     expect(rowCapacity({ ...board, modules_per_row: null }, board.rows[0])).toBeNull();
@@ -43,6 +43,36 @@ describe('electric helpers', () => {
     expect(upstreamRcd(row, 'b0')).toBeNull();
     expect(upstreamRcd(row, 'b1')?.id).toBe('rcd1');
     expect(upstreamRcd(row, 'rcbo')?.id).toBe('rcbo');
+  });
+
+  it('resolves feeds like the backend: RCD on the left, manual links, service entrance, sub-board', () => {
+    const boards = payload.model.boards;
+    const index = new FeedIndex(boards);
+    const all = [...index.modules.values()];
+    const byRef = (ref: string) => all.find((m) => m.ref === ref)!;
+    const [meter, head] = board.supply!;
+    expect([meter.kind, head.kind, head.rating_a]).toEqual(['meter', 'main_breaker', 45]);
+    expect(index.feeder(byRef('T1-R1-2'))?.ref).toBe('T1-R1-ID');
+    expect(index.feeder(byRef('T1-R1-ID'))).toBe(head);
+    // the garage feeder is wired straight from the main breaker, not through the R3 RCD
+    const feeder = byRef('T1-R3-4');
+    expect(feeder.fed_by).toBe(head.id);
+    expect(index.defaultFeeder(feeder)?.ref).toBe('T1-R3-ID');
+    expect(index.protector(feeder)).toBe(head);
+    expect(index.chain(byRef('T2-R1-1')).map((m) => m.ref)).toEqual(['T1-R3-4', 'T1-AGCP', 'T1-CPT']);
+    expect(index.downstream(feeder.id).has(byRef('T2-R1-2').id)).toBe(true);
+    // a module cannot be fed by something downstream of it (loop)
+    expect(index.candidates(head).map((m) => m.id)).toEqual([meter.id]);
+    expect(index.candidates(feeder).some((m) => m.ref === 'T2-R1-1')).toBe(false);
+  });
+
+  it('knows off and spare modules', () => {
+    const spare = board.rows[0].modules.find((m) => m.ref === 'T1-R1-8')!;
+    expect(spare.status).toBe('spare');
+    const m = { ...board.rows[0].modules[1], status: 'active' as const, switch_entity_id: 'switch.x' };
+    expect(isOff(m, mockHass({ states: { 'switch.x': { state: 'off', attributes: {} } } }))).toBe(true);
+    expect(isOff(m, mockHass({ states: { 'switch.x': { state: 'on', attributes: {} } } }))).toBe(false);
+    expect(isOff({ ...m, status: 'off' })).toBe(true);
   });
 
   it('sums power, ignoring unavailable sensors and converting kW', () => {

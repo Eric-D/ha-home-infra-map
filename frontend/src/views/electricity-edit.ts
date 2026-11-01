@@ -1,12 +1,12 @@
 /** Electricity edit mode: edit directly on the drawing, side form, atomic save. */
 import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { errorCode, errorMessage, save, uploadPhoto } from '../api.js';
-import { blankModule, deepClone, moveItem, newId } from '../helpers/electric.js';
+import { blankModule, deepClone, FeedIndex, moduleTitle, moveItem, newId } from '../helpers/electric.js';
 import { translator, type Translate } from '../i18n.js';
 import { cardStyles } from '../styles.js';
-import type { Board, CircuitKind, Hass, Module, ModuleKind, Payload, Row } from '../types.js';
+import type { Board, CircuitKind, Hass, Module, ModuleKind, ModuleStatus, Payload, Row } from '../types.js';
 import { areaField, entityField, ensureHaElements, fire, selectField, textField } from '../ui.js';
-import { moduleSpan, railStyle, railUsage, renderFreeSlots, renderModule } from './electricity.js';
+import { linksFor, moduleSpan, railStyle, railUsage, renderFreeSlots, renderModule, renderSupply, type Links } from './electricity.js';
 
 const KINDS: ModuleKind[] = ['breaker', 'rcd', 'rcbo', 'device', 'spacer'];
 const RATINGS = [2, 6, 10, 16, 20, 25, 32, 40, 50, 63];
@@ -15,6 +15,9 @@ const SENSITIVITIES = [10, 30, 100, 300, 500];
 const RCD_TYPES = ['AC', 'A', 'F', 'B', '?'];
 const CURVES = ['B', 'C', 'D', '?'];
 const CABLES = [1.5, 2.5, 4, 6, 10, 16];
+const HEAD_RATINGS = [15, 30, 45, 60, 90];
+const HEAD_SENSITIVITIES = [300, 500, 650];
+const STATUSES: ModuleStatus[] = ['active', 'off', 'spare'];
 const CIRCUIT_KINDS: CircuitKind[] = ['lighting', 'sockets', 'dedicated', 'cooking', 'water_heater', 'heating', 'feeder', 'other', 'unknown'];
 
 function boardCode(board: Board): string {
@@ -94,19 +97,36 @@ export class HomeInfraMapElectricityEditor extends LitElement {
     this._dirty = true;
   }
 
-  private _locate(moduleId: string): { row: Row; index: number } | null {
-    for (const board of this._boards)
+  /** Where a module sits: a rail (`row`) or the service entrance (`row` null). */
+  private _locate(moduleId: string): { list: Module[]; row: Row | null; index: number } | null {
+    for (const board of this._boards) {
+      const supply = (board.supply ??= []);
+      const s = supply.findIndex((m) => m.id === moduleId);
+      if (s >= 0) return { list: supply, row: null, index: s };
       for (const row of board.rows) {
         const index = row.modules.findIndex((m) => m.id === moduleId);
-        if (index >= 0) return { row, index };
+        if (index >= 0) return { list: row.modules, row, index };
       }
+    }
     return null;
   }
 
   private _patch(moduleId: string, patch: Partial<Module>): void {
     const loc = this._locate(moduleId);
     if (!loc) return;
-    loc.row.modules[loc.index] = { ...loc.row.modules[loc.index], ...patch };
+    loc.list[loc.index] = { ...loc.list[loc.index], ...patch };
+    this._touch();
+  }
+
+  private _addSupply(kind: 'meter' | 'main_breaker'): void {
+    const board = this._board!;
+    const code = boardCode(board) || `T${this._boards.indexOf(board) + 1}`;
+    const module = blankModule(kind, `${code}-${kind === 'meter' ? 'CPT' : 'AGCP'}`);
+    const supply = (board.supply ??= []);
+    // the meter is upstream of the main breaker
+    if (kind === 'meter') supply.unshift(module);
+    else supply.push(module);
+    this._selected = module.id;
     this._touch();
   }
 
@@ -151,9 +171,9 @@ export class HomeInfraMapElectricityEditor extends LitElement {
   private _delete(moduleId: string): void {
     const loc = this._locate(moduleId);
     if (!loc) return;
-    const m = loc.row.modules[loc.index];
+    const m = loc.list[loc.index];
     if (!window.confirm(this._t('edit.confirm_delete', { name: m.ref || m.circuit_name || m.label }))) return;
-    loc.row.modules.splice(loc.index, 1);
+    loc.list.splice(loc.index, 1);
     this._selected = null;
     this._touch();
   }
@@ -175,7 +195,7 @@ export class HomeInfraMapElectricityEditor extends LitElement {
 
   private _move(moduleId: string, delta: number): void {
     const loc = this._locate(moduleId);
-    if (!loc) return;
+    if (!loc?.row) return;
     loc.row.modules = moveItem(loc.row.modules, loc.index, loc.index + delta);
     this._touch();
     void this.updateComplete.then(() =>
@@ -186,8 +206,8 @@ export class HomeInfraMapElectricityEditor extends LitElement {
   /** Drop `moduleId` before `targetId` (or at the end of `row` when targetId is null). */
   moveTo(moduleId: string, row: Row, targetId: string | null): void {
     const from = this._locate(moduleId);
-    if (!from || moduleId === targetId) return;
-    const [module] = from.row.modules.splice(from.index, 1);
+    if (!from?.row || moduleId === targetId) return;
+    const [module] = from.list.splice(from.index, 1);
     const index = targetId ? row.modules.findIndex((m) => m.id === targetId) : -1;
     if (index < 0) row.modules.push(module);
     else row.modules.splice(index, 0, module);
@@ -238,6 +258,9 @@ export class HomeInfraMapElectricityEditor extends LitElement {
     const t = this._t;
     const board = this._board;
     const selected = this._selected ? this._locate(this._selected) : null;
+    const index = new FeedIndex(this._boards);
+    const links = linksFor(index, this._selected);
+    const supply = board?.supply ?? [];
     return html`
       <div class="toolbar">
         ${this._boards.length > 1
@@ -283,8 +306,41 @@ export class HomeInfraMapElectricityEditor extends LitElement {
                     this._touch();
                   })
                 : nothing}
+              ${this._boards.length > 1
+                ? selectField(
+                    'ee-bfed',
+                    t('ee.board_fed_by'),
+                    board.fed_by ?? '',
+                    [
+                      { value: '', label: '—' },
+                      ...[...index.modules.values()]
+                        .filter((m) => index.boardOf.get(m.id)?.id !== board.id && m.kind !== 'spacer')
+                        .map((m) => ({ value: m.id, label: this._optionLabel(m, index, board) })),
+                    ],
+                    (v) => {
+                      board.fed_by = v || null;
+                      this._touch();
+                    },
+                  )
+                : nothing}
               <span class="muted small">${t('ee.select_hint')}</span>
-              <div class="board">${board.rows.map((row) => this._renderRail(row))}</div>
+              <div class=${links.up.size || links.down.size ? 'board linking' : 'board'}>
+                ${renderSupply(board, {
+                  hass: this.hass,
+                  t,
+                  lang: this._lang,
+                  selectedModuleId: this._selected,
+                  links,
+                  onSelectModule: (id) => (this._selected = id),
+                  extra: html`${supply.some((m) => m.kind === 'meter')
+                    ? nothing
+                    : html`<button class="btn" @click=${() => this._addSupply('meter')}>${t('ee.add_meter')}</button>`}
+                  ${supply.some((m) => m.kind === 'main_breaker')
+                    ? nothing
+                    : html`<button class="btn" @click=${() => this._addSupply('main_breaker')}>${t('ee.add_main_breaker')}</button>`}`,
+                })}
+                ${board.rows.map((row) => this._renderRail(row, links))}
+              </div>
               <div class="btns">
                 <button class="btn" @click=${this._addRow}>${t('ee.add_row')}</button>
                 <button class="btn" @click=${() => this._addBoard()}>${t('ee.add_board')}</button>
@@ -301,13 +357,21 @@ export class HomeInfraMapElectricityEditor extends LitElement {
                 <button class="btn danger" @click=${this._deleteBoard}>${t('ee.delete_board')}</button>
               </div>
             </div>
-            ${selected ? this._renderForm(selected.row.modules[selected.index], selected.row) : html`<div class="form muted">${t('ee.select_hint')}</div>`}
+            ${selected ? this._renderForm(selected.list[selected.index], selected.row, index) : html`<div class="form muted">${t('ee.select_hint')}</div>`}
           </div>`
         : nothing}
     `;
   }
 
-  private _renderRail(row: Row): TemplateResult {
+  private _optionLabel(m: Module, index: FeedIndex, board: Board | undefined): string {
+    const t = this._t;
+    const other = index.boardOf.get(m.id);
+    const name = `${m.ref || '—'} · ${t(`el.kind.${m.kind}`)} ${moduleTitle(m)}`;
+    const circuit = (m.kind === 'breaker' || m.kind === 'rcbo') && m.circuit_name && m.circuit_name !== '?' ? ` · ${m.circuit_name}` : '';
+    return `${name}${circuit}${other && board && other.id !== board.id ? ` (${other.name})` : ''}`;
+  }
+
+  private _renderRail(row: Row, links?: Links): TemplateResult {
     const t = this._t;
     return html`<div
       class="rail"
@@ -356,6 +420,8 @@ export class HomeInfraMapElectricityEditor extends LitElement {
             lang: this._lang,
             selected: m.id === this._selected || this._dragOver === m.id,
             warned: false,
+            link: links?.up.has(m.id) ? 'up' : links?.down.has(m.id) ? 'down' : null,
+            feeder: m.fed_by ? links?.index.feeder(m) : null,
             onClick: () => (this._selected = m.id),
           })}
         </div>`,
@@ -375,13 +441,33 @@ export class HomeInfraMapElectricityEditor extends LitElement {
     })()}`;
   }
 
-  private _renderForm(m: Module, row: Row): TemplateResult {
+  private _renderForm(m: Module, row: Row | null, feeds: FeedIndex): TemplateResult {
     const t = this._t;
     const hass = this.hass!;
     const p = (patch: Partial<Module>) => this._patch(m.id, patch);
     const num = (v: string) => (v === '' || v === '?' ? null : Number(v));
     const isCircuit = m.kind === 'breaker' || m.kind === 'rcbo';
     const isRcd = m.kind === 'rcd' || m.kind === 'rcbo';
+    const board = this._board;
+    const auto = feeds.defaultFeeder(m);
+    const fedField = html`${selectField(
+        'ee-fed',
+        t('ee.f.fed_by'),
+        m.fed_by ?? '',
+        [
+          { value: '', label: t('ee.f.fed_auto', { ref: auto ? auto.ref || t(`el.kind.${auto.kind}`) : t('ee.f.fed_none') }) },
+          ...feeds.candidates(m).map((c) => ({ value: c.id, label: this._optionLabel(c, feeds, board) })),
+        ],
+        (v) => p({ fed_by: v || null }),
+      )}
+      <span class="muted small">${t('ee.fed_hint')}</span>`;
+    const statusField =
+      m.kind === 'spacer'
+        ? nothing
+        : selectField('ee-status', t('ee.f.status'), m.status ?? 'active', STATUSES.map((x) => ({ value: x, label: t(`el.status.${x}`) })), (v) =>
+            p({ status: v as ModuleStatus }),
+          );
+    if (!row) return this._renderSupplyForm(m, fedField, statusField);
     const index = row.modules.indexOf(m);
     return html`<div class="form" aria-label=${m.ref}>
       <b>${m.ref || '—'}</b>
@@ -389,6 +475,8 @@ export class HomeInfraMapElectricityEditor extends LitElement {
         p({ kind: v as ModuleKind, width_modules: v === 'rcd' ? Math.max(2, m.width_modules) : m.width_modules }),
       )}
       ${textField('ee-ref', t('ee.f.ref'), m.ref, (v) => p({ ref: v }))}
+      ${statusField}
+      ${m.kind !== 'spacer' ? fedField : nothing}
       ${isCircuit
         ? html`<div class="grid2">
             ${selectField('ee-rating', t('ee.f.rating'), m.rating_a ?? '?', [...RATINGS.map((r) => ({ value: r, label: `${r} A` })), { value: '?', label: '?' }], (v) => p({ rating_a: num(v) }))}
@@ -420,7 +508,8 @@ export class HomeInfraMapElectricityEditor extends LitElement {
         : nothing}
       ${isCircuit || m.kind === 'device'
         ? html`${entityField(hass, 'ee-power', t('ee.f.power'), m.power_entity_id, 'power', (v) => p({ power_entity_id: v }))}
-          ${entityField(hass, 'ee-energy', t('ee.f.energy'), m.energy_entity_id, 'energy', (v) => p({ energy_entity_id: v }))}`
+          ${entityField(hass, 'ee-energy', t('ee.f.energy'), m.energy_entity_id, 'energy', (v) => p({ energy_entity_id: v }))}
+          ${entityField(hass, 'ee-switch', t('ee.f.switch'), m.switch_entity_id, null, (v) => p({ switch_entity_id: v }), ['switch', 'light', 'input_boolean'])}`
         : nothing}
       ${m.kind !== 'spacer' ? textField('ee-model', t('ee.f.model'), m.model, (v) => p({ model: v || null })) : nothing}
       ${textField('ee-width', t('ee.f.width'), m.width_modules, (v) => p({ width_modules: Math.max(1, Math.min(24, Number(v) || 1)) }), { type: 'number' })}
@@ -450,6 +539,44 @@ export class HomeInfraMapElectricityEditor extends LitElement {
           { type: 'number' },
         )}
         <button class="btn danger" @click=${() => this._deleteRow(row)}>${t('ee.delete_row')}</button>
+      </div>
+    </div>`;
+  }
+
+  private _renderSupplyForm(m: Module, fedField: TemplateResult, statusField: TemplateResult | typeof nothing): TemplateResult {
+    const t = this._t;
+    const hass = this.hass!;
+    const p = (patch: Partial<Module>) => this._patch(m.id, patch);
+    const num = (v: string) => (v === '' || v === '?' ? null : Number(v));
+    return html`<div class="form" aria-label=${m.ref}>
+      <b>${t(`el.kind.${m.kind}`)}</b>
+      ${textField('ee-ref', t('ee.f.ref'), m.ref, (v) => p({ ref: v }))}
+      ${textField('ee-model', t('ee.f.model'), m.model, (v) => p({ model: v || null }))}
+      ${m.kind === 'meter'
+        ? textField(
+            'ee-kva',
+            t('ee.f.kva'),
+            m.subscribed_kva ?? '',
+            (v) => {
+              const n = Number(v.replace(',', '.'));
+              p({ subscribed_kva: v.trim() && n > 0 ? n : null });
+            },
+            { type: 'number' },
+          )
+        : html`<div class="grid2">
+            ${selectField('ee-hr', t('ee.f.head_rating'), m.rating_a ?? '?', [...HEAD_RATINGS.map((r) => ({ value: r, label: `${r} A` })), { value: '?', label: '?' }], (v) => p({ rating_a: num(v) }))}
+            ${selectField('ee-hs', t('ee.f.sensitivity'), m.sensitivity_ma ?? '?', [...HEAD_SENSITIVITIES.map((x) => ({ value: x, label: `${x} mA` })), { value: '?', label: '?' }], (v) => p({ sensitivity_ma: num(v) }))}
+          </div>`}
+      ${statusField}
+      ${fedField}
+      ${entityField(hass, 'ee-power', t('ee.f.power'), m.power_entity_id, 'power', (v) => p({ power_entity_id: v }))}
+      ${entityField(hass, 'ee-energy', t('ee.f.energy'), m.energy_entity_id, 'energy', (v) => p({ energy_entity_id: v }))}
+      <div class="f">
+        <label for="ee-notes">${t('ee.f.notes')}</label>
+        <textarea class="inp" id="ee-notes" rows="3" .value=${m.notes ?? ''} @input=${(e: Event) => p({ notes: (e.target as HTMLTextAreaElement).value || null })}></textarea>
+      </div>
+      <div class="btns">
+        <button class="btn danger" @click=${() => this._delete(m.id)}>${t('ee.delete_supply')}</button>
       </div>
     </div>`;
   }

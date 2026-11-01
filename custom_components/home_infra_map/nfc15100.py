@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from typing import Final
 
-from .models import JsonDict, row_capacity, row_used_slots
+from .models import JsonDict, ModuleIndex, row_capacity, row_used_slots
 
 MAX_BREAKERS_PER_RCD: Final = 8
 # Highest rating commonly allowed per copper cross-section (mm² -> A).
@@ -38,9 +38,16 @@ def _is_unidentified(module: JsonDict) -> bool:
     return str(module.get("circuit_name") or "").strip() in ("", "?")
 
 
-def check_board(board: JsonDict) -> list[JsonDict]:
-    """Return the warnings of one board."""
+def check_board(board: JsonDict, index: ModuleIndex | None = None) -> list[JsonDict]:
+    """Return the warnings of one board.
+
+    `index` resolves the feeds across boards (sub-board fed by a breaker of
+    another board); without it the board is checked on its own.
+    """
+    index = index or ModuleIndex([board])
     warnings: list[JsonDict] = []
+    # RCD id -> breakers it protects (wherever they sit)
+    groups: dict[str, list[JsonDict]] = {}
     for row in board["rows"]:
         capacity = row_capacity(board, row)
         used = row_used_slots(row)
@@ -55,31 +62,41 @@ def check_board(board: JsonDict) -> list[JsonDict]:
                     "params": {"row": row.get("label") or "", "used": used, "capacity": capacity},
                 }
             )
-        rcd: JsonDict | None = None
-        groups: dict[str, list[JsonDict]] = {}
+        for module in row["modules"]:
+            if module["kind"] == "rcd":
+                groups.setdefault(module["id"], [])
+    for row in board["rows"]:
         for module in row["modules"]:
             kind = module["kind"]
-            if kind == "rcd":
-                rcd = module
-                groups[module["id"]] = []
-                continue
-            if kind not in ("breaker", "rcbo"):
+            # a spare breaker is not wired: nothing to check yet
+            if kind not in ("breaker", "rcbo") or module.get("status") == "spare":
                 continue
 
-            protector = module if kind == "rcbo" else rcd
-            if protector is not None and kind == "breaker":
-                groups[protector["id"]].append(module)
+            protector = index.protector(module)
+            if protector is not None and kind == "breaker" and protector["kind"] == "rcd":
+                groups.setdefault(protector["id"], []).append(module)
 
             sensitivity = protector.get("sensitivity_ma") if protector else None
-            if protector is None:
+            not_30ma = protector is None or sensitivity is None or sensitivity > 30
+            if not_30ma and module.get("circuit_kind") == "feeder":
+                # a feeder to a sub-board may rely on the RCDs of that board
+                warnings.append(
+                    _warning("feeder_no_rcd", board, module, severity="info", sensitivity_ma=sensitivity)
+                )
+            elif protector is None:
                 warnings.append(_warning("no_rcd", board, module))
-            elif sensitivity is None or sensitivity > 30:
+            elif not_30ma:
                 warnings.append(_warning("no_rcd_30ma", board, module, sensitivity_ma=sensitivity))
 
             needs_type_a = module.get("circuit_kind") == "cooking" or bool(
                 TYPE_A_NAMES.search(str(module.get("circuit_name") or ""))
             )
-            if needs_type_a and protector is not None and protector.get("rcd_type") not in ("A", "F", "B"):
+            if (
+                needs_type_a
+                and protector is not None
+                and protector["kind"] != "main_breaker"
+                and protector.get("rcd_type") not in ("A", "F", "B")
+            ):
                 warnings.append(
                     _warning(
                         "rcd_type_a",
@@ -115,23 +132,24 @@ def check_board(board: JsonDict) -> list[JsonDict]:
             if _is_unidentified(module):
                 warnings.append(_warning("unidentified", board, module, severity="info"))
 
-        for rcd_id, breakers in groups.items():
-            rcd_module = next(m for m in row["modules"] if m["id"] == rcd_id)
-            if len(breakers) > MAX_BREAKERS_PER_RCD:
-                warnings.append(
-                    _warning(
-                        "too_many_breakers", board, rcd_module, count=len(breakers), max=MAX_BREAKERS_PER_RCD
-                    )
+    for rcd_id, breakers in groups.items():
+        rcd_module = index.modules[rcd_id]
+        if len(breakers) > MAX_BREAKERS_PER_RCD:
+            warnings.append(
+                _warning(
+                    "too_many_breakers", board, rcd_module, count=len(breakers), max=MAX_BREAKERS_PER_RCD
                 )
-            total = sum(b.get("rating_a") or 0 for b in breakers)
-            rating = rcd_module.get("rating_a")
-            if rating and total > rating * RCD_SUM_RATIO:
-                warnings.append(
-                    _warning("rcd_sum", board, rcd_module, severity="info", total_a=total, rating_a=rating)
-                )
+            )
+        total = sum(b.get("rating_a") or 0 for b in breakers)
+        rating = rcd_module.get("rating_a")
+        if rating and total > rating * RCD_SUM_RATIO:
+            warnings.append(
+                _warning("rcd_sum", board, rcd_module, severity="info", total_a=total, rating_a=rating)
+            )
     return warnings
 
 
 def check_boards(boards: list[JsonDict]) -> list[JsonDict]:
     """Return the warnings of every board."""
-    return [w for board in boards for w in check_board(board)]
+    index = ModuleIndex(boards)
+    return [w for board in boards for w in check_board(board, index)]

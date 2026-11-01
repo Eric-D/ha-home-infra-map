@@ -212,7 +212,7 @@ async def test_export_import_checks_dashboard(
     imported = await _ws(
         client, {"type": f"{DOMAIN}/import_yaml", "content": fixture_text("electricite.yaml")}
     )
-    assert imported["result"]["modules"] == 30
+    assert imported["result"]["modules"] == 31
     checks = (await _ws(client, {"type": f"{DOMAIN}/checks"}))["result"]
     assert any(c["code"] == "rcd_type_a" for c in checks)
     export = (await _ws(client, {"type": f"{DOMAIN}/export"}))["result"]

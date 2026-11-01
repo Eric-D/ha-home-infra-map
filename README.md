@@ -33,6 +33,9 @@ Les captures sont produites automatiquement depuis la carte réelle, sur la mais
 - [Compte OPNsense en lecture seule](#compte-opnsense-en-lecture-seule)
 - [Switch en SNMP](#switch-en-snmp)
 - [Premiers pas](#premiers-pas)
+- [Tableaux : largeurs, trous, taille des rails](#tableaux--largeurs-trous-taille-des-rails)
+- [Arrivée, liens d'alimentation, réserve](#arrivée-liens-dalimentation-réserve)
+- [Import / export en fichier YAML](#import--export-en-fichier-yaml)
 - [Exemples de cartes et tableau de bord généré](#exemples-de-cartes-et-tableau-de-bord-généré)
 - [Entités créées](#entités-créées)
 - [Services et événements](#services-et-événements)
@@ -138,6 +141,30 @@ tableaux:
 
 L'ancienne forme (`differentiel`, puis `disjoncteurs`, puis `modules`) reste acceptée ; on peut y glisser `{vide: 2}` et `largeur: n` sur chaque élément. Exemple complet (maison fictive) : [`docs/examples/tableau-largeurs.yaml`](docs/examples/tableau-largeurs.yaml).
 
+## Arrivée, liens d'alimentation, réserve
+
+- **Arrivée** : en mode édition, *+ Compteur* et *+ Disjoncteur de branchement* au-dessus des rails. Le compteur porte la puissance souscrite et, si vous en avez un, le capteur de puissance (TIC, pince) ; le disjoncteur de branchement affiche sa charge en % de son calibre.
+- **Alimenté par** : par défaut un module est alimenté par le différentiel à sa gauche sur la rangée, sinon par l'arrivée. Pour un câblage particulier (un C40 pris directement sous le disjoncteur de branchement, hors différentiel), choisissez l'élément dans « Alimenté par » : le module est marqué ↱, et les contrôles en tiennent compte. Un tableau divisionnaire se relie au départ qui l'alimente (« Tableau alimenté par »).
+- Cliquer sur un module met en évidence ce qui l'alimente et tout ce qu'il alimente.
+- **État** : *coupé / disjoncté* (bordure rouge, étiquette « Coupé » ; aussi automatiquement quand le relais lié est éteint) ou *en réserve* (posé pour de futurs travaux, non raccordé : hachuré, ignoré par les contrôles).
+
+```yaml
+tableaux:
+  - id: T1
+    arrivee:
+      compteur: {modele: Linky, puissance_souscrite: 12 kVA, entite_puissance: sensor.linky_papp}
+      disjoncteur: {calibre: 60A, sensibilite: 500mA}
+    rangees:
+      - id: T1-R1
+        elements:
+          - differentiel: {calibre: 40A, sensibilite: 30mA, type: A}
+          - disjoncteur: {repere: T1-R1-1, calibre: C16, circuit: Prises}
+          - disjoncteur: {repere: T1-R1-2, calibre: C20, circuit: Réserve, etat: réserve}
+          - disjoncteur: {repere: T1-R1-3, calibre: C40, circuit: Départ garage, alimente_par: arrivee}
+  - id: T2
+    alimente_par: T1-R1-3       # tableau divisionnaire
+```
+
 ## Import / export en fichier YAML
 
 - **Depuis la carte** (crayon) : **Exporter** → *Télécharger (.yaml)* enregistre un fichier `home-infra-map-export-AAAA-MM-JJ.yaml` (ou *Copier*). **Importer** → *Choisir un fichier .yaml…* (ou coller le texte) → *Importer*. Les sections présentes dans le fichier (tableaux et/ou réseau) remplacent les données actuelles ; l'export se réimporte à l'identique.
@@ -196,7 +223,7 @@ Résultat mis en cache 5 minutes. Exemple de référence (testé, maison de dém
 
 ## Contrôles électriques
 
-Avertissements prudents (« à vérifier »), jamais bloquants, inspirés de la NF C 15-100 ; ils **ne remplacent pas un électricien** : disjoncteur sans différentiel 30 mA en amont ; plus de 8 disjoncteurs derrière un différentiel ; plaque de cuisson ou lave-linge derrière un différentiel qui n'est pas de type A/F/B ; calibre trop fort pour la section (1,5 mm² > 16 A, 2,5 mm² > 20 A, 4 mm² > 25 A, 6 mm² > 32 A) ; éclairage > 16 A, prises > 20 A ; somme des calibres d'un différentiel disproportionnée (information) ; circuits non identifiés (« ? ») ; rangée qui dépasse la largeur de son rail.
+Avertissements prudents (« à vérifier »), jamais bloquants, inspirés de la NF C 15-100 ; ils **ne remplacent pas un électricien** : disjoncteur sans différentiel 30 mA en amont ; plus de 8 disjoncteurs derrière un différentiel ; plaque de cuisson ou lave-linge derrière un différentiel qui n'est pas de type A/F/B ; calibre trop fort pour la section (1,5 mm² > 16 A, 2,5 mm² > 20 A, 4 mm² > 25 A, 6 mm² > 32 A) ; éclairage > 16 A, prises > 20 A ; somme des calibres d'un différentiel disproportionnée (information) ; circuits non identifiés (« ? ») ; rangée qui dépasse la largeur de son rail ; départ vers un tableau divisionnaire sans 30 mA en amont (information). Les contrôles suivent les liens « alimenté par » ; les modules en réserve sont ignorés.
 
 ## Limites connues
 

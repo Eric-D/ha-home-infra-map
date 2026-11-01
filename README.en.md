@@ -81,6 +81,10 @@ Non-admin users see everything but cannot edit: editing commands are **refused b
 
 Each module takes **N DIN slots** (18 mm): an RCD 2, a Shelly Pro 4PM 4, a DIN socket 3…; the drawing is proportional. **Holes** are "empty places" of one or more slots. A board has any number of rows and a **rail width** ("modules per row": 13, 18, 24…), which a row may override; when known, the free slots are drawn ("17 / 18 modules"), the rail fits the card width, and an overfull rail is flagged. In house YAML files: `modules_par_rangee: 18` on the board, `capacite: 13` on a row, an ordered `elements:` list of `{differentiel: …}`, `{disjoncteur: …}`, `{module: …}`, `{vide: n}`, and `largeur: n` on any item (the historical `differentiel` / `disjoncteurs` / `modules` layout is still accepted, with `{vide: n}` holes). Full example: [`docs/examples/tableau-largeurs.yaml`](docs/examples/tableau-largeurs.yaml).
 
+## Service entrance, feed links, spare breakers
+
+In edit mode, *+ Meter* and *+ Main breaker* add the service entrance above the rails (subscribed power, live power, load in % of the main breaker rating). By default a module is fed by the RCD on its left on the row, else by the entrance; **Fed by** links it to any other element (e.g. a C40 wired straight under the main breaker, outside any RCD) and a sub-board to the breaker feeding it. Selecting a module highlights its feed chain and everything it feeds. A module's **state** can be *off / tripped* (also automatic when its linked relay is off) or *spare* (installed for future works, not wired: hatched and ignored by the checks). House YAML files: `arrivee: {compteur: {modele: Linky, puissance_souscrite: 12 kVA}, disjoncteur: {calibre: 60A, sensibilite: 500mA}}` on a board, `alimente_par: <ref | arrivee>` on an element or a board, `etat: réserve | coupé`.
+
 ## YAML file import / export
 
 In the card (pencil): **Export** → *Download (.yaml)* (or *Copy*); **Import** → *Choose a .yaml file…* (or paste) → *Import*. The sections present in the file replace the current data; an export re-imports identically. Actions: `home_infra_map.export_yaml` / `home_infra_map.import_yaml` (paths in `/config`).
@@ -117,7 +121,7 @@ Read-only, no packet tester: **what the device can do** (floating then interface
 
 ## Electrical checks
 
-Cautious hints inspired by NF C 15-100, never blocking, **not a substitute for an electrician**: breaker without a 30 mA RCD upstream; more than 8 breakers behind one RCD; hob or washing machine behind an RCD that is not type A/F/B; rating too high for the cable (1.5 mm² > 16 A, 2.5 mm² > 20 A, 4 mm² > 25 A, 6 mm² > 32 A); lighting > 16 A, sockets > 20 A; disproportionate sum of ratings behind an RCD (info); unidentified circuits ("?"); row wider than its rail.
+Cautious hints inspired by NF C 15-100, never blocking, **not a substitute for an electrician**: breaker without a 30 mA RCD upstream; more than 8 breakers behind one RCD; hob or washing machine behind an RCD that is not type A/F/B; rating too high for the cable (1.5 mm² > 16 A, 2.5 mm² > 20 A, 4 mm² > 25 A, 6 mm² > 32 A); lighting > 16 A, sockets > 20 A; disproportionate sum of ratings behind an RCD (info); unidentified circuits ("?"); row wider than its rail; feeder to a sub-board without a 30 mA RCD upstream (info). The checks follow the "fed by" links; spare modules are ignored.
 
 ## Known limitations
 

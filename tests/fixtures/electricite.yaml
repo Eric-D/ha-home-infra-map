@@ -1,24 +1,29 @@
 # Maison de démonstration (fictive) — format « fichiers de la maison ».
 # Repérage : T<tableau>-R<rangée>-<position>. « ? » = circuit à identifier.
+# arrivee: = compteur + disjoncteur de branchement ; alimente_par: = élément qui
+# alimente (par défaut le différentiel à gauche sur la rangée) ; etat: réserve / coupé.
 tableaux:
   - id: T1
     nom: Tableau principal
     emplacement: Cellier
     photo: photos/tableau_principal.jpg
     modules_par_rangee: 13
+    arrivee:
+      compteur: {modele: Compteur communicant, puissance_souscrite: 9 kVA, entite_puissance: sensor.compteur_puissance_apparente}
+      disjoncteur: {modele: Différentiel sélectif S, calibre: 45A, sensibilite: 500mA, note: "réglage 30-45 A, sélectif"}
     rangees:
       - id: T1-R1
         elements:
           - differentiel: {repere: T1-R1-ID, modele: ID 40A 30mA, calibre: 40A, sensibilite: 30mA, type: AC, largeur: 2}
           - disjoncteur: {repere: T1-R1-1, calibre: C10, circuit: Éclairage séjour}
           - disjoncteur: {repere: T1-R1-2, calibre: C10, circuit: Éclairage chambres}
-          - disjoncteur: {repere: T1-R1-3, calibre: C10, circuit: Éclairage extérieur}
+          - disjoncteur: {repere: T1-R1-3, calibre: C10, circuit: Éclairage extérieur, etat: coupé}
           - disjoncteur: {repere: T1-R1-4, calibre: C16, circuit: Prises séjour}
           - disjoncteur: {repere: T1-R1-5, calibre: C16, circuit: Prises chambres}
           - disjoncteur: {repere: T1-R1-6, calibre: C16, circuit: "?"}
           - vide: 2
           - disjoncteur: {repere: T1-R1-7, calibre: C20, circuit: Lave-linge, note: "derrière un ID type AC : à vérifier"}
-          - disjoncteur: {repere: T1-R1-8, calibre: C20, circuit: "?"}
+          - disjoncteur: {repere: T1-R1-8, calibre: C20, circuit: Réserve (futur atelier), etat: réserve}
       - id: T1-R2
         differentiel: {repere: T1-R2-ID, calibre: 40A, sensibilite: 30mA, type: A, largeur: 2}
         disjoncteurs:
@@ -40,10 +45,12 @@ tableaux:
           - module: {type: Switch réseau DIN, largeur: 3}
           - module: {type: Parafoudre, largeur: 2}
           - disjoncteur: {repere: T1-R3-3, calibre: C2, circuit: Sonnette}
+          - disjoncteur: {repere: T1-R3-4, calibre: C32, circuit: Départ tableau garage, alimente_par: arrivee}
   - id: T2
     nom: Tableau garage
     emplacement: Garage
     modules_par_rangee: 8
+    alimente_par: T1-R3-4
     rangees:
       - id: T2-R1
         elements:

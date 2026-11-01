@@ -19,9 +19,38 @@ def _board(modules: list[dict[str, Any]]) -> dict[str, Any]:
 def test_example_board() -> None:
     boards = parse_document(fixture_text("electricite.yaml")).boards
     codes = Counter(w["code"] for w in check_boards(boards))  # type: ignore[arg-type]
-    assert codes == {"unidentified": 4, "rcd_sum": 2, "rcd_type_a": 1}
+    # T1-R1-8 is a spare: not counted; the garage feeder only has the 500 mA head
+    assert codes == {"unidentified": 3, "rcd_sum": 1, "rcd_type_a": 1, "feeder_no_rcd": 1}
     [type_a] = [w for w in check_boards(boards) if w["code"] == "rcd_type_a"]  # type: ignore[arg-type]
     assert type_a["ref"] == "T1-R1-7" and type_a["params"]["rcd_type"] == "AC"  # washing machine behind AC
+
+
+def test_breaker_fed_by_the_head_is_not_30ma() -> None:
+    [board] = validate_boards(
+        [
+            {
+                "name": "B",
+                "supply": [{"id": "h", "kind": "main_breaker", "rating_a": 60, "sensitivity_ma": 500}],
+                "rows": [
+                    {
+                        "modules": [
+                            {"kind": "rcd", "sensitivity_ma": 30, "rcd_type": "A"},
+                            {
+                                "id": "c40",
+                                "kind": "breaker",
+                                "rating_a": 40,
+                                "circuit_name": "PAC",
+                                "fed_by": "h",
+                            },
+                            {"kind": "breaker", "rating_a": 2, "circuit_name": "x", "status": "spare"},
+                        ]
+                    }
+                ],
+            }
+        ]
+    )
+    found = [(w["ref"], w["code"], w["params"]) for w in check_board(board)]
+    assert found == [("", "no_rcd_30ma", {"sensitivity_ma": 500})]
 
 
 def test_too_many_breakers() -> None:

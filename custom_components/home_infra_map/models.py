@@ -17,7 +17,12 @@ import probatio as vol
 
 type JsonDict = dict[str, Any]
 
-MODULE_KINDS: Final = ("rcd", "breaker", "rcbo", "device", "spacer")
+MODULE_KINDS: Final = ("rcd", "breaker", "rcbo", "device", "spacer", "meter", "main_breaker")
+# Kinds of the service entrance (board `supply`), drawn above the rails.
+SUPPLY_KINDS: Final = ("meter", "main_breaker")
+# active = in service; off = switched off / tripped; spare = installed for
+# future works, not wired.
+MODULE_STATUSES: Final = ("active", "off", "spare")
 RCD_TYPES: Final = ("AC", "A", "F", "B", "?")
 CURVES: Final = ("B", "C", "D", "?")
 CIRCUIT_KINDS: Final = (
@@ -45,7 +50,15 @@ DEVICE_KINDS: Final = (
     "other",
 )
 PORT_SOURCES: Final = ("auto", "manual")
-DEFAULT_WIDTH: Final = {"rcd": 2, "breaker": 1, "rcbo": 1, "device": 1, "spacer": 1}
+DEFAULT_WIDTH: Final = {
+    "rcd": 2,
+    "breaker": 1,
+    "rcbo": 1,
+    "device": 1,
+    "spacer": 1,
+    "meter": 4,
+    "main_breaker": 2,
+}
 
 _MAC_RE = re.compile(r"^[0-9a-f]{2}(:[0-9a-f]{2}){5}$")
 _COLOR_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
@@ -120,12 +133,18 @@ MODULE_SCHEMA: Final = vol.Schema(
         vol.Optional("width_modules"): vol.All(vol.Coerce(int), vol.Range(min=1, max=24)),
         vol.Optional("model", default=None): _optional_str,
         vol.Optional("notes", default=None): _optional_str,
+        vol.Optional("status", default="active"): vol.In(MODULE_STATUSES),
+        # module feeding this one; None = automatic (last RCD to the left on
+        # the row, else the board's service entrance)
+        vol.Optional("fed_by", default=None): _optional_str,
         # protection
         vol.Optional("rating_a", default=None): _opt_int(1, 250),
         vol.Optional("curve", default="C"): vol.In(CURVES),
         vol.Optional("sensitivity_ma", default=None): _opt_int(1, 1000),
         vol.Optional("rcd_type", default="?"): vol.In(RCD_TYPES),
         vol.Optional("cable_mm2", default=None): _opt_float(0.5, 240),
+        # meter: subscribed power (kVA)
+        vol.Optional("subscribed_kva", default=None): _opt_float(1, 250),
         # circuit
         vol.Optional("circuit_name", default="?"): _str,
         vol.Optional("circuit_kind", default="unknown"): vol.In(CIRCUIT_KINDS),
@@ -160,6 +179,10 @@ BOARD_SCHEMA: Final = vol.Schema(
         vol.Optional("photo_path", default=None): _optional_str,
         # DIN slots per rail (13, 18, 24…); None = not documented
         vol.Optional("modules_per_row", default=None): _opt_int(1, 96),
+        # service entrance, upstream first (utility meter, main breaker…)
+        vol.Optional("supply", default=list): [MODULE_SCHEMA],
+        # module of another board feeding this one (sub-board)
+        vol.Optional("fed_by", default=None): _optional_str,
         vol.Optional("rows", default=list): [ROW_SCHEMA],
     },
     extra=vol.REMOVE_EXTRA,
@@ -264,15 +287,42 @@ def validate_boards(value: Any) -> list[JsonDict]:
     """Validate and normalise the list of electrical boards."""
     boards: list[JsonDict] = vol.Schema([BOARD_SCHEMA])(value)
     _unique_ids(boards, "board")
-    module_ids: list[JsonDict] = []
+    modules: list[JsonDict] = []
     for board in boards:
         _unique_ids(board["rows"], "row")
+        for module in board["supply"]:
+            _fill_module_defaults(module)
+            modules.append(module)
         for row in board["rows"]:
             for module in row["modules"]:
                 _fill_module_defaults(module)
-                module_ids.append(module)
-    _unique_ids(module_ids, "module")
+                modules.append(module)
+    _unique_ids(modules, "module")
+    _clean_feeds(boards)
     return boards
+
+
+def _clean_feeds(boards: list[JsonDict]) -> None:
+    """Clear dangling or looping `fed_by` links instead of rejecting the save.
+
+    Deleting a module must not make the boards unsavable; a link closing a
+    loop (A fed by B fed by A) is dropped.
+    """
+    index = ModuleIndex(boards)
+    for module in index.modules.values():
+        if module["fed_by"] not in index.modules or module["fed_by"] == module["id"]:
+            module["fed_by"] = None
+    for board in boards:
+        if board["fed_by"] not in index.modules:
+            board["fed_by"] = None
+    for module in index.modules.values():
+        if module["fed_by"] and index.loops(module):
+            module["fed_by"] = None
+    for board in boards:
+        if board["fed_by"]:
+            index = ModuleIndex(boards)
+            if any(index.loops(m) for m in index.board_modules(board)):
+                board["fed_by"] = None
 
 
 def validate_network(value: Any) -> JsonDict:
@@ -364,6 +414,86 @@ def upstream_rcd(row: JsonDict, module_id: str) -> JsonDict | None:
         if module["kind"] == "rcd":
             current = module
     return None
+
+
+class ModuleIndex:
+    """Who feeds whom, across every board.
+
+    A module is fed by its explicit `fed_by`, else (on a rail) by the last RCD
+    to its left, else by the last element of its board's service entrance,
+    else by the module feeding the board. Entrance elements are chained in
+    order (meter, then main breaker).
+    """
+
+    def __init__(self, boards: list[JsonDict]) -> None:
+        self.modules: dict[str, JsonDict] = {}
+        self._default: dict[str, str | None] = {}
+        for board in boards:
+            head = board["fed_by"]
+            for module in board["supply"]:
+                self.modules[module["id"]] = module
+                self._default[module["id"]] = head
+                head = module["id"]
+            for row in board["rows"]:
+                rcd: str | None = None
+                for module in row["modules"]:
+                    self.modules[module["id"]] = module
+                    if module["kind"] in SUPPLY_KINDS or module["kind"] == "rcd":
+                        self._default[module["id"]] = head
+                        if module["kind"] == "rcd":
+                            rcd = module["id"]
+                    else:
+                        self._default[module["id"]] = rcd or head
+
+    def board_modules(self, board: JsonDict) -> list[JsonDict]:
+        """Every module of a board, entrance first."""
+        return [*board["supply"], *(m for row in board["rows"] for m in row["modules"])]
+
+    def feeder(self, module: JsonDict) -> JsonDict | None:
+        """Module directly upstream of `module` (None at the head)."""
+        target = module.get("fed_by") or self._default.get(module["id"])
+        return self.modules.get(target) if target else None
+
+    def chain(self, module: JsonDict) -> list[JsonDict]:
+        """Modules upstream of `module`, nearest first (stops on a loop)."""
+        result: list[JsonDict] = []
+        seen = {module["id"]}
+        current = self.feeder(module)
+        while current is not None and current["id"] not in seen:
+            result.append(current)
+            seen.add(current["id"])
+            current = self.feeder(current)
+        return result
+
+    def loops(self, module: JsonDict) -> bool:
+        """True when following the feeds from `module` comes back to it."""
+        seen = {module["id"]}
+        current = self.feeder(module)
+        while current is not None:
+            if current["id"] in seen:
+                return bool(current["id"] == module["id"])
+            seen.add(current["id"])
+            current = self.feeder(current)
+        return False
+
+    def protector(self, module: JsonDict) -> JsonDict | None:
+        """Residual-current device protecting `module` (an RCBO protects itself).
+
+        The main breaker counts when its sensitivity is known (500 mA
+        typically): the caller then flags it as not 30 mA.
+        """
+        if module["kind"] == "rcbo":
+            return module
+        for upstream in self.chain(module):
+            if upstream["kind"] in ("rcd", "rcbo"):
+                return upstream
+            if upstream["kind"] == "main_breaker" and upstream.get("sensitivity_ma"):
+                return upstream
+        return None
+
+    def fed(self, module_id: str) -> list[JsonDict]:
+        """Modules directly fed by `module_id`."""
+        return [m for m in self.modules.values() if (self.feeder(m) or {}).get("id") == module_id]
 
 
 def row_capacity(board: JsonDict, row: JsonDict) -> int | None:
