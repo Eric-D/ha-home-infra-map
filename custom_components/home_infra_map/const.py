@@ -8,7 +8,7 @@ DOMAIN: Final = "home_infra_map"
 NAME: Final = "Home Infra Map"
 
 # Kept in sync by the release workflow (see tests/test_manifest.py).
-VERSION: Final = "0.3.0"
+VERSION: Final = "0.4.0"
 
 CARD_TAG: Final = "home-infra-map-card"
 CARD_FILENAME: Final = "home-infra-map-card.js"
@@ -85,6 +85,7 @@ ENTITY_SUFFIXES: Final[dict[str, dict[str, str]]] = {
         "switch_port": "port_switch",
         "blocks": "blocages",
         "power": "puissance",
+        "alerts": "alertes",
         "port": "port",
     },
     "en": {
@@ -94,6 +95,7 @@ ENTITY_SUFFIXES: Final[dict[str, dict[str, str]]] = {
         "switch_port": "switch_port",
         "blocks": "blocks",
         "power": "power",
+        "alerts": "alerts",
         "port": "port",
     },
 }

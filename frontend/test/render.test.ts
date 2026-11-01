@@ -89,6 +89,26 @@ describe('electricity view', () => {
     expect(el.textContent).toContain('1 en réserve');
   });
 
+  it("shows the owner's alerts on the module, in a chip and in the detail", () => {
+    const flagged = board.rows[0].modules.find((m) => m.ref === 'T1-R1-2')!;
+    const el = mount();
+    render(renderElectricity(ctx), el);
+    const m = el.querySelector<HTMLElement>(`[data-module-id="${flagged.id}"]`)!;
+    expect(m.classList.contains('al')).toBe(true);
+    expect(m.querySelector('.amark')).not.toBeNull();
+    expect(m.title).toContain('Alerte : Prise sur un circuit éclairage (chambre 2)');
+    expect(el.textContent).toContain('1 alerte(s)');
+    expect(el.textContent).toContain('1 point(s) à vérifier');
+    render(renderElectricity({ ...ctx, showWarnings: true }), el);
+    const items = [...el.querySelectorAll('.warnlist li')];
+    expect(items[0].classList.contains('manual')).toBe(true);
+    expect(items[0].textContent).toContain('Prise sur un circuit éclairage');
+    render(renderElectricity({ ...ctx, selectedModuleId: flagged.id }), el);
+    const detail = el.querySelector('dl.detail')!;
+    expect(detail.querySelector('.alert-text')!.textContent).toBe('Prise sur un circuit éclairage (chambre 2)');
+    expect(detail.querySelectorAll('.warnlist li')).toHaveLength(0);
+  });
+
   it('highlights the feed links of the selected module', () => {
     const feeder = board.rows[2].modules.find((m) => m.ref === 'T1-R3-4')!;
     const el = mount();

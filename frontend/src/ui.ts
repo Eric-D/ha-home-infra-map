@@ -129,13 +129,17 @@ export function textField(
   label: string,
   value: string | number | null | undefined,
   onChange: (value: string) => void,
-  opts: { type?: string; placeholder?: string; hint?: TemplateResult | string; onBlur?: () => void } = {},
+  opts: { type?: string; placeholder?: string; hint?: TemplateResult | string; onBlur?: () => void; suggestions?: string[] } = {},
 ): TemplateResult {
   return html`<div class="f">
     <label for=${id}>${label}</label>
+    ${opts.suggestions
+      ? html`<datalist id=${`${id}-list`}>${opts.suggestions.map((v) => html`<option value=${v}></option>`)}</datalist>`
+      : nothing}
     <input
       class="inp"
       id=${id}
+      list=${opts.suggestions ? `${id}-list` : nothing}
       type=${opts.type ?? 'text'}
       placeholder=${opts.placeholder ?? ''}
       .value=${value === null || value === undefined ? '' : String(value)}

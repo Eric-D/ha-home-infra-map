@@ -467,7 +467,20 @@ export class HomeInfraMapElectricityEditor extends LitElement {
         : selectField('ee-status', t('ee.f.status'), m.status ?? 'active', STATUSES.map((x) => ({ value: x, label: t(`el.status.${x}`) })), (v) =>
             p({ status: v as ModuleStatus }),
           );
-    if (!row) return this._renderSupplyForm(m, fedField, statusField);
+    const alertField = html`${textField('ee-alert', t('ee.f.alert'), m.alert, (v) => p({ alert: v.trim() ? v : null }), {
+        suggestions: [1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => t(`ee.alert.s${i}`)),
+        hint: html`<span class="muted small">${t('ee.alert_hint')}</span>`,
+      })}
+      ${m.alert
+        ? selectField(
+            'ee-alert-level',
+            t('ee.f.alert_level'),
+            m.alert_level ?? 'warning',
+            (['warning', 'info'] as const).map((x) => ({ value: x, label: t(`ee.alert_level.${x}`) })),
+            (v) => p({ alert_level: v as 'warning' | 'info' }),
+          )
+        : nothing}`;
+    if (!row) return this._renderSupplyForm(m, fedField, statusField, alertField);
     const index = row.modules.indexOf(m);
     return html`<div class="form" aria-label=${m.ref}>
       <b>${m.ref || '—'}</b>
@@ -476,6 +489,7 @@ export class HomeInfraMapElectricityEditor extends LitElement {
       )}
       ${textField('ee-ref', t('ee.f.ref'), m.ref, (v) => p({ ref: v }))}
       ${statusField}
+      ${m.kind !== 'spacer' ? alertField : nothing}
       ${m.kind !== 'spacer' ? fedField : nothing}
       ${isCircuit
         ? html`<div class="grid2">
@@ -543,7 +557,12 @@ export class HomeInfraMapElectricityEditor extends LitElement {
     </div>`;
   }
 
-  private _renderSupplyForm(m: Module, fedField: TemplateResult, statusField: TemplateResult | typeof nothing): TemplateResult {
+  private _renderSupplyForm(
+    m: Module,
+    fedField: TemplateResult,
+    statusField: TemplateResult | typeof nothing,
+    alertField: TemplateResult,
+  ): TemplateResult {
     const t = this._t;
     const hass = this.hass!;
     const p = (patch: Partial<Module>) => this._patch(m.id, patch);
@@ -568,6 +587,7 @@ export class HomeInfraMapElectricityEditor extends LitElement {
             ${selectField('ee-hs', t('ee.f.sensitivity'), m.sensitivity_ma ?? '?', [...HEAD_SENSITIVITIES.map((x) => ({ value: x, label: `${x} mA` })), { value: '?', label: '?' }], (v) => p({ sensitivity_ma: num(v) }))}
           </div>`}
       ${statusField}
+      ${alertField}
       ${fedField}
       ${entityField(hass, 'ee-power', t('ee.f.power'), m.power_entity_id, 'power', (v) => p({ power_entity_id: v }))}
       ${entityField(hass, 'ee-energy', t('ee.f.energy'), m.energy_entity_id, 'energy', (v) => p({ energy_entity_id: v }))}

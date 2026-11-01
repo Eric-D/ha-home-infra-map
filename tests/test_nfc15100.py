@@ -20,7 +20,10 @@ def test_example_board() -> None:
     boards = parse_document(fixture_text("electricite.yaml")).boards
     codes = Counter(w["code"] for w in check_boards(boards))  # type: ignore[arg-type]
     # T1-R1-8 is a spare: not counted; the garage feeder only has the 500 mA head
-    assert codes == {"unidentified": 3, "rcd_sum": 1, "rcd_type_a": 1, "feeder_no_rcd": 1}
+    assert codes == {"unidentified": 3, "rcd_sum": 1, "rcd_type_a": 1, "feeder_no_rcd": 1, "manual": 1}
+    [manual] = [w for w in check_boards(boards) if w["code"] == "manual"]  # type: ignore[arg-type]
+    assert (manual["ref"], manual["severity"]) == ("T1-R1-2", "warning")
+    assert manual["params"] == {"text": "Prise sur un circuit éclairage (chambre 2)"}
     [type_a] = [w for w in check_boards(boards) if w["code"] == "rcd_type_a"]  # type: ignore[arg-type]
     assert type_a["ref"] == "T1-R1-7" and type_a["params"]["rcd_type"] == "AC"  # washing machine behind AC
 

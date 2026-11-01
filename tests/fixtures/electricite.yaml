@@ -16,7 +16,7 @@ tableaux:
         elements:
           - differentiel: {repere: T1-R1-ID, modele: ID 40A 30mA, calibre: 40A, sensibilite: 30mA, type: AC, largeur: 2}
           - disjoncteur: {repere: T1-R1-1, calibre: C10, circuit: Éclairage séjour}
-          - disjoncteur: {repere: T1-R1-2, calibre: C10, circuit: Éclairage chambres}
+          - disjoncteur: {repere: T1-R1-2, calibre: C10, circuit: Éclairage chambres, alerte: Prise sur un circuit éclairage (chambre 2)}
           - disjoncteur: {repere: T1-R1-3, calibre: C10, circuit: Éclairage extérieur, etat: coupé}
           - disjoncteur: {repere: T1-R1-4, calibre: C16, circuit: Prises séjour}
           - disjoncteur: {repere: T1-R1-5, calibre: C16, circuit: Prises chambres}

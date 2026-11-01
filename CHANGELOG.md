@@ -4,6 +4,13 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnement
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-01
+
+### Ajouté
+- **Alertes** : n'importe quel élément (module, compteur, disjoncteur de branchement) peut porter une alerte écrite par vous (« prise sur un circuit éclairage », « disjoncteur qui chauffe »…), avec suggestions et niveau « à traiter » / « pour information ». Module entouré et marqué « ! », pastille « n alerte(s) », alertes en tête de la liste des points à vérifier.
+- Entité **Alertes** par tableau (`sensor.home_infra_map_<tableau>_alertes`) : nombre d'alertes, liste dans l'attribut `alerts`, pour une automatisation ou une notification.
+- Fichiers de la maison : `alerte: texte` (ou une liste) et `alerte_niveau: info`.
+
 ## [0.3.0] - 2026-11-01
 
 ### Ajouté

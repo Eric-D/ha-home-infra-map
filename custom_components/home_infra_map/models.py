@@ -23,6 +23,7 @@ SUPPLY_KINDS: Final = ("meter", "main_breaker")
 # active = in service; off = switched off / tripped; spare = installed for
 # future works, not wired.
 MODULE_STATUSES: Final = ("active", "off", "spare")
+ALERT_LEVELS: Final = ("warning", "info")
 RCD_TYPES: Final = ("AC", "A", "F", "B", "?")
 CURVES: Final = ("B", "C", "D", "?")
 CIRCUIT_KINDS: Final = (
@@ -134,6 +135,9 @@ MODULE_SCHEMA: Final = vol.Schema(
         vol.Optional("model", default=None): _optional_str,
         vol.Optional("notes", default=None): _optional_str,
         vol.Optional("status", default="active"): vol.In(MODULE_STATUSES),
+        # alert written by the owner ("socket on a lighting circuit"…)
+        vol.Optional("alert", default=None): _optional_str,
+        vol.Optional("alert_level", default="warning"): vol.In(ALERT_LEVELS),
         # module feeding this one; None = automatic (last RCD to the left on
         # the row, else the board's service entrance)
         vol.Optional("fed_by", default=None): _optional_str,
@@ -494,6 +498,21 @@ class ModuleIndex:
     def fed(self, module_id: str) -> list[JsonDict]:
         """Modules directly fed by `module_id`."""
         return [m for m in self.modules.values() if (self.feeder(m) or {}).get("id") == module_id]
+
+
+def board_alerts(board: JsonDict) -> list[JsonDict]:
+    """Alerts written by the owner on the modules of a board (entrance first)."""
+    modules = [*board.get("supply", []), *(m for row in board["rows"] for m in row["modules"])]
+    return [
+        {
+            "module_id": m["id"],
+            "ref": m.get("ref") or "",
+            "text": m["alert"],
+            "level": m.get("alert_level") or "warning",
+        }
+        for m in modules
+        if m.get("alert")
+    ]
 
 
 def row_capacity(board: JsonDict, row: JsonDict) -> int | None:

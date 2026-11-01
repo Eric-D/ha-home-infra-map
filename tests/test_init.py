@@ -143,6 +143,32 @@ async def test_power_sum_entities(hass: HomeAssistant, ping_ok: AsyncMock) -> No
     assert er.async_get(hass).async_get("sensor.home_infra_map_t1_r1_puissance") is None
 
 
+async def test_alerts_entity_follows_the_model(hass: HomeAssistant, ping_ok: AsyncMock) -> None:
+    entry = make_entry()
+    await _setup(hass, entry)
+    store = entry.runtime_data.store
+    module = {"kind": "breaker", "ref": "T1-R1-1", "circuit_name": "Éclairage"}
+    boards = [{"name": "Tableau 1", "rows": [{"label": "R1", "modules": [module]}]}]
+    await store.async_save_section("boards", boards, None)
+    await hass.async_block_till_done()
+    state = hass.states.get("sensor.home_infra_map_t1_alertes")
+    assert state is not None and state.state == "0" and state.attributes["alerts"] == []
+
+    module["alert"] = "Prise sur un circuit éclairage"
+    boards[0]["supply"] = [
+        {"kind": "main_breaker", "ref": "T1-AGCP", "alert": "Déclenche", "alert_level": "info"}
+    ]
+    await store.async_save_section("boards", boards, None)
+    await hass.async_block_till_done()
+    state = hass.states.get("sensor.home_infra_map_t1_alertes")
+    assert state is not None and state.state == "2"
+    assert state.attributes["warnings"] == 1
+    assert state.attributes["alerts"] == [
+        {"ref": "T1-AGCP", "text": "Déclenche", "level": "info"},
+        {"ref": "T1-R1-1", "text": "Prise sur un circuit éclairage", "level": "warning"},
+    ]
+
+
 async def test_sources_down_do_not_break_setup(
     hass: HomeAssistant, ping_ok: AsyncMock, aioclient_mock: AiohttpClientMocker
 ) -> None:

@@ -337,6 +337,18 @@ export const cardStyles = css`
   .warnlist li.warning::marker {
     color: var(--him-warn);
   }
+  .warnlist li.manual {
+    font-weight: 500;
+  }
+  .alert-text {
+    white-space: pre-line;
+    color: color-mix(in srgb, var(--him-warn) 75%, var(--him-ink));
+    font-weight: 500;
+  }
+  .alert-text.info {
+    color: var(--him-ink);
+    font-weight: 400;
+  }
 
   /* electrical board */
   .board {
@@ -553,6 +565,45 @@ export const cardStyles = css`
   .tag.inline {
     display: inline-block;
     font-size: 11px;
+  }
+  /* alert written by the owner */
+  .m.al,
+  .sup.al {
+    border: 2px solid var(--him-warn);
+  }
+  .m.al.al-info,
+  .sup.al.al-info {
+    border-color: var(--him-accent);
+  }
+  .amark-chip {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--him-warn);
+    color: #000;
+    font: 700 10px/14px var(--him-mono, monospace);
+    text-align: center;
+  }
+  .amark {
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--him-warn);
+    color: #000;
+    font: 700 11px/15px var(--him-mono, monospace);
+    text-align: center;
+  }
+  .al-info .amark {
+    background: var(--him-accent);
+    color: #fff;
+  }
+  .sup .amark {
+    position: static;
+    flex: none;
   }
   /* explicit feed (not the RCD on the left) */
   .m .fxmark {

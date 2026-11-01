@@ -36,6 +36,9 @@ export interface Module {
   model: string | null;
   notes: string | null;
   status?: ModuleStatus;
+  /** Alert written by the owner ("socket on a lighting circuit"…). */
+  alert?: string | null;
+  alert_level?: 'warning' | 'info';
   /** Module feeding this one; null = automatic (RCD on the left, else the service entrance). */
   fed_by?: string | null;
   /** Meter: subscribed power (kVA). */

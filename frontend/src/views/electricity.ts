@@ -50,6 +50,7 @@ export function moduleClasses(module: Module, selected: boolean, state: ModuleSt
   if (module.status === 'spare') cls.push('spare');
   else if (state.off) cls.push('off');
   if (module.fed_by) cls.push('fx');
+  if (module.alert) cls.push(module.alert_level === 'info' ? 'al al-info' : 'al');
   if (state.link) cls.push(state.link);
   if (selected) cls.push('sel');
   return cls.join(' ');
@@ -92,10 +93,12 @@ export function renderModule(module: Module, o: ModuleRenderOpts): TemplateResul
   const off = module.status !== 'spare' && isOff(module, o.hass);
   const tag = module.status === 'spare' ? o.t('el.tag.spare') : off ? o.t('el.tag.off') : '';
   const fx = module.fed_by && o.feeder ? o.t('el.fx', { ref: o.feeder.ref || moduleTitle(o.feeder) }) : '';
+  const alert = module.alert ? o.t('el.alert', { text: module.alert.replace(/\n/g, ' · ') }) : '';
   const label = [
     o.t('el.module_aria', { kind: o.t(`el.kind.${module.kind}`), ref: module.ref, title, name: sub }),
     tag,
     fx,
+    alert,
   ]
     .filter(Boolean)
     .join(' · ');
@@ -106,7 +109,7 @@ export function renderModule(module: Module, o: ModuleRenderOpts): TemplateResul
     data-kind=${module.kind}
     aria-label=${label}
     aria-pressed=${o.selected ? 'true' : 'false'}
-    title=${[module.ref, sub, tag, fx].filter(Boolean).join(' · ')}
+    title=${[module.ref, sub, tag, fx, alert].filter(Boolean).join(' · ')}
     @click=${o.onClick}
   >
     ${fx ? html`<span class="fxmark" aria-hidden="true">↱</span>` : nothing}
@@ -116,7 +119,11 @@ export function renderModule(module: Module, o: ModuleRenderOpts): TemplateResul
     ${hasSensor
       ? html`<span class="w" title=${formatWatts(watts, o.lang)}>${formatWattsCompact(watts, o.lang)}</span>`
       : nothing}
-    ${o.warned ? html`<span class="wmark" aria-hidden="true"></span>` : nothing}
+    ${module.alert
+      ? html`<span class="amark" aria-hidden="true">!</span>`
+      : o.warned
+        ? html`<span class="wmark" aria-hidden="true"></span>`
+        : nothing}
   </button>`;
 }
 
@@ -221,7 +228,8 @@ export function renderModuleDetail(
     sameBoard(m)
       ? html`<button class="ent" @click=${() => ctx.onSelectModule(m.id)}>${refOf(m, t, index, board)}</button>`
       : html`<span>${refOf(m, t, index, board)}</span>`;
-  const warnings = checksFor(ctx.payload.checks, module.id);
+  // the owner's alert has its own line: not repeated in the hints
+  const warnings = checksFor(ctx.payload.checks, module.id).filter((c) => c.code !== 'manual');
   const watts = powerOf(ctx.hass, module.power_entity_id);
   const isCircuit = module.kind === 'breaker' || module.kind === 'rcbo';
   return html`<dl class="detail" aria-live="polite">
@@ -230,6 +238,9 @@ export function renderModuleDetail(
       <b>${module.ref || '—'}</b> · ${desc}
       <button class="icon-btn" style="float:right;width:24px;height:24px" aria-label=${t('el.d.close')} @click=${() => ctx.onSelectModule(null)}>✕</button>
     </dd>
+    ${module.alert
+      ? html`<dt>${t('el.d.alert')}</dt><dd class=${module.alert_level === 'info' ? 'alert-text info' : 'alert-text'}>${module.alert}</dd>`
+      : nothing}
     ${module.model ? html`<dt>${t('el.d.model')}</dt><dd>${module.model}</dd>` : nothing}
     ${status ? html`<dt>${t('el.d.status')}</dt><dd><span class=${`tag inline ${status}`}>${t(`el.status.${status}`)}</span></dd>` : nothing}
     ${module.kind === 'meter' && module.subscribed_kva
@@ -373,6 +384,7 @@ export function renderSupply(board: Board, ctx: SupplyCtx): TemplateResult | typ
         selected ? 'sel' : '',
         linkRole(ctx.links, m.id) ?? '',
         m.status === 'spare' ? 'spare' : isOff(m, ctx.hass) ? 'off' : '',
+        m.alert ? (m.alert_level === 'info' ? 'al al-info' : 'al') : '',
       ]
         .filter(Boolean)
         .join(' ');
@@ -391,6 +403,7 @@ export function renderSupply(board: Board, ctx: SupplyCtx): TemplateResult | typ
             ${sub ? html`<small>${sub}</small>` : nothing}
           </span>
           ${watts !== null ? html`<span class="w">${formatWattsCompact(watts, ctx.lang)}</span>` : nothing}
+          ${m.alert ? html`<span class="amark" title=${m.alert}>!</span>` : nothing}
           ${load !== null
             ? html`<span class="load" title=${t('el.load', { p: load, a: m.rating_a ?? '?' })}>
                 <span class="bar"><span style=${`width:${Math.min(100, Math.max(0, load))}%`} class=${load >= 80 ? 'hot' : ''}></span></span>
@@ -410,7 +423,13 @@ export function renderElectricity(ctx: ElectricityCtx): TemplateResult {
   if (!board) return html`<div class="empty">${t('el.no_board')}</div>`;
   const stats = boardStats(board, ctx.hass);
   const total = sumPower(ctx.hass, boardPowerEntities(board));
-  const boardChecks = payload.checks.filter((c) => c.board_id === board.id && c.severity === 'warning');
+  const boardChecks = payload.checks.filter(
+    (c) => c.board_id === board.id && (c.severity === 'warning' || c.code === 'manual'),
+  );
+  // owner's alerts first, then the automatic hints
+  boardChecks.sort((a, b) => Number(b.code === 'manual') - Number(a.code === 'manual'));
+  const alerts = boardChecks.filter((c) => c.code === 'manual').length;
+  const hints = boardChecks.length - alerts;
   const index = new FeedIndex(boards);
   let selected: { module: Module; row: Row | null } | null = null;
   const head = (board.supply ?? []).find((x) => x.id === ctx.selectedModuleId);
@@ -442,9 +461,14 @@ export function renderElectricity(ctx: ElectricityCtx): TemplateResult {
         ? html`<span class="chip">${t('el.board_fed_by', { ref: refOf(boardFeeder, t, index, board) })}</span>`
         : nothing}
       ${total !== null ? html`<span class="chip num">${t('el.now', { w: formatWatts(total, ctx.lang) })}</span>` : nothing}
-      ${boardChecks.length
+      ${alerts
         ? html`<button class="chip warn" aria-expanded=${ctx.showWarnings ? 'true' : 'false'} @click=${ctx.onToggleWarnings}>
-            <span class="dot warn"></span>${t('el.warnings', { n: boardChecks.length })}
+            <span class="amark-chip">!</span>${t('el.alerts', { n: alerts })}
+          </button>`
+        : nothing}
+      ${hints
+        ? html`<button class="chip warn" aria-expanded=${ctx.showWarnings ? 'true' : 'false'} @click=${ctx.onToggleWarnings}>
+            <span class="dot warn"></span>${t('el.warnings', { n: hints })}
           </button>`
         : nothing}
       ${ctx.hasPhoto
@@ -455,7 +479,7 @@ export function renderElectricity(ctx: ElectricityCtx): TemplateResult {
       ? html`<div class="form">
           <ul class="warnlist">
             ${boardChecks.map(
-              (c) => html`<li class="warning">
+              (c) => html`<li class=${c.code === 'manual' ? `${c.severity} manual` : 'warning'}>
                 <button class="ent" @click=${() => ctx.onSelectModule(c.module_id)}>${c.ref}</button> · ${warningText(c, t)}
               </li>`,
             )}

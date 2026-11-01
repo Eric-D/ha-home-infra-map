@@ -11,5 +11,5 @@
   "loggers": ["icmplib", "pysnmp"],
   "requirements": ["icmplib>=3.0.4", "pysnmp>=7.1.27"],
   "single_config_entry": true,
-  "version": "0.3.0"
+  "version": "0.4.0"
 }

@@ -112,13 +112,18 @@ tableaux:
           - disjoncteur: {repere: T9-R1-1, calibre: C16, alimente_par: T9-R1-42}
           - disjoncteur: {repere: T9-R1-2, calibre: C16, alimente_par: arrivee}
           - disjoncteur: {repere: T9-R1-3, calibre: C16, reserve: true, etat: "?"}
-          - disjoncteur: {repere: T9-R1-4, calibre: C16, etat: disjoncté}
+          - disjoncteur: {repere: T9-R1-4, calibre: C16, etat: disjoncté, alerte: [Chauffe, Bornier noirci]}
+          - disjoncteur: {repere: T9-R1-5, calibre: C16, alerte: Étiquette fausse, alerte_niveau: info}
 """
     result = parse_document(doc)
     assert len(result.warnings) == 2
     modules = result.boards[0]["rows"][0]["modules"]  # type: ignore[index]
-    assert [m["fed_by"] for m in modules] == [None, None, None, None]
-    assert [m["status"] for m in modules] == ["active", "active", "spare", "off"]
+    assert [m["fed_by"] for m in modules] == [None] * 5
+    assert [m["status"] for m in modules] == ["active", "active", "spare", "off", "active"]
+    assert [(m["alert"], m["alert_level"]) for m in modules[3:]] == [
+        ("Chauffe\nBornier noirci", "warning"),
+        ("Étiquette fausse", "info"),
+    ]
 
 
 def test_network_example_counts() -> None:

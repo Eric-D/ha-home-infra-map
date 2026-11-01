@@ -15,7 +15,7 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.util import slugify
 
 from .const import DOMAIN, ENTITY_SUFFIXES
-from .models import JsonDict, board_power_entities, row_power_entities
+from .models import JsonDict, board_alerts, board_power_entities, row_power_entities
 
 
 def suffixes(hass: HomeAssistant) -> dict[str, str]:
@@ -227,6 +227,18 @@ def entity_plan(
                         fingerprint=(*board_fp, row["label"], tuple(row_power_entities(row))),
                     )
                 )
+        alerts = board_alerts(board)
+        plan.append(
+            PlannedEntity(
+                "sensor",
+                "alerts",
+                f"{entry_id}_board_{board['id']}_alerts",
+                f"sensor.{object_id(code, sfx['alerts'])}",
+                board["id"],
+                # re-created when an alert changes: the state follows the model
+                fingerprint=(*board_fp, tuple((a["ref"], a["text"], a["level"]) for a in alerts)),
+            )
+        )
         if any_power:
             plan.append(
                 PlannedEntity(

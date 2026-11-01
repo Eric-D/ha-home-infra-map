@@ -10,7 +10,8 @@
       "blocks": { "default": "mdi:wall-fire" },
       "port": { "default": "mdi:ethernet", "state": { "down": "mdi:ethernet-off" } },
       "row_power": { "default": "mdi:flash" },
-      "board_power": { "default": "mdi:home-lightning-bolt-outline" }
+      "board_power": { "default": "mdi:home-lightning-bolt-outline" },
+      "alerts": { "default": "mdi:alert-outline" }
     }
   },
   "services": {

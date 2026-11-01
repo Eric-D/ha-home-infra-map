@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from typing import Final
 
-from .models import JsonDict, ModuleIndex, row_capacity, row_used_slots
+from .models import JsonDict, ModuleIndex, board_alerts, row_capacity, row_used_slots
 
 MAX_BREAKERS_PER_RCD: Final = 8
 # Highest rating commonly allowed per copper cross-section (mm² -> A).
@@ -45,7 +45,17 @@ def check_board(board: JsonDict, index: ModuleIndex | None = None) -> list[JsonD
     another board); without it the board is checked on its own.
     """
     index = index or ModuleIndex([board])
-    warnings: list[JsonDict] = []
+    warnings: list[JsonDict] = [
+        {
+            "code": "manual",
+            "severity": alert["level"],
+            "board_id": board["id"],
+            "module_id": alert["module_id"],
+            "ref": alert["ref"],
+            "params": {"text": alert["text"]},
+        }
+        for alert in board_alerts(board)
+    ]
     # RCD id -> breakers it protects (wherever they sit)
     groups: dict[str, list[JsonDict]] = {}
     for row in board["rows"]:

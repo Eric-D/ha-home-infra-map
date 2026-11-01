@@ -19,7 +19,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpda
 from . import current_plan
 from .coordinator import HomeInfraMapConfigEntry, OpnsenseCoordinator, PingCoordinator, SnmpCoordinator
 from .entity import PlannedEntity, PlatformSync, board_device_info, network_device_info, switch_device_info
-from .models import JsonDict, find_device, row_power_entities
+from .models import JsonDict, board_alerts, find_device, row_power_entities
 
 PARALLEL_UPDATES = 0
 
@@ -63,6 +63,8 @@ async def async_setup_entry(
         board = next((b for b in model["boards"] if b["id"] == planned.owner_id), None)
         if board is None:
             return None
+        if planned.key == "alerts":
+            return AlertsSensor(hass, entry.entry_id, planned, board)
         if planned.key == "row_power":
             row = next(r for r in board["rows"] if r["id"] == planned.extra["row_id"])
             sources = row_power_entities(row)
@@ -263,3 +265,25 @@ class PowerSumSensor(SensorEntity):
         self._attr_available = count > 0
         self._attr_native_value = round(total, 1) if count else None
         self._attr_extra_state_attributes = {"sources": self._sources, "counted": count}
+
+
+class AlertsSensor(SensorEntity):
+    """Number of alerts written by the owner on a board; the list in attributes.
+
+    Re-created by PlatformSync whenever an alert changes (fingerprint).
+    """
+
+    _attr_has_entity_name = True
+    _attr_should_poll = False
+    _attr_translation_key = "alerts"
+
+    def __init__(self, hass: HomeAssistant, entry_id: str, planned: PlannedEntity, board: JsonDict) -> None:
+        self._attr_unique_id = planned.unique_id
+        self.entity_id = planned.entity_id
+        self._attr_device_info = board_device_info(hass, entry_id, board)
+        alerts = board_alerts(board)
+        self._attr_native_value = len(alerts)
+        self._attr_extra_state_attributes = {
+            "alerts": [{"ref": a["ref"], "text": a["text"], "level": a["level"]} for a in alerts],
+            "warnings": sum(1 for a in alerts if a["level"] == "warning"),
+        }

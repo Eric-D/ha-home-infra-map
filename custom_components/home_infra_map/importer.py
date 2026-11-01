@@ -187,7 +187,20 @@ def _entity_or_none(value: Any) -> str | None:
 
 
 _MODULE_KEYS = frozenset(
-    {"type", "modele", "entite_ha", "note", "repere", "largeur", "modules", "etat", "alimente_par", "reserve"}
+    {
+        "type",
+        "modele",
+        "entite_ha",
+        "note",
+        "repere",
+        "largeur",
+        "modules",
+        "etat",
+        "alimente_par",
+        "reserve",
+        "alerte",
+        "alerte_niveau",
+    }
 )
 
 _SPARE_WORDS = ("reserve", "réserve", "spare", "non raccorde", "non raccordé", "futur")
@@ -211,9 +224,20 @@ def parse_status(item: JsonDict, circuit: Any = None) -> str:
     return "active"
 
 
+def _alert(item: JsonDict) -> JsonDict:
+    """`alerte: Prise sur un circuit éclairage` (a list gives one line each)."""
+    value = item.get("alerte")
+    lines = [str(v).strip() for v in value] if isinstance(value, list) else [_clean(value) or ""]
+    text = "\n".join(line for line in lines if line)
+    if not text:
+        return {}
+    level = "info" if str(item.get("alerte_niveau") or "").strip().lower() == "info" else "warning"
+    return {"alert": text, "alert_level": level}
+
+
 def _common(item: JsonDict, circuit: Any = None) -> JsonDict:
     """Fields shared by every element: state, `alimente_par`, width."""
-    extra: JsonDict = {"status": parse_status(item, circuit), **_width(item)}
+    extra: JsonDict = {"status": parse_status(item, circuit), **_width(item), **_alert(item)}
     if fed := _clean(item.get("alimente_par")):
         extra[_FED_REF] = fed
     return extra
@@ -424,6 +448,7 @@ def _legacy_supply(arrivee: Any, code: str) -> list[JsonDict]:
                 "energy_entity_id": _entity_or_none(meter.get("entite_energie")),
                 "notes": _clean(meter.get("note")),
                 "status": parse_status(meter),
+                **_alert(meter),
             }
         )
     breaker = arrivee.get("disjoncteur") or arrivee.get("disjoncteur_branchement")
@@ -438,6 +463,7 @@ def _legacy_supply(arrivee: Any, code: str) -> list[JsonDict]:
                 "sensitivity_ma": parse_ma(breaker.get("sensibilite")),
                 "notes": _clean(breaker.get("note")),
                 "status": parse_status(breaker),
+                **_alert(breaker),
             }
         )
     return supply

@@ -85,6 +85,8 @@ Each module takes **N DIN slots** (18 mm): an RCD 2, a Shelly Pro 4PM 4, a DIN s
 
 In edit mode, *+ Meter* and *+ Main breaker* add the service entrance above the rails (subscribed power, live power, load in % of the main breaker rating). By default a module is fed by the RCD on its left on the row, else by the entrance; **Fed by** links it to any other element (e.g. a C40 wired straight under the main breaker, outside any RCD) and a sub-board to the breaker feeding it. Selecting a module highlights its feed chain and everything it feeds. A module's **state** can be *off / tripped* (also automatic when its linked relay is off) or *spare* (installed for future works, not wired: hatched and ignored by the checks). House YAML files: `arrivee: {compteur: {modele: Linky, puissance_souscrite: 12 kVA}, disjoncteur: {calibre: 60A, sensibilite: 500mA}}` on a board, `alimente_par: <ref | arrivee>` on an element or a board, `etat: réserve | coupé`.
 
+**Alerts**: any element can carry an alert written by you ("socket on a lighting circuit", "breaker running hot"…, with suggestions), level *to fix* or *for information*. It is outlined and marked "!", counted in an "n alert(s)" chip, and exposed by the board's **Alerts** entity (`sensor.home_infra_map_<board>_alerts`: count, list in the `alerts` attribute) for automations. House files: `alerte: text` (or a list), `alerte_niveau: info`.
+
 ## YAML file import / export
 
 In the card (pencil): **Export** → *Download (.yaml)* (or *Copy*); **Import** → *Choose a .yaml file…* (or paste) → *Import*. The sections present in the file replace the current data; an export re-imports identically. Actions: `home_infra_map.export_yaml` / `home_infra_map.import_yaml` (paths in `/config`).
@@ -108,6 +110,7 @@ Each monitored device becomes an HA **device** (MAC connection when known, sugge
 | Switch port state | `sensor.home_infra_map_<switch>_port_<n>` | diagnostic, disabled by default unless used |
 | Row power | `sensor.home_infra_map_t1_r3_power` | at least one linked sensor |
 | Board power | `sensor.home_infra_map_t1_power` | same |
+| Board alerts | `sensor.home_infra_map_t1_alerts` (count; `alerts` attribute: ref, text, level) | always |
 
 Entities follow the model **without reloading the integration**.
 

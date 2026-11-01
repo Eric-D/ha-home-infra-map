@@ -189,6 +189,9 @@
       },
       "board_power": {
         "name": "Power"
+      },
+      "alerts": {
+        "name": "Alerts"
       }
     }
   },

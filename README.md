@@ -34,7 +34,7 @@ Les captures sont produites automatiquement depuis la carte réelle, sur la mais
 - [Switch en SNMP](#switch-en-snmp)
 - [Premiers pas](#premiers-pas)
 - [Tableaux : largeurs, trous, taille des rails](#tableaux--largeurs-trous-taille-des-rails)
-- [Arrivée, liens d'alimentation, réserve](#arrivée-liens-dalimentation-réserve)
+- [Arrivée, liens d'alimentation, réserve, alertes](#arrivée-liens-dalimentation-réserve-alertes)
 - [Import / export en fichier YAML](#import--export-en-fichier-yaml)
 - [Exemples de cartes et tableau de bord généré](#exemples-de-cartes-et-tableau-de-bord-généré)
 - [Entités créées](#entités-créées)
@@ -141,11 +141,12 @@ tableaux:
 
 L'ancienne forme (`differentiel`, puis `disjoncteurs`, puis `modules`) reste acceptée ; on peut y glisser `{vide: 2}` et `largeur: n` sur chaque élément. Exemple complet (maison fictive) : [`docs/examples/tableau-largeurs.yaml`](docs/examples/tableau-largeurs.yaml).
 
-## Arrivée, liens d'alimentation, réserve
+## Arrivée, liens d'alimentation, réserve, alertes
 
 - **Arrivée** : en mode édition, *+ Compteur* et *+ Disjoncteur de branchement* au-dessus des rails. Le compteur porte la puissance souscrite et, si vous en avez un, le capteur de puissance (TIC, pince) ; le disjoncteur de branchement affiche sa charge en % de son calibre.
 - **Alimenté par** : par défaut un module est alimenté par le différentiel à sa gauche sur la rangée, sinon par l'arrivée. Pour un câblage particulier (un C40 pris directement sous le disjoncteur de branchement, hors différentiel), choisissez l'élément dans « Alimenté par » : le module est marqué ↱, et les contrôles en tiennent compte. Un tableau divisionnaire se relie au départ qui l'alimente (« Tableau alimenté par »).
 - Cliquer sur un module met en évidence ce qui l'alimente et tout ce qu'il alimente.
+- **Alertes** : champ « Alerte » sur chaque élément (suggestions : prise sur un circuit éclairage, câble trop fin, pas de terre, disjoncteur qui chauffe…), niveau « à traiter » ou « pour information ». L'élément est entouré et marqué « ! », la pastille « n alerte(s) » ouvre la liste, et l'entité `sensor.home_infra_map_<tableau>_alertes` (nombre, liste dans l'attribut `alerts`) permet une notification.
 - **État** : *coupé / disjoncté* (bordure rouge, étiquette « Coupé » ; aussi automatiquement quand le relais lié est éteint) ou *en réserve* (posé pour de futurs travaux, non raccordé : hachuré, ignoré par les contrôles).
 
 ```yaml
@@ -158,7 +159,7 @@ tableaux:
       - id: T1-R1
         elements:
           - differentiel: {calibre: 40A, sensibilite: 30mA, type: A}
-          - disjoncteur: {repere: T1-R1-1, calibre: C16, circuit: Prises}
+          - disjoncteur: {repere: T1-R1-1, calibre: C16, circuit: Prises, alerte: Prise sur un circuit éclairage}
           - disjoncteur: {repere: T1-R1-2, calibre: C20, circuit: Réserve, etat: réserve}
           - disjoncteur: {repere: T1-R1-3, calibre: C40, circuit: Départ garage, alimente_par: arrivee}
   - id: T2
@@ -197,6 +198,7 @@ Chaque équipement surveillé devient un **appareil** HA (MAC en connexion si co
 | Port de switch | `sensor.home_infra_map_<switch>_port_<n>` (up/down, vitesse, PoE, équipements vus) | diagnostic ; désactivé par défaut sauf ports utilisés |
 | Puissance d'une rangée | `sensor.home_infra_map_t1_r3_puissance` (W, somme des capteurs liés, indisponibles ignorés) | au moins un capteur lié |
 | Puissance d'un tableau | `sensor.home_infra_map_t1_puissance` | idem |
+| Alertes d'un tableau | `sensor.home_infra_map_t1_alertes` (nombre d'alertes ; attributs `alerts` : repère, texte, niveau, et `warnings`) | toujours |
 
 Un disjoncteur sans capteur reste de la documentation : pas d'entité. Les entités suivent le modèle **sans recharger l'intégration** : ajouter, renommer ou supprimer un équipement crée, met à jour ou retire ses entités immédiatement (l'historique est conservé tant que l'identifiant interne ne change pas).
 
