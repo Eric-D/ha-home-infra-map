@@ -34,9 +34,9 @@ describe('electricity view', () => {
   it('stacks every board one below the other, each with its own chips', () => {
     const el = mount();
     render(renderElectricity({ ...ctx, stacked: true }), el);
-    const sections = el.querySelectorAll('.board-section');
+    const sections = el.querySelectorAll('.board-section:not(.bx-section)');
     expect(sections).toHaveLength(payload.model.boards.length);
-    expect([...el.querySelectorAll('.board-title')].map((h) => h.textContent)).toEqual(payload.model.boards.map((b) => [b.name, b.location].filter(Boolean).join(' · ')));
+    expect([...el.querySelectorAll('.board-section:not(.bx-section) > .board-title')].map((h) => h.textContent)).toEqual(payload.model.boards.map((b) => [b.name, b.location].filter(Boolean).join(' · ')));
     expect(el.querySelector('[role="tablist"]')).toBeNull();
     expect(el.querySelectorAll('.board')).toHaveLength(payload.model.boards.length);
     // detail of a module of the second board, under that board

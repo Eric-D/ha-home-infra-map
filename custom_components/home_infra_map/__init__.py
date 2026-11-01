@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import copy
 import logging
 from pathlib import Path
 from typing import Any
@@ -39,7 +40,7 @@ from .coordinator import (
     build_opnsense_client,
 )
 from .entity import PlannedEntity, entity_plan
-from .importer import ImportError_, export_document, parse_document
+from .importer import ImportError_, export_document, parse_document, remap_box_circuits
 from .models import JsonDict
 from .photos import PhotoView, async_import_photo
 from .snmp import SnmpClient
@@ -350,6 +351,13 @@ async def async_import_text(
         model["boards"] = boards
     if result.network is not None:
         model["network"] = result.network
+    if result.boxes is not None:
+        model["boxes"] = result.boxes
+    elif result.boards is not None:
+        # boards re-imported alone: the boxes keep their circuits (same repères)
+        boxes = copy.deepcopy(store.model["boxes"])
+        remap_box_circuits(boxes, store.model["boards"], result.boards)
+        model["boxes"] = boxes
     if result.house_name:
         model["house_name"] = result.house_name
     await store.async_replace(model)
@@ -362,6 +370,7 @@ async def async_import_text(
         "vlans": len(network["vlans"]),
         "devices": len(network["devices"]),
         "switches": len(network["switches"]),
+        "boxes": len(store.model["boxes"]),
     }
 
 

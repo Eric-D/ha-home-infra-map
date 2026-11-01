@@ -26,6 +26,7 @@ import { copyText, moreInfo, toast } from './ui.js';
 import { CARD_VERSION } from './version.js';
 import { HomeInfraMapDeviceSheet } from './views/device-sheet.js';
 import { HomeInfraMapElectricityEditor } from './views/electricity-edit.js';
+import { HomeInfraMapBoxesEditor } from './views/boxes-edit.js';
 import { renderElectricity } from './views/electricity.js';
 import type { NetCtx } from './views/network-common.js';
 import { HomeInfraMapNetworkEditor } from './views/network-edit.js';
@@ -77,6 +78,9 @@ export class HomeInfraMapCard extends LitElement {
     _moduleId: { state: true },
     _history: { state: true },
     _showWarnings: { state: true },
+    _boxId: { state: true },
+    _editBoxes: { state: true },
+    _conduitId: { state: true },
     _deviceId: { state: true },
     _sheetTab: { state: true },
     _switchId: { state: true },
@@ -96,6 +100,9 @@ export class HomeInfraMapCard extends LitElement {
   declare _moduleId: string | null;
   declare _history: Point[] | null;
   declare _showWarnings: ReadonlySet<string>;
+  declare _boxId: string | null;
+  declare _editBoxes: boolean;
+  declare _conduitId: string | null;
   declare _deviceId: string | null;
   declare _sheetTab: 'info' | 'firewall' | 'history';
   declare _switchId: string | null;
@@ -129,6 +136,9 @@ export class HomeInfraMapCard extends LitElement {
     this._moduleId = null;
     this._history = null;
     this._showWarnings = new Set();
+    this._boxId = null;
+    this._editBoxes = false;
+    this._conduitId = null;
     this._deviceId = null;
     this._sheetTab = 'info';
     this._switchId = null;
@@ -428,6 +438,12 @@ export class HomeInfraMapCard extends LitElement {
       lang: this._lang,
       board: this._board,
       stacked: this._stacked,
+      selectedBoxId: this._boxId,
+      selectedConduitId: this._conduitId,
+      onSelectBox: (id, conduitId = null) => {
+        this._boxId = id;
+        this._conduitId = id ? conduitId : null;
+      },
       selectedModuleId: this._moduleId,
       showWarnings: this._showWarnings,
       history: this._history,
@@ -504,7 +520,29 @@ export class HomeInfraMapCard extends LitElement {
     return keyed(
       `${this._view}-${this._editKey}`,
       this._view === 'electricity'
-        ? html`<home-infra-map-electricity-editor
+        ? html`<div class="seg" role="tablist" aria-label=${this._t('view.electricity')} style="margin-bottom:8px">
+              ${([false, true] as const).map(
+                (boxes) => html`<button
+                  role="tab"
+                  aria-selected=${this._editBoxes === boxes ? 'true' : 'false'}
+                  @click=${() => (this._editBoxes = boxes)}
+                >
+                  ${this._t(boxes ? 'be.tab.boxes' : 'be.tab.boards')}
+                </button>`,
+              )}
+            </div>
+            ${this._editBoxes
+              ? html`<home-infra-map-boxes-editor
+                  .hass=${this.hass}
+                  .payload=${this._payload}
+                  @him-saved=${() => {
+                    onSaved();
+                    this._edit = false;
+                  }}
+                  @him-cancel=${() => (this._edit = false)}
+                  @him-conflict=${this._onConflict}
+                ></home-infra-map-boxes-editor>`
+              : html`<home-infra-map-electricity-editor
             .hass=${this.hass}
             .payload=${this._payload}
             .boardId=${this._boardId}
@@ -515,7 +553,7 @@ export class HomeInfraMapCard extends LitElement {
             }}
             @him-cancel=${() => (this._edit = false)}
             @him-conflict=${this._onConflict}
-          ></home-infra-map-electricity-editor>`
+          ></home-infra-map-electricity-editor>`}`
         : html`<home-infra-map-network-editor
             .hass=${this.hass}
             .payload=${this._payload}
@@ -581,6 +619,7 @@ export class HomeInfraMapCard extends LitElement {
 // ---------------------------------------------------------------------------
 defineOnce('home-infra-map-device-sheet', HomeInfraMapDeviceSheet);
 defineOnce('home-infra-map-electricity-editor', HomeInfraMapElectricityEditor);
+defineOnce('home-infra-map-boxes-editor', HomeInfraMapBoxesEditor);
 defineOnce('home-infra-map-network-editor', HomeInfraMapNetworkEditor);
 defineOnce(EDITOR_TAG, HomeInfraMapCardEditor);
 defineOnce(CARD_TAG, HomeInfraMapCard);

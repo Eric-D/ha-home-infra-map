@@ -35,6 +35,7 @@ Les captures sont produites automatiquement depuis la carte réelle, sur la mais
 - [Premiers pas](#premiers-pas)
 - [Tableaux : largeurs, trous, taille des rails](#tableaux--largeurs-trous-taille-des-rails)
 - [Arrivée, liens d'alimentation, réserve, alertes](#arrivée-liens-dalimentation-réserve-alertes)
+- [Boîtes de dérivation](#boîtes-de-dérivation)
 - [Import / export en fichier YAML](#import--export-en-fichier-yaml)
 - [Exemples de cartes et tableau de bord généré](#exemples-de-cartes-et-tableau-de-bord-généré)
 - [Entités créées](#entités-créées)
@@ -165,6 +166,36 @@ tableaux:
           - disjoncteur: {repere: T1-R1-3, calibre: C40, circuit: Départ garage, alimente_par: arrivee}
   - id: T2
     alimente_par: T1-R1-3       # tableau divisionnaire
+```
+
+## Boîtes de dérivation
+
+![Boîte de dérivation servant de rallonge : entrées reliées deux à deux](docs/img/boite.png)
+
+Sous les tableaux, une tuile par boîte ; un clic dessine la boîte comme un tableau : les **gaines** autour, par côté (H haut, B bas, G gauche, D droite) et position, chacune de la couleur de son circuit, avec ce vers quoi elle part (tableau, autre boîte et son entrée, prise / lumière / interrupteur / appareil, réserve, « ? »).
+
+- **Liaisons** : une boîte utilisée en rallonge relie ses entrées deux à deux (tous les fils). La liaison est dessinée par un trait d'une gaine à l'autre, et le circuit la traverse : il suffit de l'indiquer sur la gaine qui vient du tableau. Une gaine reliée à plusieurs autres (un câble qui se divise) est dessinée en étoile.
+- **Wagos détaillés** (facultatif) : type, fil (phase, neutre, terre, retour lampe, navettes), circuit, gaines reliées — listés sous la boîte. Un Wago de terre commun ne mélange pas les circuits.
+- **Ce qu'on ne sait pas** : gaine sans position (« Position inconnue »), côté connu sans numéro (« B? »), gaine sans circuit (pointillés), destination « ? », Wago sans gaines, ou seulement la liste des circuits qui passent par une boîte pas encore ouverte. La tuile compte ce qui reste « à compléter ».
+- Dans le détail d'un disjoncteur, la **Desserte** montre le parcours tableau → boîtes → points, et les points sont comptés pour le contrôle NF C 15-100 quand vous n'avez pas saisi leur nombre.
+- **Édition** : mode édition → onglet *Boîtes de dérivation*. Cliquez un « + » pour ajouter une gaine, une gaine pour la modifier ; *Relier à…* puis une autre gaine pour les joindre (recliquer une gaine déjà reliée la délie).
+
+```yaml
+boites:
+  - boite: Boîte grenier
+    emplacement: grenier, sur la panne côté rue
+    cotes: {haut: 2, bas: 2, gauche: 2, droite: 2}
+    gaines:
+      - {pos: G1, circuit: T1-R1-1, vient_de: tableau, cable: 3G1.5, longueur: 12}
+      - {pos: D1, vers: {lumiere: Séjour, nom: suspension}}
+      - {pos: B1, vers: {boite: Boîte chambre 1, pos: H1}}
+      - {pos: B2, vers: {prise: Bureau, nombre: 2, alerte: "noircie"}}
+      - {pos: "?", nom: gaine grise, vers: "?"}
+    liaisons: [[G1, D1], [B1, B2]]            # ou relie_a: D1 sur une gaine
+    connexions:
+      - {type: Wago 221-413, fil: retour, circuit: T1-R1-2, relie: [G2, H1]}
+  - boite: Boîte derrière l'armoire
+    circuits: [T1-R1-5]                       # pas encore ouverte
 ```
 
 ## Import / export en fichier YAML

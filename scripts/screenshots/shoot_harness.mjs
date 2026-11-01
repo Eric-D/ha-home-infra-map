@@ -19,13 +19,14 @@ const SHOTS = [
   ['historique', `view=network&device=${STATION}&tab=history`, 1000],
   ['edition', 'view=electricity&edit=1&edit_module=T1-R1-6', 1100],
   ['ajout-equipement', `view=network&edit=1&add_device=${STATION}`, 1100],
+  ['boite', `view=electricity&box=${encodeURIComponent('Boîte grenier')}`, 1000, '.bx'],
   ['mobile-sombre', 'view=electricity&theme=dark&width=390', 430],
   ['mobile-reseau-sombre', 'view=network&network_view=topology&theme=dark&width=390', 430],
   ['en-network-switch', 'view=network&network_view=switch&port=22&lang=en', 1000],
 ];
 
 const browser = await chromium.launch();
-for (const [name, query, width] of SHOTS) {
+for (const [name, query, width, selector] of SHOTS) {
   const page = await browser.newPage({ viewport: { width, height: 900 }, deviceScaleFactor: 2, timezoneId: 'Europe/Paris', locale: 'fr-FR' });
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -34,7 +35,9 @@ for (const [name, query, width] of SHOTS) {
   await page.waitForTimeout(800);
   // device sheets are dialogs over the card: capture the dialog only
   const dialog = page.locator('home-infra-map-card [role="dialog"]').first();
-  const target = query.includes('device=') && (await dialog.count()) ? dialog : page.locator('home-infra-map-card').first();
+  const target = selector
+    ? page.locator(selector).first()
+    : query.includes('device=') && (await dialog.count()) ? dialog : page.locator('home-infra-map-card').first();
   await target.screenshot({ path: `${OUT}/${name}.png` });
   console.log(name, errors.length ? errors : 'ok');
   await page.close();

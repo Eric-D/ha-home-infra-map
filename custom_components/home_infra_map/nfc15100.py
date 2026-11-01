@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from typing import Final
 
-from .models import JsonDict, ModuleIndex, board_alerts, row_capacity, row_used_slots
+from .models import JsonDict, ModuleIndex, board_alerts, circuit_points, row_capacity, row_used_slots
 
 MAX_BREAKERS_PER_RCD: Final = 8
 # Highest rating commonly allowed per copper cross-section (mm² -> A).
@@ -54,7 +54,21 @@ def _is_unidentified(module: JsonDict) -> bool:
     return str(module.get("circuit_name") or "").strip() in ("", "?")
 
 
-def check_board(board: JsonDict, index: ModuleIndex | None = None) -> list[JsonDict]:
+def derived_points(module: JsonDict, boxes: list[JsonDict]) -> int | None:
+    """Points of a circuit counted from the boxes (lights or sockets per its kind)."""
+    counts = circuit_points(boxes, module["id"])
+    if not counts:
+        return None
+    if module.get("circuit_kind") == "lighting":
+        return counts.get("light", 0)
+    if module.get("circuit_kind") == "sockets":
+        return counts.get("socket", 0) + counts.get("outlet", 0)
+    return None
+
+
+def check_board(
+    board: JsonDict, index: ModuleIndex | None = None, boxes: list[JsonDict] | None = None
+) -> list[JsonDict]:
     """Return the warnings of one board.
 
     `index` resolves the feeds across boards (sub-board fed by a breaker of
@@ -155,7 +169,10 @@ def check_board(board: JsonDict, index: ModuleIndex | None = None) -> list[JsonD
                         max_a=kind_limit,
                     )
                 )
+            # typed by the owner, else counted from the junction boxes
             points = module.get("points_count")
+            if points is None and boxes:
+                points = derived_points(module, boxes)
             limit_points = max_points(module)
             if points and limit_points is not None and points > limit_points:
                 warnings.append(
@@ -188,7 +205,7 @@ def check_board(board: JsonDict, index: ModuleIndex | None = None) -> list[JsonD
     return warnings
 
 
-def check_boards(boards: list[JsonDict]) -> list[JsonDict]:
+def check_boards(boards: list[JsonDict], boxes: list[JsonDict] | None = None) -> list[JsonDict]:
     """Return the warnings of every board."""
     index = ModuleIndex(boards)
-    return [w for board in boards for w in check_board(board, index)]
+    return [w for board in boards for w in check_board(board, index, boxes)]

@@ -19,6 +19,8 @@ import {
   sumPower,
 } from '../helpers/electric.js';
 import { sparkPath, type Point } from '../helpers/sparkline.js';
+import { circuitPoints } from '../helpers/boxes.js';
+import { renderBoxes, renderCircuitPath, type BoxesCtx } from './boxes.js';
 import type { Translate } from '../i18n.js';
 import type { Board, Check, Hass, Module, Payload, Row } from '../types.js';
 import { areaNames } from '../ui.js';
@@ -148,6 +150,9 @@ export interface ElectricityCtx {
   onToggleWarnings: (boardId: string) => void;
   onOpenPhoto: (boardId: string) => void;
   onMoreInfo: (entityId: string) => void;
+  selectedBoxId?: string | null;
+  selectedConduitId?: string | null;
+  onSelectBox?: (id: string | null, conduitId?: string | null) => void;
 }
 
 /** Up/downstream sets of the selected module, to draw its feed links. */
@@ -213,12 +218,21 @@ function refOf(m: Module, t: Translate, index: FeedIndex, board: Board | null): 
   return other && board && other.id !== board.id ? `${name} (${other.name})` : name;
 }
 
+/** Points counted from the boxes, per the circuit kind (as the backend check). */
+function derivedPoints(module: Module, counted: Record<string, number>): number | null {
+  if (module.circuit_kind === 'lighting') return counted.light || null;
+  if (module.circuit_kind === 'sockets') return (counted.socket ?? 0) + (counted.outlet ?? 0) || null;
+  return null;
+}
+
 export function renderModuleDetail(
   module: Module,
   _row: Row | null,
   ctx: Pick<ElectricityCtx, 'hass' | 't' | 'lang' | 'payload' | 'history' | 'historyRange' | 'onMoreInfo' | 'onSelectModule'> & {
     index?: FeedIndex;
     board?: Board | null;
+    /** junction boxes: path of the circuit, points counted from them */
+    boxes?: BoxesCtx;
   },
 ): TemplateResult {
   const { t } = ctx;
@@ -248,6 +262,11 @@ export function renderModuleDetail(
   const warnings = checksFor(ctx.payload.checks, module.id).filter((c) => c.code !== 'manual');
   const watts = powerOf(ctx.hass, module.power_entity_id);
   const isCircuit = module.kind === 'breaker' || module.kind === 'rcbo';
+  const counted = ctx.boxes ? circuitPoints(ctx.boxes.boxes, module.id) : {};
+  const countedText = Object.entries(counted)
+    .map(([k, n]) => `${n} ${t(`box.point_n.${k}`)}`)
+    .join(' · ');
+  const points = module.points_count ?? derivedPoints(module, counted);
   return html`<dl class="detail" aria-live="polite">
     <dt>${t('el.d.ref')}</dt>
     <dd>
@@ -276,10 +295,14 @@ export function renderModuleDetail(
             ${module.circuit_kind !== 'unknown' ? html`<span class="muted"> · ${t(`ck.kind.${module.circuit_kind}`)}</span>` : nothing}
           </dd>`
       : nothing}
-    ${isCircuit && module.points_count
+    ${isCircuit && (points || countedText)
       ? html`<dt>${t('el.d.points')}</dt>
-          <dd>${maxPoints(module) !== null ? t('el.d.points_max', { n: module.points_count, max: maxPoints(module)! }) : module.points_count}</dd>`
+          <dd>
+            ${points && maxPoints(module) !== null ? t('el.d.points_max', { n: points, max: maxPoints(module)! }) : points || ''}
+            ${countedText ? html`<span class="muted">${points ? ' · ' : ''}${t('box.counted', { list: countedText })}</span>` : nothing}
+          </dd>`
       : nothing}
+    ${isCircuit && ctx.boxes ? renderCircuitPath(module.id, ctx.boxes) : nothing}
     ${isCircuit ? renderNorm(module, t) : nothing}
     ${module.area_ids.length ? html`<dt>${t('el.d.areas')}</dt><dd>${areaNames(ctx.hass, module.area_ids).join(' · ')}</dd>` : nothing}
     ${module.kind === 'breaker'
@@ -441,14 +464,16 @@ export function renderSupply(board: Board, ctx: SupplyCtx): TemplateResult | typ
 export function renderElectricity(ctx: ElectricityCtx): TemplateResult {
   const { t, payload } = ctx;
   const boards = payload.model.boards;
+  const index = new FeedIndex(boards);
+  const bx = boxesCtx(ctx, index);
   if (ctx.stacked && boards.length > 1) {
-    const index = new FeedIndex(boards);
     return html`${boards.map(
-      (b) => html`<section class="board-section" aria-label=${b.name}>
-        <h3 class="board-title">${[b.name, b.location].filter(Boolean).join(' · ')}</h3>
-        ${renderBoard(b, ctx, index)}
-      </section>`,
-    )}`;
+        (b) => html`<section class="board-section" aria-label=${b.name}>
+          <h3 class="board-title">${[b.name, b.location].filter(Boolean).join(' · ')}</h3>
+          ${renderBoard(b, ctx, index, bx)}
+        </section>`,
+      )}
+      ${bx ? renderBoxes(bx) : nothing}`;
   }
   const board = ctx.board;
   if (!board) return html`<div class="empty">${t('el.no_board')}</div>`;
@@ -462,12 +487,29 @@ export function renderElectricity(ctx: ElectricityCtx): TemplateResult {
           )}
         </div>`
       : nothing}
-    ${renderBoard(board, ctx, new FeedIndex(boards))}
+    ${renderBoard(board, ctx, index, bx)}
+    ${bx ? renderBoxes(bx) : nothing}
   `;
 }
 
+function boxesCtx(ctx: ElectricityCtx, index: FeedIndex): BoxesCtx | undefined {
+  const boxes = ctx.payload.model.boxes ?? [];
+  if (!boxes.length) return undefined;
+  return {
+    hass: ctx.hass,
+    t: ctx.t,
+    boxes,
+    index,
+    selectedBoxId: ctx.selectedBoxId ?? null,
+    selectedConduitId: ctx.selectedConduitId ?? null,
+    onSelectBox: ctx.onSelectBox ?? (() => undefined),
+    onSelectModule: ctx.onSelectModule,
+    onMoreInfo: ctx.onMoreInfo,
+  };
+}
+
 /** One board: chips, warnings, supply and rails, detail of its selected module. */
-function renderBoard(board: Board, ctx: ElectricityCtx, index: FeedIndex): TemplateResult {
+function renderBoard(board: Board, ctx: ElectricityCtx, index: FeedIndex, bx?: BoxesCtx): TemplateResult {
   const { t, payload } = ctx;
   const stats = boardStats(board, ctx.hass);
   const total = sumPower(ctx.hass, boardPowerEntities(board));
@@ -532,6 +574,6 @@ function renderBoard(board: Board, ctx: ElectricityCtx, index: FeedIndex): Templ
       ${renderSupply(board, { ...ctx, links })}
       ${board.rows.map((row) => renderRail(row, { ...ctx, board, links }))}
     </div>
-    ${selected ? renderModuleDetail(selected.module, selected.row, { ...ctx, index, board }) : nothing}
+    ${selected ? renderModuleDetail(selected.module, selected.row, { ...ctx, index, board, boxes: bx }) : nothing}
   `;
 }

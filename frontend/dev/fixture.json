@@ -5,7 +5,8 @@
   "section_revisions": {
    "boards": 1,
    "network": 1,
-   "house_name": 0
+   "house_name": 0,
+   "boxes": 1
   },
   "model": {
    "house_name": "Maison",
@@ -1450,7 +1451,732 @@
       "model": null
      }
     ]
-   }
+   },
+   "boxes": [
+    {
+     "id": "demo0000000000000000000000000065",
+     "name": "Boîte couloir étage",
+     "location": "plafond, au-dessus de la porte de la chambre 1",
+     "notes": null,
+     "sides": {
+      "top": 3,
+      "bottom": 2,
+      "left": 2,
+      "right": 2
+     },
+     "circuits": [],
+     "conduits": [
+      {
+       "id": "demo0000000000000000000000000066",
+       "side": "left",
+       "position": 1,
+       "label": null,
+       "kind": "ICTA",
+       "diameter_mm": 20,
+       "circuits": [
+        "demo0000000000000000000000000009"
+       ],
+       "cable": "3G2.5",
+       "length_m": 12.0,
+       "route": "gaine plafond",
+       "notes": null,
+       "end": "board",
+       "end_box_id": null,
+       "end_conduit_id": null,
+       "point": null
+      },
+      {
+       "id": "demo0000000000000000000000000067",
+       "side": "left",
+       "position": 2,
+       "label": null,
+       "kind": "ICTA",
+       "diameter_mm": 20,
+       "circuits": [
+        "demo0000000000000000000000000006"
+       ],
+       "cable": "3G1.5",
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "board",
+       "end_box_id": null,
+       "end_conduit_id": null,
+       "point": null
+      },
+      {
+       "id": "demo0000000000000000000000000068",
+       "side": "top",
+       "position": 1,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000006"
+       ],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "point",
+       "point": {
+        "kind": "light",
+        "label": "plafonnier",
+        "room": "Chambre 1",
+        "count": 1,
+        "entity_id": null,
+        "alert": null
+       },
+       "end_box_id": null,
+       "end_conduit_id": null
+      },
+      {
+       "id": "demo0000000000000000000000000069",
+       "side": "top",
+       "position": 2,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000006"
+       ],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "point",
+       "point": {
+        "kind": "light",
+        "label": "plafonnier",
+        "room": "Chambre 2",
+        "count": 1,
+        "entity_id": null,
+        "alert": null
+       },
+       "end_box_id": null,
+       "end_conduit_id": null
+      },
+      {
+       "id": "demo0000000000000000000000000070",
+       "side": "top",
+       "position": 3,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "spare",
+       "end_box_id": null,
+       "end_conduit_id": null,
+       "point": null
+      },
+      {
+       "id": "demo0000000000000000000000000071",
+       "side": "bottom",
+       "position": 1,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000009"
+       ],
+       "cable": null,
+       "length_m": 4.0,
+       "route": null,
+       "notes": null,
+       "end": "box",
+       "end_box_id": "demo0000000000000000000000000072",
+       "end_conduit_id": "demo0000000000000000000000000073",
+       "point": null
+      },
+      {
+       "id": "demo0000000000000000000000000074",
+       "side": "right",
+       "position": 1,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000009"
+       ],
+       "cable": null,
+       "length_m": 6.0,
+       "route": null,
+       "notes": null,
+       "end": "box",
+       "end_box_id": "demo0000000000000000000000000075",
+       "end_conduit_id": null,
+       "point": null
+      },
+      {
+       "id": "demo0000000000000000000000000076",
+       "side": "bottom",
+       "position": 2,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000019"
+       ],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "board",
+       "end_box_id": null,
+       "end_conduit_id": null,
+       "point": null
+      },
+      {
+       "id": "demo0000000000000000000000000077",
+       "side": "right",
+       "position": 2,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "point",
+       "point": {
+        "kind": "socket",
+        "label": "Cuisine",
+        "room": null,
+        "count": 2,
+        "entity_id": null,
+        "alert": null
+       },
+       "end_box_id": null,
+       "end_conduit_id": null
+      },
+      {
+       "id": "demo0000000000000000000000000078",
+       "side": null,
+       "position": null,
+       "label": "gaine grise",
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "unknown",
+       "end_box_id": null,
+       "end_conduit_id": null,
+       "point": null
+      }
+     ],
+     "connectors": [
+      {
+       "kind": "Wago 221-413",
+       "poles": null,
+       "wire": "all",
+       "circuit": "demo0000000000000000000000000009",
+       "conduits": [
+        "demo0000000000000000000000000066",
+        "demo0000000000000000000000000071",
+        "demo0000000000000000000000000074"
+       ],
+       "notes": null,
+       "id": "demo0000000000000000000000000079"
+      },
+      {
+       "kind": "Wago 221-415",
+       "poles": null,
+       "wire": "earth",
+       "circuit": null,
+       "conduits": [],
+       "notes": null,
+       "id": "demo0000000000000000000000000080"
+      },
+      {
+       "kind": "Wago 221-413",
+       "poles": null,
+       "wire": "switched",
+       "circuit": "demo0000000000000000000000000006",
+       "conduits": [
+        "demo0000000000000000000000000067",
+        "demo0000000000000000000000000068",
+        "demo0000000000000000000000000069"
+       ],
+       "notes": null,
+       "id": "demo0000000000000000000000000081"
+      },
+      {
+       "kind": "Liaison",
+       "poles": null,
+       "wire": "all",
+       "circuit": null,
+       "conduits": [
+        "demo0000000000000000000000000077",
+        "demo0000000000000000000000000076"
+       ],
+       "notes": null,
+       "id": "demo0000000000000000000000000082"
+      }
+     ],
+     "area_id": null,
+     "photo_path": null,
+     "alert": null,
+     "alert_level": "warning"
+    },
+    {
+     "id": "demo0000000000000000000000000072",
+     "name": "Boîte chambre 1",
+     "location": "plinthe derrière le lit",
+     "notes": null,
+     "sides": {
+      "top": 1,
+      "bottom": 2,
+      "left": 0,
+      "right": 1
+     },
+     "circuits": [],
+     "conduits": [
+      {
+       "id": "demo0000000000000000000000000073",
+       "side": "top",
+       "position": 1,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000009"
+       ],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "unknown",
+       "end_box_id": null,
+       "end_conduit_id": null,
+       "point": null
+      },
+      {
+       "id": "demo0000000000000000000000000083",
+       "side": "bottom",
+       "position": 1,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000009"
+       ],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "point",
+       "point": {
+        "kind": "socket",
+        "label": "lit gauche",
+        "room": "Chambre 1",
+        "count": 1,
+        "entity_id": null,
+        "alert": null
+       },
+       "end_box_id": null,
+       "end_conduit_id": null
+      },
+      {
+       "id": "demo0000000000000000000000000084",
+       "side": "bottom",
+       "position": 2,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000009"
+       ],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "point",
+       "point": {
+        "kind": "socket",
+        "label": "lit droite",
+        "room": "Chambre 1",
+        "count": 1,
+        "entity_id": null,
+        "alert": null
+       },
+       "end_box_id": null,
+       "end_conduit_id": null
+      },
+      {
+       "id": "demo0000000000000000000000000085",
+       "side": "right",
+       "position": 1,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000009"
+       ],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "point",
+       "point": {
+        "kind": "socket",
+        "label": "bureau",
+        "room": "Chambre 1",
+        "count": 1,
+        "entity_id": null,
+        "alert": null
+       },
+       "end_box_id": null,
+       "end_conduit_id": null
+      }
+     ],
+     "connectors": [],
+     "area_id": null,
+     "photo_path": null,
+     "alert": null,
+     "alert_level": "warning"
+    },
+    {
+     "id": "demo0000000000000000000000000075",
+     "name": "Boîte chambre 2",
+     "location": "derrière l'armoire (non ouverte)",
+     "notes": null,
+     "sides": {
+      "top": 0,
+      "bottom": 0,
+      "left": 0,
+      "right": 0
+     },
+     "circuits": [
+      "demo0000000000000000000000000009",
+      "demo0000000000000000000000000006"
+     ],
+     "conduits": [
+      {
+       "id": "demo0000000000000000000000000086",
+       "side": "bottom",
+       "position": null,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000009"
+       ],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "point",
+       "point": {
+        "kind": "socket",
+        "label": "Chambre 2",
+        "room": null,
+        "count": 2,
+        "entity_id": null,
+        "alert": null
+       },
+       "end_box_id": null,
+       "end_conduit_id": null
+      },
+      {
+       "id": "demo0000000000000000000000000087",
+       "side": null,
+       "position": null,
+       "label": "vers la fenêtre",
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000009"
+       ],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "point",
+       "point": {
+        "kind": "socket",
+        "label": "fenêtre",
+        "room": "Chambre 2",
+        "count": 1,
+        "entity_id": null,
+        "alert": "noircie, à remplacer"
+       },
+       "end_box_id": null,
+       "end_conduit_id": null
+      },
+      {
+       "id": "demo0000000000000000000000000088",
+       "side": null,
+       "position": null,
+       "label": "prise sur l'éclairage",
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000006"
+       ],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "point",
+       "point": {
+        "kind": "socket",
+        "label": "à côté de la porte",
+        "room": "Chambre 2",
+        "count": 1,
+        "entity_id": null,
+        "alert": null
+       },
+       "end_box_id": null,
+       "end_conduit_id": null
+      }
+     ],
+     "connectors": [],
+     "area_id": null,
+     "photo_path": null,
+     "alert": null,
+     "alert_level": "warning"
+    },
+    {
+     "id": "demo0000000000000000000000000089",
+     "name": "Boîte grenier",
+     "location": "grenier, sur la panne côté rue",
+     "notes": "sert de rallonge, chaque entrée est reliée à une autre",
+     "sides": {
+      "top": 2,
+      "bottom": 2,
+      "left": 2,
+      "right": 2
+     },
+     "circuits": [],
+     "conduits": [
+      {
+       "id": "demo0000000000000000000000000090",
+       "side": "left",
+       "position": 1,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000005"
+       ],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "board",
+       "end_box_id": null,
+       "end_conduit_id": null,
+       "point": null
+      },
+      {
+       "id": "demo0000000000000000000000000091",
+       "side": "right",
+       "position": 1,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "point",
+       "point": {
+        "kind": "light",
+        "label": "suspension",
+        "room": "Séjour",
+        "count": 1,
+        "entity_id": null,
+        "alert": null
+       },
+       "end_box_id": null,
+       "end_conduit_id": null
+      },
+      {
+       "id": "demo0000000000000000000000000092",
+       "side": "left",
+       "position": 2,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000008"
+       ],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "board",
+       "end_box_id": null,
+       "end_conduit_id": null,
+       "point": null
+      },
+      {
+       "id": "demo0000000000000000000000000093",
+       "side": "right",
+       "position": 2,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "point",
+       "point": {
+        "kind": "socket",
+        "label": "Séjour",
+        "room": null,
+        "count": 3,
+        "entity_id": null,
+        "alert": null
+       },
+       "end_box_id": null,
+       "end_conduit_id": null
+      },
+      {
+       "id": "demo0000000000000000000000000094",
+       "side": "top",
+       "position": 1,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [
+        "demo0000000000000000000000000026"
+       ],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "board",
+       "end_box_id": null,
+       "end_conduit_id": null,
+       "point": null
+      },
+      {
+       "id": "demo0000000000000000000000000095",
+       "side": "bottom",
+       "position": 1,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "point",
+       "point": {
+        "kind": "socket",
+        "label": "Bureau",
+        "room": null,
+        "count": 2,
+        "entity_id": null,
+        "alert": null
+       },
+       "end_box_id": null,
+       "end_conduit_id": null
+      },
+      {
+       "id": "demo0000000000000000000000000096",
+       "side": "top",
+       "position": 2,
+       "label": "gaine noire",
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "unknown",
+       "end_box_id": null,
+       "end_conduit_id": null,
+       "point": null
+      },
+      {
+       "id": "demo0000000000000000000000000097",
+       "side": "bottom",
+       "position": 2,
+       "label": null,
+       "kind": null,
+       "diameter_mm": null,
+       "circuits": [],
+       "cable": null,
+       "length_m": null,
+       "route": null,
+       "notes": null,
+       "end": "unknown",
+       "end_box_id": null,
+       "end_conduit_id": null,
+       "point": null
+      }
+     ],
+     "connectors": [
+      {
+       "kind": "Liaison",
+       "poles": null,
+       "wire": "all",
+       "circuit": null,
+       "conduits": [
+        "demo0000000000000000000000000090",
+        "demo0000000000000000000000000091"
+       ],
+       "notes": null,
+       "id": "demo0000000000000000000000000098"
+      },
+      {
+       "kind": "Liaison",
+       "poles": null,
+       "wire": "all",
+       "circuit": null,
+       "conduits": [
+        "demo0000000000000000000000000092",
+        "demo0000000000000000000000000093"
+       ],
+       "notes": null,
+       "id": "demo0000000000000000000000000099"
+      },
+      {
+       "kind": "Liaison",
+       "poles": null,
+       "wire": "all",
+       "circuit": null,
+       "conduits": [
+        "demo0000000000000000000000000094",
+        "demo0000000000000000000000000095"
+       ],
+       "notes": null,
+       "id": "demo0000000000000000000000000100"
+      },
+      {
+       "kind": "Liaison",
+       "poles": null,
+       "wire": "all",
+       "circuit": null,
+       "conduits": [
+        "demo0000000000000000000000000096",
+        "demo0000000000000000000000000097"
+       ],
+       "notes": null,
+       "id": "demo0000000000000000000000000101"
+      }
+     ],
+     "area_id": null,
+     "photo_path": null,
+     "alert": null,
+     "alert_level": "warning"
+    }
+   ]
   },
   "settings": {
    "default_view": "electricity",

@@ -89,6 +89,10 @@ In edit mode, *+ Meter* and *+ Main breaker* add the service entrance above the 
 
 **Alerts**: any element can carry an alert written by you ("socket on a lighting circuit", "breaker running hot"…, with suggestions), level *to fix* or *for information*. It is outlined and marked "!", counted in an "n alert(s)" chip, and exposed by the board's **Alerts** entity (`sensor.home_infra_map_<board>_alerts`: count, list in the `alerts` attribute) for automations. House files: `alerte: text` (or a list), `alerte_niveau: info`.
 
+## Junction boxes
+
+Below the boards, one tile per junction box; a click draws the box like a board: its **conduits** around it by side (T, B, L, R) and position, in the colour of their circuit, with where they lead (board, another box and its entry, socket / light / switch / appliance, spare, "?"). A box used as an extension joins its entries two by two: the **join** is drawn as a line and the circuit goes through it (write it only on the conduit coming from the board). Detailed **Wagos** (wire, circuit, conduits) are optional and listed below the box. Unknowns are fine: conduit without position, side without number ("B?"), conduit without circuit, destination "?", or just the circuits known to go through an unopened box. A breaker's detail shows its **path** board → boxes → points, and the points are counted for the NF C 15-100 check when you did not type their number. Edit mode → *Junction boxes* tab: click a "+" to add a conduit, *Join to…* then another conduit to join them. House files: a `boites:` list (`gaines:` with `pos: G1`, `circuit:`, `vient_de: tableau` / `vers: {boite: …, pos: …}` / `vers: {prise: Room, nombre: 2}`, `liaisons: [[G1, D1]]`, `connexions:`).
+
 ## YAML file import / export
 
 In the card (pencil): **Export** → *Download (.yaml)* (or *Copy*); **Import** → *Choose a .yaml file…* (or paste) → *Import*. The sections present in the file replace the current data; an export re-imports identically. Actions: `home_infra_map.export_yaml` / `home_infra_map.import_yaml` (paths in `/config`).

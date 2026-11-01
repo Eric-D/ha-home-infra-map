@@ -162,7 +162,7 @@ def full_payload(hass: HomeAssistant, entry: HomeInfraMapConfigEntry) -> JsonDic
         "settings": settings_payload(entry),
         "entities": entities_payload(hass, entry),
         "live": live_payload(entry.runtime_data),
-        "checks": check_boards(store.model["boards"]),
+        "checks": check_boards(store.model["boards"], store.model["boxes"]),
     }
 
 
@@ -220,7 +220,7 @@ def ws_subscribe(hass: HomeAssistant, connection: websocket_api.ActiveConnection
 @websocket_api.websocket_command(
     {
         vol.Required("type"): f"{DOMAIN}/save",
-        vol.Required("section"): vol.In(["boards", "network", "house_name"]),
+        vol.Required("section"): vol.In(["boards", "network", "house_name", "boxes"]),
         vol.Required("data"): vol.Any(list, dict, str),
         vol.Optional("expected_revision"): vol.Any(None, int),
     }
@@ -595,7 +595,8 @@ def ws_checks(hass: HomeAssistant, connection: websocket_api.ActiveConnection, m
     """Electrical warnings."""
     if (entry := _require_entry(hass, connection, msg["id"])) is None:
         return
-    connection.send_result(msg["id"], check_boards(entry.runtime_data.store.model["boards"]))
+    model = entry.runtime_data.store.model
+    connection.send_result(msg["id"], check_boards(model["boards"], model["boxes"]))
 
 
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/export"})

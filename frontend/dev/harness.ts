@@ -227,9 +227,30 @@ async function applyParams(): Promise<void> {
     const m = payload.model.boards.flatMap((b) => b.rows.flatMap((r) => r.modules)).find((x) => x.ref === moduleRef);
     if (m) card._selectModule(m.id);
   }
+  const boxName = params.get('box');
+  if (boxName) {
+    const box = (payload.model.boxes ?? []).find((b: { name: string }) => b.name === boxName);
+    const conduit = box?.conduits.find((c: { label: string | null; side: string | null; position: number | null }) =>
+      params.get('conduit') === `${c.side}${c.position}` || params.get('conduit') === c.label);
+    if (box) {
+      card._boxId = box.id;
+      card._conduitId = conduit?.id ?? null;
+    }
+  }
   if (params.get('port')) card._port = Number(params.get('port'));
   if (params.get('edit')) card._edit = true;
+  if (params.get('edit_boxes')) card._editBoxes = true;
   await card.updateComplete;
+  const editBox = params.get('edit_box');
+  if (editBox) {
+    await new Promise((r) => setTimeout(r, 100));
+    const editor = card.shadowRoot?.querySelector('home-infra-map-boxes-editor') as any;
+    const box = (payload.model.boxes ?? []).find((b: { name: string }) => b.name === editBox);
+    if (editor && box) {
+      editor._boxId = box.id;
+      editor._conduitId = box.conduits.find((c: any) => `${c.side}${c.position}` === params.get('edit_conduit'))?.id ?? null;
+    }
+  }
   const editRef = params.get('edit_module');
   if (editRef) {
     await new Promise((r) => setTimeout(r, 100));
@@ -249,4 +270,5 @@ async function applyParams(): Promise<void> {
   }
   document.body.dataset.ready = '1';
 }
+(window as any).__payload = payload;
 void applyParams();

@@ -148,6 +148,67 @@ export interface Model {
   house_name: string;
   boards: Board[];
   network: Network;
+  /** Junction boxes (absent from payloads of older versions). */
+  boxes?: Box[];
+}
+
+export type BoxSide = 'top' | 'bottom' | 'left' | 'right';
+export type ConduitEnd = 'unknown' | 'board' | 'box' | 'point' | 'spare';
+export type PointKind = 'socket' | 'light' | 'switch' | 'device' | 'outlet' | 'other';
+export type WireKind = 'all' | 'phase' | 'neutral' | 'earth' | 'switched' | 'traveler' | 'other' | 'unknown';
+
+export interface BoxPoint {
+  kind: PointKind;
+  label: string;
+  room: string | null;
+  count: number;
+  entity_id: string | null;
+  alert: string | null;
+}
+
+export interface Conduit {
+  id: string;
+  /** null = not known yet */
+  side: BoxSide | null;
+  position: number | null;
+  label: string | null;
+  kind: string | null;
+  diameter_mm: number | null;
+  /** module ids of the circuits in this conduit; [] = unknown */
+  circuits: string[];
+  cable: string | null;
+  length_m: number | null;
+  route: string | null;
+  end: ConduitEnd;
+  end_box_id: string | null;
+  end_conduit_id: string | null;
+  point: BoxPoint | null;
+  notes: string | null;
+}
+
+export interface Connector {
+  id: string;
+  kind: string;
+  poles: number | null;
+  wire: WireKind;
+  circuit: string | null;
+  conduits: string[];
+  notes: string | null;
+}
+
+export interface Box {
+  id: string;
+  name: string;
+  location: string | null;
+  area_id: string | null;
+  photo_path: string | null;
+  notes: string | null;
+  alert: string | null;
+  alert_level: 'warning' | 'info';
+  sides: Partial<Record<BoxSide, number>>;
+  circuits: string[];
+  conduits: Conduit[];
+  connectors: Connector[];
 }
 
 export interface EntityRef {
@@ -213,7 +274,7 @@ export interface Settings {
   sources: { opnsense: boolean; snmp: { id: string; host: string }[] };
 }
 
-export type Section = 'boards' | 'network' | 'house_name';
+export type Section = 'boards' | 'network' | 'house_name' | 'boxes';
 
 export interface Payload {
   version: string;

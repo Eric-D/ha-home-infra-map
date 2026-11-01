@@ -23,7 +23,7 @@ from .conftest import fixture_text
 
 def test_electricity_example_counts() -> None:
     result = parse_document(fixture_text("electricite.yaml"))
-    assert result.sections == ["boards"]
+    assert result.sections == ["boards", "boxes"]
     assert result.boards is not None
     main, garage = result.boards
     assert [len(b["rows"]) for b in result.boards] == [3, 1]

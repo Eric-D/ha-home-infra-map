@@ -4,6 +4,16 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnement
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-01
+
+### Ajouté
+- **Boîtes de dérivation** : gaines par côté et position (H/B/G/D), circuit(s), câble, longueur, passage, et destination (tableau, autre boîte et son entrée, prise / point lumineux / interrupteur / appareil / sortie de câble, réserve, inconnue). Boîte dessinée sous les tableaux, détail par gaine.
+- **Liaisons** : entrées reliées deux à deux (boîte utilisée en rallonge) dessinées par un trait ; le circuit traverse les liaisons et les liens entre boîtes, il suffit de l'indiquer sur la gaine qui vient du tableau.
+- **Wagos détaillés** facultatifs (type, fil, circuit, gaines reliées) ; un Wago de terre commun ne mélange pas les circuits.
+- Tout peut rester inconnu : position, côté, circuit, destination, gaines d'un Wago, ou seulement les circuits d'une boîte non ouverte.
+- **Desserte** dans le détail d'un disjoncteur (tableau → boîtes → points) ; points comptés depuis les boîtes pour le contrôle du nombre de points quand il n'est pas saisi.
+- Édition dans la carte (onglet *Boîtes de dérivation* du mode édition) ; `boites:` dans `electricite.yaml` et dans l'export. Une réimportation des tableaux seuls conserve les circuits des boîtes (mêmes repères).
+
 ## [0.5.0] - 2026-11-01
 
 ### Modifié

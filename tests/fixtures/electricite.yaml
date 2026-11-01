@@ -58,3 +58,53 @@ tableaux:
           - disjoncteur: {repere: T2-R1-2, calibre: C32, sensibilite: 30mA, type: A, circuit: Borne de recharge, largeur: 2}
           - vide: 2
           - module: {type: Prise DIN 2P+T 16A, largeur: 3}
+
+# Boîtes de dérivation : gaines par côté (H haut, B bas, G gauche, D droite) et
+# position ; tout est facultatif (« ? » = inconnu, côté sans numéro, gaine sans circuit).
+boites:
+  - boite: Boîte couloir étage
+    emplacement: plafond, au-dessus de la porte de la chambre 1
+    cotes: {haut: 3, bas: 2, gauche: 2, droite: 2}
+    gaines:
+      - {pos: G1, type: ICTA, diametre: 20, circuit: T1-R1-5, vient_de: tableau, cable: 3G2.5, longueur: 12, passage: gaine plafond, longe le mur nord}
+      - {pos: G2, type: ICTA, diametre: 20, circuit: T1-R1-2, vient_de: tableau, cable: 3G1.5}
+      - {pos: H1, circuit: T1-R1-2, vers: {lumiere: Chambre 1, nom: plafonnier}}
+      - {pos: H2, circuit: T1-R1-2, vers: {lumiere: Chambre 2, nom: plafonnier}}
+      - {pos: H3, reserve: true}
+      - {pos: B1, circuit: T1-R1-5, vers: {boite: Boîte chambre 1, pos: H1}, longueur: 4}
+      - {pos: D1, circuit: T1-R1-5, vers: {boite: Boîte chambre 2}, longueur: 6}
+      - {pos: B2, circuit: T1-R2-4, vient_de: tableau}
+      - {pos: D2, vers: {prise: Cuisine, nombre: 2}, relie_a: B2}
+      - {nom: gaine grise, pos: "?", vers: "?"}
+    connexions:
+      - {type: Wago 221-413, fil: tous, circuit: T1-R1-5, relie: [G1, B1, D1]}
+      - {type: Wago 221-415, fil: terre}
+      - {type: Wago 221-413, fil: retour, circuit: T1-R1-2, relie: [G2, H1, H2]}
+  - boite: Boîte chambre 1
+    emplacement: plinthe derrière le lit
+    gaines:
+      - {pos: H1, circuit: T1-R1-5}
+      - {pos: B1, circuit: T1-R1-5, vers: {prise: Chambre 1, nom: lit gauche}}
+      - {pos: B2, circuit: T1-R1-5, vers: {prise: Chambre 1, nom: lit droite}}
+      - {pos: D1, circuit: T1-R1-5, vers: {prise: Chambre 1, nom: bureau}}
+  - boite: Boîte chambre 2
+    emplacement: derrière l'armoire (non ouverte)
+    circuits: [T1-R1-5, T1-R1-2]
+    gaines:
+      - {pos: B, circuit: T1-R1-5, vers: {prise: Chambre 2, nombre: 2}}
+      - {nom: vers la fenêtre, circuit: T1-R1-5, vers: {prise: Chambre 2, nom: fenêtre, alerte: "noircie, à remplacer"}}
+      - {nom: prise sur l'éclairage, circuit: T1-R1-2, vers: {prise: Chambre 2, nom: à côté de la porte}}
+  - boite: Boîte grenier
+    emplacement: grenier, sur la panne côté rue
+    note: sert de rallonge, chaque entrée est reliée à une autre
+    cotes: {haut: 2, bas: 2, gauche: 2, droite: 2}
+    gaines:
+      - {pos: G1, circuit: T1-R1-1, vient_de: tableau}
+      - {pos: D1, vers: {lumiere: Séjour, nom: suspension}}
+      - {pos: G2, circuit: T1-R1-4, vient_de: tableau}
+      - {pos: D2, vers: {prise: Séjour, nombre: 3}}
+      - {pos: H1, circuit: T1-R3-1, vient_de: tableau}
+      - {pos: B1, vers: {prise: Bureau, nombre: 2}}
+      - {pos: H2, nom: gaine noire}
+      - {pos: B2, vers: "?"}
+    liaisons: [[G1, D1], [G2, D2], [H1, B1], [H2, B2]]

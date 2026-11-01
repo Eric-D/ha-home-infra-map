@@ -12,7 +12,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.storage import Store
 
 from .const import STORAGE_KEY, STORAGE_MINOR_VERSION, STORAGE_VERSION
-from .models import JsonDict, empty_model, validate_boards, validate_model, validate_network
+from .models import JsonDict, empty_model, validate_boards, validate_boxes, validate_model, validate_network
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ def migrate_document(old_major: int, old_minor: int, data: JsonDict) -> JsonDict
 
     History:
     - 1.1: devices carried `port_auto: bool`; replaced by `port_source`.
-    - 1.2: current.
+    - 1.2: current (boxes added without a version bump: missing = []).
     """
     if old_major > STORAGE_VERSION:
         raise NotImplementedError(f"storage version {old_major} is newer than supported")
@@ -67,7 +67,7 @@ class ModelStore:
         # Per-section revisions guard user edits. Automatic updates (detected
         # switch port) bump only the global revision, so a background SNMP
         # refresh never makes an edit in progress fail with a conflict.
-        self._section_revisions: dict[str, int] = {"boards": 0, "network": 0, "house_name": 0}
+        self._section_revisions: dict[str, int] = {"boards": 0, "network": 0, "house_name": 0, "boxes": 0}
         self._listeners: list[ModelListener] = []
 
     @property
@@ -136,6 +136,10 @@ class ModelStore:
         model = copy.deepcopy(self._model)
         if section == "boards":
             model["boards"] = validate_boards(value)
+            # deleted circuits disappear from the boxes too
+            model["boxes"] = validate_boxes(model["boxes"], model["boards"])
+        elif section == "boxes":
+            model["boxes"] = validate_boxes(value, model["boards"])
         elif section == "network":
             model["network"] = validate_network(value)
         else:

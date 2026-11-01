@@ -8,7 +8,7 @@ DOMAIN: Final = "home_infra_map"
 NAME: Final = "Home Infra Map"
 
 # Kept in sync by the release workflow (see tests/test_manifest.py).
-VERSION: Final = "0.5.0"
+VERSION: Final = "0.6.0"
 
 CARD_TAG: Final = "home-infra-map-card"
 CARD_FILENAME: Final = "home-infra-map-card.js"

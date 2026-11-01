@@ -75,7 +75,7 @@ def main() -> None:
             device["monitor"]["latency"] = True
         if device["name"].startswith("Imprimante"):
             device["monitor"]["offline_alert_minutes"] = 5
-    model = {"house_name": "Maison", "boards": boards.boards, "network": network}
+    model = {"house_name": "Maison", "boards": boards.boards, "network": network, "boxes": boards.boxes or []}
     sw = network["switches"][0]
     sw["snmp_source_id"] = "snmp1"
     plan = entity_plan(hass, "entry", model, snmp_switch_ids={sw["id"]}, has_snmp=True, has_firewall=True)  # type: ignore[arg-type]
@@ -171,7 +171,7 @@ def main() -> None:
     payload = {
         "version": "0.1.0",
         "revision": 3,
-        "section_revisions": {"boards": 1, "network": 1, "house_name": 0},
+        "section_revisions": {"boards": 1, "network": 1, "house_name": 0, "boxes": 1},
         "model": model,
         "settings": {
             "default_view": "electricity",
@@ -183,7 +183,7 @@ def main() -> None:
         },
         "entities": entities,
         "live": live,
-        "checks": check_boards(model["boards"]),
+        "checks": check_boards(model["boards"], model["boxes"]),
     }
     out = {"get": payload, "states": states, "firewall": {star["id"]: report}}
     text = json.dumps(out, ensure_ascii=False, indent=1) + "\n"

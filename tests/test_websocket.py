@@ -84,6 +84,47 @@ async def test_get_subscribe_save(
     assert bad["error"]["code"] == "invalid_format"
 
 
+async def test_save_boxes_and_points_in_checks(
+    hass: HomeAssistant, loaded: Any, hass_ws_client: WebSocketGenerator
+) -> None:
+    client = await hass_ws_client(hass)
+    board = {
+        "name": "T",
+        "rows": [{"modules": [{"id": "m1", "kind": "breaker", "ref": "T-1", "rating_a": 16,
+                               "circuit_kind": "sockets", "circuit_name": "Prises"}]}],
+    }  # fmt: skip
+    rev = (await _ws(client, {"type": f"{DOMAIN}/get"}))["result"]["section_revisions"]
+    assert (await _ws(client, {"type": f"{DOMAIN}/save", "section": "boards", "data": [board]}))["success"]
+    box = {
+        "name": "Boîte",
+        "conduits": [
+            {"id": "a", "side": "left", "position": 1, "end": "board", "circuits": ["m1", "gone"]},
+            {
+                "id": "b",
+                "side": "right",
+                "position": 1,
+                "end": "point",
+                "point": {"kind": "socket", "count": 9},
+            },
+        ],
+        "connectors": [{"wire": "all", "conduits": ["a", "b"]}],
+    }
+    saved = await _ws(
+        client,
+        {"type": f"{DOMAIN}/save", "section": "boxes", "data": [box], "expected_revision": rev["boxes"]},
+    )
+    assert saved["success"], saved
+    stored = loaded.runtime_data.store.model["boxes"][0]
+    assert stored["conduits"][0]["circuits"] == ["m1"]  # dangling circuit dropped
+    assert stored["sides"]["left"] == 1
+    got = (await _ws(client, {"type": f"{DOMAIN}/get"}))["result"]
+    # 9 sockets reached through the join: more than 8 on a 16 A circuit
+    assert any(c["code"] == "too_many_points" for c in got["checks"])
+    # deleting the board removes the circuit from the boxes
+    assert (await _ws(client, {"type": f"{DOMAIN}/save", "section": "boards", "data": []}))["success"]
+    assert loaded.runtime_data.store.model["boxes"][0]["conduits"][0]["circuits"] == []
+
+
 async def test_non_admin_cannot_edit(
     hass: HomeAssistant, loaded: Any, hass_ws_client: WebSocketGenerator, hass_read_only_access_token: str
 ) -> None:

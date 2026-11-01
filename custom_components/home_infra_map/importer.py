@@ -28,6 +28,7 @@ from .models import (
     new_id,
     normalize_mac,
     validate_boards,
+    validate_boxes,
     validate_network,
     vlan_for_ip,
 )
@@ -41,6 +42,7 @@ class ImportResult:
 
     boards: list[JsonDict] | None = None
     network: JsonDict | None = None
+    boxes: list[JsonDict] | None = None
     house_name: str | None = None
     # board id -> photo path as written in the source file (relative)
     photos: dict[str, str] = field(default_factory=dict)
@@ -54,6 +56,8 @@ class ImportResult:
             names.append("boards")
         if self.network is not None:
             names.append("network")
+        if self.boxes is not None:
+            names.append("boxes")
         return names
 
 
@@ -646,6 +650,246 @@ def _legacy_network(doc: JsonDict) -> JsonDict:
     return validate_network(network)
 
 
+# --- junction boxes (`boites:`) -------------------------------------------
+
+_SIDE_WORDS = {
+    "h": "top", "haut": "top", "top": "top", "t": "top",
+    "b": "bottom", "bas": "bottom", "bottom": "bottom",
+    "g": "left", "gauche": "left", "left": "left", "l": "left",
+    "d": "right", "droite": "right", "right": "right", "r": "right",
+}  # fmt: skip
+_POS_RE = re.compile(r"^\s*([a-zA-Zé]+)\s*[-_ ]?\s*(\d+)?\s*$")
+_POINT_WORDS = {
+    "prise": "socket", "prises": "socket", "socket": "socket",
+    "lumiere": "light", "lumière": "light", "eclairage": "light", "éclairage": "light",
+    "point_lumineux": "light", "plafonnier": "light", "applique": "light", "light": "light",
+    "interrupteur": "switch", "inter": "switch", "va_et_vient": "switch", "switch": "switch",
+    "appareil": "device", "equipement": "device", "équipement": "device", "device": "device",
+    "sortie": "outlet", "sortie_de_cable": "outlet", "dcl": "outlet", "outlet": "outlet",
+    "point": "other", "autre": "other",
+}  # fmt: skip
+_WIRE_WORDS = {
+    "tous": "all", "tout": "all", "complet": "all", "complete": "all", "complète": "all",
+    "liaison": "all", "all": "all",
+    "phase": "phase", "neutre": "neutral", "neutral": "neutral", "terre": "earth", "earth": "earth",
+    "retour": "switched", "retour_lampe": "switched", "switched": "switched",
+    "navette": "traveler", "navettes": "traveler", "traveler": "traveler", "autre": "other",
+}  # fmt: skip
+_BOARD_WORDS = ("tableau", "board", "depart", "départ", "arrivee", "arrivée")
+
+
+def parse_position(value: Any) -> tuple[str | None, int | None]:
+    """'G1', 'gauche 2', 'H', '?' -> (side, position); unknown parts are None."""
+    text = _clean(value)
+    if text is None or _unknown(text):
+        return None, None
+    match = _POS_RE.match(text)
+    if not match:
+        return None, None
+    side = _SIDE_WORDS.get(match.group(1).lower())
+    pos = int(match.group(2)) if match.group(2) and side else None
+    return side, pos
+
+
+def _as_list(value: Any) -> list[Any]:
+    if value is None:
+        return []
+    return value if isinstance(value, list) else [value]
+
+
+def _point(raw: JsonDict) -> JsonDict | None:
+    """`{prise: Chambre 1, nom: lit gauche}` -> socket "lit gauche" in room "Chambre 1".
+
+    The value of the kind key is the room when a `nom:` is given, else the label;
+    `piece:` always names the room.
+    """
+    for key, kind in _POINT_WORDS.items():
+        if key not in raw:
+            continue
+        value = _clean(raw[key])
+        name = _clean(raw.get("nom"))
+        room = _clean(raw.get("piece") or raw.get("pièce"))
+        if room is None and name is not None:
+            room, value = value, name
+        return {
+            "kind": kind,
+            "label": name or value or "",
+            "room": room,
+            "count": _int_or_none(raw.get("nombre")) or 1,
+            "entity_id": _entity_or_none(raw.get("entite") or raw.get("entité")),
+            "alert": _clean(raw.get("alerte")),
+        }
+    return None
+
+
+def _legacy_boxes(items: list[Any], boards: list[JsonDict], result: ImportResult) -> list[JsonDict]:
+    """Parse the hand-written `boites:` list; references are repères and names."""
+    by_ref = {
+        str(m["ref"]).lower(): m["id"]
+        for b in boards
+        for m in [*b["supply"], *(x for r in b["rows"] for x in r["modules"])]
+        if m.get("ref")
+    }
+
+    def circuits(raw: JsonDict) -> list[str]:
+        out = []
+        for ref in [*_as_list(raw.get("circuit")), *_as_list(raw.get("circuits"))]:
+            text = _clean(ref)
+            if text is None or _unknown(text):
+                continue
+            if text.lower() in by_ref:
+                out.append(by_ref[text.lower()])
+            else:
+                result.warnings.append(f"boites: unknown circuit {text!r}")
+        return out
+
+    boxes: list[JsonDict] = []
+    pending: list[tuple[JsonDict, Any]] = []  # (conduit, raw target)
+    for b_index, raw in enumerate(items, start=1):
+        if not isinstance(raw, dict):
+            raise ImportError_(f"boites[{b_index}] must be a mapping")
+        sides = raw.get("cotes") or raw.get("côtés") or {}
+        box: JsonDict = {
+            "id": new_id(),
+            "name": _clean(raw.get("boite") or raw.get("nom")) or f"Boîte {b_index}",
+            "location": _clean(raw.get("emplacement")),
+            "notes": _clean(raw.get("note")),
+            **_alert(raw),
+            "sides": {
+                side: n
+                for key, value in (sides.items() if isinstance(sides, dict) else [])
+                if (side := _SIDE_WORDS.get(str(key).lower())) and (n := _int_or_none(value)) is not None
+            },
+            "circuits": circuits(raw),
+            "conduits": [],
+            "connectors": [],
+        }
+        for g_raw in raw.get("gaines") or []:
+            if not isinstance(g_raw, dict):
+                continue
+            side, pos = parse_position(g_raw.get("pos") or g_raw.get("position"))
+            conduit: JsonDict = {
+                "id": new_id(),
+                "side": side,
+                "position": pos,
+                "label": _clean(g_raw.get("nom")),
+                "kind": _clean(g_raw.get("type")),
+                "diameter_mm": _int_or_none(g_raw.get("diametre") or g_raw.get("diamètre")),
+                "circuits": circuits(g_raw),
+                "cable": _clean(g_raw.get("cable") or g_raw.get("câble")),
+                "length_m": _int_or_none(g_raw.get("longueur")),
+                "route": _clean(g_raw.get("passage")),
+                "notes": _clean(g_raw.get("note")),
+                "_pos": _clean(g_raw.get("pos") or g_raw.get("position")),
+            }
+            if g_raw.get("reserve") or g_raw.get("libre"):
+                conduit["end"] = "spare"
+            else:
+                pending.append((conduit, g_raw.get("vers", g_raw.get("vient_de"))))
+            box["conduits"].append(conduit)
+        for c_raw in raw.get("connexions") or raw.get("wagos") or []:
+            if isinstance(c_raw, dict):
+                box["connectors"].append(c_raw)
+        # box used as an extension: conduits joined two by two (or more)
+        for pair in raw.get("liaisons") or []:
+            box["connectors"].append({"type": "Liaison", "fil": "tous", "relie": pair})
+        for g_raw in raw.get("gaines") or []:
+            if isinstance(g_raw, dict) and g_raw.get("relie_a") is not None:
+                box["connectors"].append(
+                    {
+                        "type": "Liaison",
+                        "fil": "tous",
+                        "relie": [g_raw.get("pos") or g_raw.get("nom"), g_raw["relie_a"]],
+                    }
+                )
+        boxes.append(box)
+
+    by_name = {b["name"].lower(): b for b in boxes}
+
+    def find_conduit(box: JsonDict, ref: Any) -> JsonDict | None:
+        text = (_clean(ref) or "").lower()
+        if not text:
+            return None
+        side, pos = parse_position(text)
+        for conduit in box["conduits"]:
+            same_name = text in ((conduit["_pos"] or "").lower(), (conduit["label"] or "").lower())
+            if same_name or (side and pos and conduit["side"] == side and conduit["position"] == pos):
+                found: JsonDict = conduit
+                return found
+        return None
+
+    for conduit, target in pending:
+        if (isinstance(target, str) and target.strip().lower() in _BOARD_WORDS) or (
+            isinstance(target, dict) and any(k in target for k in ("tableau", "board"))
+        ):
+            conduit["end"] = "board"
+        elif isinstance(target, dict) and ("boite" in target or "boîte" in target):
+            other = by_name.get((_clean(target.get("boite") or target.get("boîte")) or "").lower())
+            if other is None:
+                result.warnings.append(f"boites: unknown box {target.get('boite') or target.get('boîte')!r}")
+                conduit["end"] = "unknown"
+            else:
+                peer = find_conduit(other, target.get("pos") or target.get("gaine"))
+                conduit.update(end="box", end_box_id=other["id"], end_conduit_id=peer["id"] if peer else None)
+        elif isinstance(target, dict) and (point := _point(target)):
+            conduit.update(end="point", point=point)
+        else:
+            conduit["end"] = "unknown"
+
+    for box in boxes:
+        connectors = []
+        for c_raw in box["connectors"]:
+            members = []
+            for ref in _as_list(c_raw.get("relie") or c_raw.get("gaines")):
+                found = find_conduit(box, ref)
+                if found:
+                    members.append(found["id"])
+                else:
+                    result.warnings.append(f"boites: {box['name']}: unknown conduit {ref!r}")
+            wire = _WIRE_WORDS.get((_clean(c_raw.get("fil")) or "").lower().replace(" ", "_"), "unknown")
+            known = circuits({"circuit": c_raw.get("circuit")})
+            circuit = known[0] if known else None
+            connectors.append(
+                {
+                    "kind": _clean(c_raw.get("type")) or "Wago",
+                    "poles": _int_or_none(c_raw.get("poles") or c_raw.get("pôles")),
+                    "wire": wire,
+                    "circuit": circuit,
+                    "conduits": members,
+                    "notes": _clean(c_raw.get("note")),
+                }
+            )
+        box["connectors"] = connectors
+        for conduit in box["conduits"]:
+            conduit.pop("_pos", None)
+    return validate_boxes(boxes, boards)
+
+
+def remap_box_circuits(boxes: list[JsonDict], old_boards: list[JsonDict], new_boards: list[JsonDict]) -> None:
+    """Keep the circuits of the boxes when the boards are re-imported (new ids, same repères)."""
+
+    def refs(boards: list[JsonDict]) -> dict[str, str]:
+        return {
+            m["id"]: str(m["ref"]).lower()
+            for b in boards
+            for m in [*b["supply"], *(x for r in b["rows"] for x in r["modules"])]
+            if m.get("ref")
+        }
+
+    old = refs(old_boards)
+    new = {ref: mid for mid, ref in refs(new_boards).items()}
+
+    def mapped(mid: str | None) -> str | None:
+        return new.get(old.get(mid or "", ""), mid) if mid else mid
+
+    for box in boxes:
+        box["circuits"] = [m for m in (mapped(x) for x in box["circuits"]) if m]
+        for conduit in box["conduits"]:
+            conduit["circuits"] = [m for m in (mapped(x) for x in conduit["circuits"]) if m]
+        for connector in box["connectors"]:
+            connector["circuit"] = mapped(connector["circuit"])
+
+
 def parse_document(text: str, resolve_area: AreaResolver | None = None) -> ImportResult:
     """Parse an import document (native or legacy format)."""
     try:
@@ -661,12 +905,16 @@ def parse_document(text: str, resolve_area: AreaResolver | None = None) -> Impor
             result.boards = validate_boards(doc.get("boards") or [])
         if "network" in doc:
             result.network = validate_network(doc.get("network") or {})
+        if "boxes" in doc:
+            result.boxes = validate_boxes(doc.get("boxes") or [], result.boards)
         if doc.get("house_name"):
             result.house_name = str(doc["house_name"])
         return result
 
     if "tableaux" in doc:
         result.boards = _legacy_boards(doc.get("tableaux") or [], resolve_area, result)
+        if "boites" in doc or "boîtes" in doc:
+            result.boxes = _legacy_boxes(doc.get("boites") or doc.get("boîtes") or [], result.boards, result)
     if "equipements" in doc or "vlans" in doc:
         result.network = _legacy_network(doc)
     if not result.sections:
@@ -683,6 +931,7 @@ def export_document(model: JsonDict) -> str:
         "house_name": model.get("house_name", ""),
         "boards": model["boards"],
         "network": model["network"],
+        "boxes": model.get("boxes", []),
     }
     header = (
         "# Home Infra Map export — re-importable with home_infra_map.import_yaml\n"

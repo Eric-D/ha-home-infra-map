@@ -273,7 +273,90 @@ NETWORK_SCHEMA: Final = vol.Schema(
     extra=vol.REMOVE_EXTRA,
 )
 
-SECTIONS: Final = ("boards", "network")
+# Junction boxes: conduits entering by a side and a position, the points they
+# lead to, the connectors (Wago…) inside. Every detail is optional: a box can
+# be just a name, a conduit can have an unknown side, circuit or destination.
+BOX_SIDES: Final = ("top", "bottom", "left", "right")
+CONDUIT_ENDS: Final = ("unknown", "board", "box", "point", "spare")
+POINT_KINDS: Final = ("socket", "light", "switch", "device", "outlet", "other")
+# "all": every conductor of the conduits joined one to one (the box used as an
+# extension); drawn as a line between the conduits.
+WIRE_KINDS: Final = ("all", "phase", "neutral", "earth", "switched", "traveler", "other", "unknown")
+
+POINT_SCHEMA: Final = vol.Schema(
+    {
+        vol.Optional("kind", default="other"): vol.In(POINT_KINDS),
+        vol.Optional("label", default=""): _str,
+        vol.Optional("room", default=None): _optional_str,
+        vol.Optional("count", default=1): vol.All(vol.Coerce(int), vol.Range(min=1, max=50)),
+        vol.Optional("entity_id", default=None): _entity_id,
+        vol.Optional("alert", default=None): _optional_str,
+    },
+    extra=vol.REMOVE_EXTRA,
+)
+
+CONDUIT_SCHEMA: Final = vol.Schema(
+    {
+        vol.Optional("id", default=new_id): _ID,
+        # side and position on that side (1 = first from the left / the top);
+        # None = not known yet
+        vol.Optional("side", default=None): vol.Any(None, vol.In(BOX_SIDES)),
+        vol.Optional("position", default=None): _opt_int(1, 48),
+        # free name, useful while the position is unknown ("gaine grise")
+        vol.Optional("label", default=None): _optional_str,
+        vol.Optional("kind", default=None): _optional_str,
+        vol.Optional("diameter_mm", default=None): _opt_int(3, 160),
+        # circuits (module ids) whose cables run in this conduit; [] = unknown
+        vol.Optional("circuits", default=list): [_str],
+        vol.Optional("cable", default=None): _optional_str,
+        vol.Optional("length_m", default=None): _opt_float(0, 500),
+        vol.Optional("route", default=None): _optional_str,
+        vol.Optional("end", default="unknown"): vol.In(CONDUIT_ENDS),
+        vol.Optional("end_box_id", default=None): _optional_str,
+        vol.Optional("end_conduit_id", default=None): _optional_str,
+        vol.Optional("point", default=None): vol.Any(None, POINT_SCHEMA),
+        vol.Optional("notes", default=None): _optional_str,
+    },
+    extra=vol.REMOVE_EXTRA,
+)
+
+CONNECTOR_SCHEMA: Final = vol.Schema(
+    {
+        vol.Optional("id", default=new_id): _ID,
+        vol.Optional("kind", default="Wago"): _str,
+        vol.Optional("poles", default=None): _opt_int(1, 24),
+        vol.Optional("wire", default="unknown"): vol.In(WIRE_KINDS),
+        vol.Optional("circuit", default=None): _optional_str,
+        # conduits whose wires meet in this connector; [] = not described
+        vol.Optional("conduits", default=list): [_str],
+        vol.Optional("notes", default=None): _optional_str,
+    },
+    extra=vol.REMOVE_EXTRA,
+)
+
+BOX_SCHEMA: Final = vol.Schema(
+    {
+        vol.Optional("id", default=new_id): _ID,
+        vol.Required("name"): vol.All(_str, vol.Length(min=1, max=120)),
+        vol.Optional("location", default=None): _optional_str,
+        vol.Optional("area_id", default=None): _optional_str,
+        vol.Optional("photo_path", default=None): _optional_str,
+        vol.Optional("notes", default=None): _optional_str,
+        vol.Optional("alert", default=None): _optional_str,
+        vol.Optional("alert_level", default="warning"): vol.In(ALERT_LEVELS),
+        # positions drawn on each side (at least the highest one used)
+        vol.Optional("sides", default=dict): {
+            vol.In(BOX_SIDES): vol.All(vol.Coerce(int), vol.Range(min=0, max=48))
+        },
+        # circuits known to go through the box when the conduits are not described
+        vol.Optional("circuits", default=list): [_str],
+        vol.Optional("conduits", default=list): [CONDUIT_SCHEMA],
+        vol.Optional("connectors", default=list): [CONNECTOR_SCHEMA],
+    },
+    extra=vol.REMOVE_EXTRA,
+)
+
+SECTIONS: Final = ("boards", "network", "boxes")
 
 
 def _fill_module_defaults(module: JsonDict) -> JsonDict:
@@ -331,6 +414,70 @@ def _clean_feeds(boards: list[JsonDict]) -> None:
                 board["fed_by"] = None
 
 
+def module_ids(boards: list[JsonDict]) -> set[str]:
+    """Ids of every module of every board (entrance included)."""
+    return {m["id"] for b in boards for m in [*b["supply"], *(x for r in b["rows"] for x in r["modules"])]}
+
+
+def validate_boxes(value: Any, boards: list[JsonDict] | None = None) -> list[JsonDict]:
+    """Validate and normalise the junction boxes.
+
+    Dangling references (deleted circuit, box or conduit) are cleared rather
+    than rejected, like the feeds of the boards. `boards` None skips the
+    circuit check (boards not known yet).
+    """
+    boxes: list[JsonDict] = vol.Schema([BOX_SCHEMA])(value)
+    _unique_ids(boxes, "box")
+    circuits = module_ids(boards) if boards is not None else None
+    conduits_of = {}
+    for box in boxes:
+        _unique_ids(box["conduits"], "conduit")
+        _unique_ids(box["connectors"], "connector")
+        conduits_of[box["id"]] = {c["id"] for c in box["conduits"]}
+
+    def keep(ids: list[str]) -> list[str]:
+        out: list[str] = []
+        for i in ids:
+            if (circuits is None or i in circuits) and i not in out:
+                out.append(i)
+        return out
+
+    for box in boxes:
+        box["circuits"] = keep(box["circuits"])
+        taken: set[tuple[str, int]] = set()
+        for conduit in box["conduits"]:
+            conduit["circuits"] = keep(conduit["circuits"])
+            if conduit["side"] is None:
+                conduit["position"] = None
+            elif conduit["position"] is not None:
+                # two conduits cannot share a hole: the later one loses its position
+                if (conduit["side"], conduit["position"]) in taken:
+                    conduit["position"] = None
+                else:
+                    taken.add((conduit["side"], conduit["position"]))
+            if conduit["end"] == "box":
+                target = conduit["end_box_id"]
+                if target not in conduits_of or target == box["id"]:
+                    conduit["end"], conduit["end_box_id"], conduit["end_conduit_id"] = "unknown", None, None
+                elif conduit["end_conduit_id"] not in conduits_of[target]:
+                    conduit["end_conduit_id"] = None
+            else:
+                conduit["end_box_id"] = conduit["end_conduit_id"] = None
+            if conduit["end"] != "point":
+                conduit["point"] = None
+            elif conduit["point"] is None:
+                conduit["point"] = POINT_SCHEMA({})
+        mine = conduits_of[box["id"]]
+        for connector in box["connectors"]:
+            connector["conduits"] = [c for c in dict.fromkeys(connector["conduits"]) if c in mine]
+            if circuits is not None and connector["circuit"] not in circuits:
+                connector["circuit"] = None
+        for side in BOX_SIDES:
+            used = max((c["position"] or 0 for c in box["conduits"] if c["side"] == side), default=0)
+            box["sides"][side] = max(box["sides"].get(side, 0), used)
+    return boxes
+
+
 def validate_network(value: Any) -> JsonDict:
     """Validate and normalise the network section."""
     network: JsonDict = NETWORK_SCHEMA(value)
@@ -358,6 +505,7 @@ def empty_model(house_name: str = "") -> JsonDict:
         "house_name": house_name,
         "boards": [],
         "network": validate_network({}),
+        "boxes": [],
     }
 
 
@@ -365,10 +513,12 @@ def validate_model(value: Any) -> JsonDict:
     """Validate a full model document (without the revision counter)."""
     if not isinstance(value, dict):
         raise vol.Invalid("model must be a mapping")
+    boards = validate_boards(value.get("boards") or [])
     return {
         "house_name": _str(value.get("house_name")),
-        "boards": validate_boards(value.get("boards") or []),
+        "boards": boards,
         "network": validate_network(value.get("network") or {}),
+        "boxes": validate_boxes(value.get("boxes") or [], boards),
     }
 
 
@@ -515,6 +665,87 @@ def board_alerts(board: JsonDict) -> list[JsonDict]:
         for m in modules
         if m.get("alert")
     ]
+
+
+def box_links(boxes: list[JsonDict]) -> dict[tuple[str, str], tuple[str, str]]:
+    """Conduit-to-conduit links between boxes, both ways.
+
+    A link is written on one side only (A:B1 -> B:H1); the other conduit
+    sees it too. Links to a box without conduit (end_conduit_id None) are
+    keyed on the box with an empty conduit id.
+    """
+    links: dict[tuple[str, str], tuple[str, str]] = {}
+    for box in boxes:
+        for conduit in box["conduits"]:
+            if conduit["end"] == "box" and conduit["end_box_id"]:
+                here = (box["id"], conduit["id"])
+                there = (conduit["end_box_id"], conduit["end_conduit_id"] or "")
+                links[here] = there
+                links.setdefault(there, here)
+    return links
+
+
+def effective_circuits(boxes: list[JsonDict]) -> dict[str, list[str]]:
+    """Circuits of every conduit, the written ones plus those carried through.
+
+    A conduit without circuit inherits those of the conduits it is joined to:
+    by a connector inside the box (except earth, shared by every circuit) and
+    by a link to a conduit of another box (same cable).
+    """
+    parent: dict[str, str] = {}
+
+    def find(x: str) -> str:
+        while parent.setdefault(x, x) != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a: str, b: str) -> None:
+        parent[find(a)] = find(b)
+
+    written: dict[str, list[str]] = {}
+    for box in boxes:
+        for conduit in box["conduits"]:
+            written[conduit["id"]] = list(conduit["circuits"])
+            find(conduit["id"])
+            if conduit["end"] == "box" and conduit["end_conduit_id"]:
+                union(conduit["id"], conduit["end_conduit_id"])
+        for connector in box["connectors"]:
+            if connector["wire"] == "earth":
+                continue
+            members = connector["conduits"]
+            for other in members[1:]:
+                union(members[0], other)
+    groups: dict[str, list[str]] = {}
+    for cid, circuits in written.items():
+        bucket = groups.setdefault(find(cid), [])
+        bucket.extend(c for c in circuits if c not in bucket)
+    return {cid: circuits or groups[find(cid)] for cid, circuits in written.items()}
+
+
+def circuit_points(boxes: list[JsonDict], module_id: str) -> dict[str, int]:
+    """Points (sockets, lights…) reached by a circuit through the boxes, by kind."""
+    circuits = effective_circuits(boxes)
+    counts: dict[str, int] = {}
+    for box in boxes:
+        for conduit in box["conduits"]:
+            point = conduit.get("point")
+            if conduit["end"] == "point" and point and module_id in circuits[conduit["id"]]:
+                counts[point["kind"]] = counts.get(point["kind"], 0) + int(point["count"])
+    return counts
+
+
+def box_alerts(box: JsonDict) -> list[JsonDict]:
+    """Alerts written on a box and on the points it leads to."""
+    alerts = []
+    if box.get("alert"):
+        level = box.get("alert_level") or "warning"
+        alerts.append({"text": box["alert"], "level": level, "conduit_id": None})
+    for conduit in box["conduits"]:
+        point = conduit.get("point")
+        if point and point.get("alert"):
+            alerts.append({"text": point["alert"], "level": "warning", "conduit_id": conduit["id"]})
+    return alerts
 
 
 def row_capacity(board: JsonDict, row: JsonDict) -> int | None:
