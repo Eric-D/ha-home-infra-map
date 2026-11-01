@@ -10,6 +10,8 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnement
 - **Alertes** : n'importe quel élément (module, compteur, disjoncteur de branchement) peut porter une alerte écrite par vous (« prise sur un circuit éclairage », « disjoncteur qui chauffe »…), avec suggestions et niveau « à traiter » / « pour information ». Module entouré et marqué « ! », pastille « n alerte(s) », alertes en tête de la liste des points à vérifier.
 - Entité **Alertes** par tableau (`sensor.home_infra_map_<tableau>_alertes`) : nombre d'alertes, liste dans l'attribut `alerts`, pour une automatisation ou une notification.
 - Fichiers de la maison : `alerte: texte` (ou une liste) et `alerte_niveau: info`.
+- **Rappels NF C 15-100** par type de circuit (éclairage, prises, spécialisé, cuisson, chauffe-eau, chauffage, départ) dans le détail et l'édition ; pour un circuit « ? », type suggéré d'après le calibre (C10 → éclairage, C16 → prises, C20 → spécialisé, C32 → cuisson, ≥ 40 A → départ), à appliquer d'un clic.
+- **Nombre de points** d'un circuit (prises ou points lumineux, `nb_prises:` / `points:` dans les fichiers) et contrôle : 8 points lumineux, 8 prises en 16 A, 12 prises en 20 A.
 
 ## [0.3.0] - 2026-11-01
 

@@ -85,6 +85,8 @@ Each module takes **N DIN slots** (18 mm): an RCD 2, a Shelly Pro 4PM 4, a DIN s
 
 In edit mode, *+ Meter* and *+ Main breaker* add the service entrance above the rails (subscribed power, live power, load in % of the main breaker rating). By default a module is fed by the RCD on its left on the row, else by the entrance; **Fed by** links it to any other element (e.g. a C40 wired straight under the main breaker, outside any RCD) and a sub-board to the breaker feeding it. Selecting a module highlights its feed chain and everything it feeds. A module's **state** can be *off / tripped* (also automatic when its linked relay is off) or *spare* (installed for future works, not wired: hatched and ignored by the checks). House YAML files: `arrivee: {compteur: {modele: Linky, puissance_souscrite: 12 kVA}, disjoncteur: {calibre: 60A, sensibilite: 500mA}}` on a board, `alimente_par: <ref | arrivee>` on an element or a board, `etat: réserve | coupé`.
 
+**Circuit kinds and reminders**: each kind shows its NF C 15-100 reminder (rating, cable, number of points); an unidentified circuit gets the usual kind of its rating as a suggestion (C10 → lighting, C16 → sockets…). The **number of points** is checked (8 light points, 8 sockets on 16 A, 12 on 20 A).
+
 **Alerts**: any element can carry an alert written by you ("socket on a lighting circuit", "breaker running hot"…, with suggestions), level *to fix* or *for information*. It is outlined and marked "!", counted in an "n alert(s)" chip, and exposed by the board's **Alerts** entity (`sensor.home_infra_map_<board>_alerts`: count, list in the `alerts` attribute) for automations. House files: `alerte: text` (or a list), `alerte_niveau: info`.
 
 ## YAML file import / export

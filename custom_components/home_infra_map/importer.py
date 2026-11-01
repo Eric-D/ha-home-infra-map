@@ -331,6 +331,7 @@ def _legacy_breaker(disj: JsonDict, ref: str, resolve_area: AreaResolver | None)
         "circuit_kind": guess_circuit_kind(circuit_name),
         "area_ids": area_ids,
         "power_entity_id": _entity_or_none(disj.get("entite_puissance")),
+        "points_count": _int_or_none(disj.get("points") or disj.get("nb_prises") or disj.get("nb_points")),
         "notes": "\n".join(notes) or None,
         **_common(disj, circuit),
     }

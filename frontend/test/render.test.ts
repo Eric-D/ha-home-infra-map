@@ -98,7 +98,7 @@ describe('electricity view', () => {
     expect(m.querySelector('.amark')).not.toBeNull();
     expect(m.title).toContain('Alerte : Prise sur un circuit éclairage (chambre 2)');
     expect(el.textContent).toContain('1 alerte(s)');
-    expect(el.textContent).toContain('1 point(s) à vérifier');
+    expect(el.textContent).toContain('2 point(s) à vérifier');
     render(renderElectricity({ ...ctx, showWarnings: true }), el);
     const items = [...el.querySelectorAll('.warnlist li')];
     expect(items[0].classList.contains('manual')).toBe(true);
@@ -107,6 +107,21 @@ describe('electricity view', () => {
     const detail = el.querySelector('dl.detail')!;
     expect(detail.querySelector('.alert-text')!.textContent).toBe('Prise sur un circuit éclairage (chambre 2)');
     expect(detail.querySelectorAll('.warnlist li')).toHaveLength(0);
+  });
+
+  it('recalls the NF C 15-100 rule of the circuit kind, or of the kind its rating suggests', () => {
+    const sockets = board.rows[0].modules.find((m) => m.ref === 'T1-R1-5')!;
+    const el = mount();
+    render(renderElectricity({ ...ctx, selectedModuleId: sockets.id }), el);
+    let detail = el.querySelector('dl.detail')!.textContent!;
+    expect(detail).toContain('Rappel NF C 15-100');
+    expect(detail).toContain('8 prises au plus');
+    expect(detail).toContain('10 (8 au plus)');
+    expect(detail).toContain('10 points sur ce circuit (8 au plus)');
+    const unknown = board.rows[0].modules.find((m) => m.ref === 'T1-R1-6')!;
+    render(renderElectricity({ ...ctx, selectedModuleId: unknown.id }), el);
+    detail = el.querySelector('dl.detail')!.textContent!;
+    expect(detail).toContain("Calibre typique d'un circuit prises");
   });
 
   it('highlights the feed links of the selected module', () => {

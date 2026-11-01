@@ -1,7 +1,7 @@
 /** Electricity edit mode: edit directly on the drawing, side form, atomic save. */
 import { html, LitElement, nothing, type TemplateResult } from 'lit';
 import { errorCode, errorMessage, save, uploadPhoto } from '../api.js';
-import { blankModule, deepClone, FeedIndex, moduleTitle, moveItem, newId } from '../helpers/electric.js';
+import { blankModule, deepClone, FeedIndex, guessKindFromRating, moduleTitle, moveItem, newId, NORM_KINDS } from '../helpers/electric.js';
 import { translator, type Translate } from '../i18n.js';
 import { cardStyles } from '../styles.js';
 import type { Board, CircuitKind, Hass, Module, ModuleKind, ModuleStatus, Payload, Row } from '../types.js';
@@ -510,6 +510,21 @@ export class HomeInfraMapElectricityEditor extends LitElement {
         ? html`
             ${textField('ee-circ', t('ee.f.circuit'), m.circuit_name, (v) => p({ circuit_name: v }))}
             ${selectField('ee-ck', t('ee.f.circuit_kind'), m.circuit_kind, CIRCUIT_KINDS.map((k) => ({ value: k, label: t(`ck.kind.${k}`) })), (v) => p({ circuit_kind: v as CircuitKind }))}
+            ${(() => {
+              const guess = m.circuit_kind === 'unknown' ? guessKindFromRating(m.rating_a) : null;
+              if (guess)
+                return html`<div class="norm small">
+                  ${t('norm.guess', { kind: t(`ck.kind.${guess}`).toLowerCase() })}
+                  <button class="btn" @click=${() => p({ circuit_kind: guess })}>${t('ee.apply_guess')}</button>
+                </div>`;
+              return NORM_KINDS.includes(m.circuit_kind)
+                ? html`<div class="norm small"><b>${t('norm.title')}</b> · ${t(`norm.${m.circuit_kind}`)}</div>`
+                : nothing;
+            })()}
+            ${textField('ee-points', t('ee.f.points'), m.points_count ?? '', (v) => {
+              const n = Math.round(Number(v));
+              p({ points_count: v.trim() && n >= 0 ? Math.min(99, n) : null });
+            }, { type: 'number' })}
             ${areaField(hass, 'ee-areas', t('ee.f.areas'), m.area_ids, true, (v) => p({ area_ids: v }))}
             ${selectField('ee-cable', t('ee.f.cable'), m.cable_mm2 ?? '', [{ value: '', label: '?' }, ...CABLES.map((c) => ({ value: c, label: `${String(c).replace('.', this._lang === 'fr' ? ',' : '.')} mm²` }))], (v) => p({ cable_mm2: v ? Number(v) : null }))}
           `

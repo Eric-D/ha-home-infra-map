@@ -7,6 +7,9 @@ import {
   FeedIndex,
   formatWatts,
   formatWattsCompact,
+  guessKindFromRating,
+  maxPoints,
+  NORM_KINDS,
   isOff,
   isUnidentified,
   moduleTitle,
@@ -191,6 +194,17 @@ function rcdText(rcd: Module, t: Translate): string {
   return `${rcd.ref} · ${parts.join(' ')}`;
 }
 
+/** NF C 15-100 reminder of a circuit kind, or the kind its rating suggests when unidentified. */
+export function renderNorm(module: Module, t: Translate): TemplateResult | typeof nothing {
+  if (module.status === 'spare') return nothing;
+  if (NORM_KINDS.includes(module.circuit_kind))
+    return html`<dt>${t('norm.title')}</dt><dd class="norm">${t(`norm.${module.circuit_kind}`)}</dd>`;
+  const guess = module.circuit_kind === 'unknown' ? guessKindFromRating(module.rating_a) : null;
+  if (!guess) return nothing;
+  return html`<dt>${t('norm.title')}</dt>
+    <dd class="norm"><span class="muted">${t('norm.guess', { kind: t(`ck.kind.${guess}`).toLowerCase() })} :</span> ${t(`norm.${guess}`)}</dd>`;
+}
+
 function refOf(m: Module, t: Translate, index: FeedIndex, board: Board | null): string {
   const name = m.ref || `${t(`el.kind.${m.kind}`)} ${moduleTitle(m)}`;
   const other = index.boardOf.get(m.id);
@@ -260,6 +274,11 @@ export function renderModuleDetail(
             ${module.circuit_kind !== 'unknown' ? html`<span class="muted"> · ${t(`ck.kind.${module.circuit_kind}`)}</span>` : nothing}
           </dd>`
       : nothing}
+    ${isCircuit && module.points_count
+      ? html`<dt>${t('el.d.points')}</dt>
+          <dd>${maxPoints(module) !== null ? t('el.d.points_max', { n: module.points_count, max: maxPoints(module)! }) : module.points_count}</dd>`
+      : nothing}
+    ${isCircuit ? renderNorm(module, t) : nothing}
     ${module.area_ids.length ? html`<dt>${t('el.d.areas')}</dt><dd>${areaNames(ctx.hass, module.area_ids).join(' · ')}</dd>` : nothing}
     ${module.kind === 'breaker'
       ? html`<dt>${t('el.d.protected_by')}</dt><dd>${rcd ? rcdText(rcd, t) : html`<span class="muted">${t('el.d.no_rcd')}</span>`}</dd>`

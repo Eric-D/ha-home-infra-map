@@ -20,7 +20,14 @@ def test_example_board() -> None:
     boards = parse_document(fixture_text("electricite.yaml")).boards
     codes = Counter(w["code"] for w in check_boards(boards))  # type: ignore[arg-type]
     # T1-R1-8 is a spare: not counted; the garage feeder only has the 500 mA head
-    assert codes == {"unidentified": 3, "rcd_sum": 1, "rcd_type_a": 1, "feeder_no_rcd": 1, "manual": 1}
+    assert codes == {
+        "unidentified": 3,
+        "rcd_sum": 1,
+        "rcd_type_a": 1,
+        "feeder_no_rcd": 1,
+        "manual": 1,
+        "too_many_points": 1,
+    }
     [manual] = [w for w in check_boards(boards) if w["code"] == "manual"]  # type: ignore[arg-type]
     assert (manual["ref"], manual["severity"]) == ("T1-R1-2", "warning")
     assert manual["params"] == {"text": "Prise sur un circuit éclairage (chambre 2)"}
@@ -54,6 +61,48 @@ def test_breaker_fed_by_the_head_is_not_30ma() -> None:
     )
     found = [(w["ref"], w["code"], w["params"]) for w in check_board(board)]
     assert found == [("", "no_rcd_30ma", {"sensitivity_ma": 500})]
+
+
+def test_points_per_circuit() -> None:
+    board = _board(
+        [
+            {"kind": "rcd", "sensitivity_ma": 30, "rcd_type": "A"},
+            {
+                "kind": "breaker",
+                "ref": "L",
+                "rating_a": 10,
+                "circuit_kind": "lighting",
+                "circuit_name": "x",
+                "points_count": 9,
+            },
+            {
+                "kind": "breaker",
+                "ref": "P16",
+                "rating_a": 16,
+                "circuit_kind": "sockets",
+                "circuit_name": "x",
+                "points_count": 9,
+            },
+            {
+                "kind": "breaker",
+                "ref": "P20",
+                "rating_a": 20,
+                "circuit_kind": "sockets",
+                "circuit_name": "x",
+                "points_count": 12,
+            },
+            {
+                "kind": "breaker",
+                "ref": "D",
+                "rating_a": 20,
+                "circuit_kind": "dedicated",
+                "circuit_name": "x",
+                "points_count": 3,
+            },
+        ]
+    )
+    found = [(w["ref"], w["params"]["max"]) for w in check_board(board) if w["code"] == "too_many_points"]
+    assert found == [("L", 8), ("P16", 8)]
 
 
 def test_too_many_breakers() -> None:

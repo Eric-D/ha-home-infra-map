@@ -1,5 +1,5 @@
 /** Pure helpers for electrical boards (unit-tested). */
-import type { Board, Check, Hass, Module, Row } from '../types.js';
+import type { Board, Check, CircuitKind, Hass, Module, Row } from '../types.js';
 
 /** RCD protecting a module: the last RCD to its left on the same row (an RCBO protects itself). */
 export function upstreamRcd(row: Row, moduleId: string): Module | null {
@@ -278,4 +278,25 @@ export function rowCapacity(board: Board, row: Row): number | null {
 /** DIN slots taken by the modules of a row, holes included. */
 export function rowUsed(row: Row): number {
   return row.modules.reduce((sum, m) => sum + Math.max(1, m.width_modules || 1), 0);
+}
+
+/** Circuit kinds with an NF C 15-100 reminder (i18n key `norm.<kind>`). */
+export const NORM_KINDS: CircuitKind[] = ['lighting', 'sockets', 'dedicated', 'cooking', 'water_heater', 'heating', 'feeder'];
+
+/** Usual circuit kind for a breaker rating, to help identify a "?" circuit (a guess, never applied silently). */
+export function guessKindFromRating(rating: number | null | undefined): CircuitKind | null {
+  if (!rating) return null;
+  if (rating <= 10) return 'lighting';
+  if (rating === 16) return 'sockets';
+  if (rating === 20) return 'dedicated';
+  if (rating === 32) return 'cooking';
+  if (rating >= 40) return 'feeder';
+  return null;
+}
+
+/** Highest number of points on a circuit (mirror of nfc15100.max_points). */
+export function maxPoints(module: Module): number | null {
+  if (module.circuit_kind === 'lighting') return 8;
+  if (module.circuit_kind === 'sockets') return module.rating_a === 16 ? 8 : module.rating_a === 20 ? 12 : null;
+  return null;
 }

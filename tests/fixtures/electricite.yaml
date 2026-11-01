@@ -19,7 +19,7 @@ tableaux:
           - disjoncteur: {repere: T1-R1-2, calibre: C10, circuit: Éclairage chambres, alerte: Prise sur un circuit éclairage (chambre 2)}
           - disjoncteur: {repere: T1-R1-3, calibre: C10, circuit: Éclairage extérieur, etat: coupé}
           - disjoncteur: {repere: T1-R1-4, calibre: C16, circuit: Prises séjour}
-          - disjoncteur: {repere: T1-R1-5, calibre: C16, circuit: Prises chambres}
+          - disjoncteur: {repere: T1-R1-5, calibre: C16, circuit: Prises chambres, nb_prises: 10}
           - disjoncteur: {repere: T1-R1-6, calibre: C16, circuit: "?"}
           - vide: 2
           - disjoncteur: {repere: T1-R1-7, calibre: C20, circuit: Lave-linge, note: "derrière un ID type AC : à vérifier"}

@@ -152,6 +152,8 @@ MODULE_SCHEMA: Final = vol.Schema(
         # circuit
         vol.Optional("circuit_name", default="?"): _str,
         vol.Optional("circuit_kind", default="unknown"): vol.In(CIRCUIT_KINDS),
+        # sockets or light points on the circuit
+        vol.Optional("points_count", default=None): _opt_int(0, 99),
         vol.Optional("area_ids", default=list): [_str],
         vol.Optional("power_entity_id", default=None): _entity_id,
         vol.Optional("energy_entity_id", default=None): _entity_id,

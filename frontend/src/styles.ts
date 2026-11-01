@@ -340,6 +340,16 @@ export const cardStyles = css`
   .warnlist li.manual {
     font-weight: 500;
   }
+  .norm {
+    font-size: 12.5px;
+    line-height: 1.35;
+    border-left: 3px solid var(--him-accent);
+    padding: 2px 0 2px 8px;
+  }
+  div.norm .btn {
+    margin-left: 6px;
+    padding: 2px 8px;
+  }
   .alert-text {
     white-space: pre-line;
     color: color-mix(in srgb, var(--him-warn) 75%, var(--him-ink));

@@ -50,6 +50,8 @@ export interface Module {
   cable_mm2: number | null;
   circuit_name: string;
   circuit_kind: CircuitKind;
+  /** Sockets or light points on the circuit. */
+  points_count?: number | null;
   area_ids: string[];
   power_entity_id: string | null;
   energy_entity_id: string | null;

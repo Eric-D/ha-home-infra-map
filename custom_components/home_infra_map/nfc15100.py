@@ -18,6 +18,22 @@ MAX_BREAKERS_PER_RCD: Final = 8
 MAX_RATING_BY_SECTION: Final[dict[float, int]] = {1.5: 16, 2.5: 20, 4.0: 25, 6.0: 32}
 MAX_RATING_BY_KIND: Final[dict[str, int]] = {"lighting": 16, "sockets": 20}
 RCD_SUM_RATIO: Final = 2.5
+MAX_LIGHT_POINTS: Final = 8
+# sockets: 16 A (1.5 mm²) -> 8, 20 A (2.5 mm²) -> 12
+MAX_SOCKETS_BY_RATING: Final[dict[int, int]] = {16: 8, 20: 12}
+
+
+def max_points(module: JsonDict) -> int | None:
+    """Highest number of points allowed on a circuit, None when no rule applies."""
+    kind = module.get("circuit_kind")
+    if kind == "lighting":
+        return MAX_LIGHT_POINTS
+    if kind == "sockets":
+        rating = module.get("rating_a")
+        return MAX_SOCKETS_BY_RATING.get(int(rating)) if rating else None
+    return None
+
+
 TYPE_A_NAMES: Final = re.compile(r"lave[- ]linge|washing|plaque|cuisson|induction|hob|cooktop", re.IGNORECASE)
 
 
@@ -137,6 +153,19 @@ def check_board(board: JsonDict, index: ModuleIndex | None = None) -> list[JsonD
                         circuit_kind=module.get("circuit_kind"),
                         rating_a=rating,
                         max_a=kind_limit,
+                    )
+                )
+            points = module.get("points_count")
+            limit_points = max_points(module)
+            if points and limit_points is not None and points > limit_points:
+                warnings.append(
+                    _warning(
+                        "too_many_points",
+                        board,
+                        module,
+                        circuit_kind=module.get("circuit_kind"),
+                        count=points,
+                        max=limit_points,
                     )
                 )
             if _is_unidentified(module):

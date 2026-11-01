@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { boardStats, FeedIndex, isOff, moduleTitle, moveItem, rowCapacity, rowUsed, sumPower, upstreamRcd } from '../src/helpers/electric.js';
+import { boardStats, FeedIndex, guessKindFromRating, isOff, maxPoints, moduleTitle, moveItem, rowCapacity, rowUsed, sumPower, upstreamRcd } from '../src/helpers/electric.js';
 import { gridOptions } from '../src/helpers/grid.js';
 import { childrenOf, counts, groupByPort, unplaced } from '../src/helpers/network.js';
 import { parseHistory, presenceSegments, sparkPath } from '../src/helpers/sparkline.js';
@@ -64,6 +64,22 @@ describe('electric helpers', () => {
     // a module cannot be fed by something downstream of it (loop)
     expect(index.candidates(head).map((m) => m.id)).toEqual([meter.id]);
     expect(index.candidates(feeder).some((m) => m.ref === 'T2-R1-1')).toBe(false);
+  });
+
+  it('guesses a kind from the rating and knows the points limits', () => {
+    expect([10, 16, 20, 32, 40, 25, null].map((r) => guessKindFromRating(r))).toEqual([
+      'lighting',
+      'sockets',
+      'dedicated',
+      'cooking',
+      'feeder',
+      null,
+      null,
+    ]);
+    const m = board.rows[0].modules[1];
+    expect(maxPoints({ ...m, circuit_kind: 'lighting' })).toBe(8);
+    expect(maxPoints({ ...m, circuit_kind: 'sockets', rating_a: 20 })).toBe(12);
+    expect(maxPoints({ ...m, circuit_kind: 'cooking' })).toBeNull();
   });
 
   it('knows off and spare modules', () => {
