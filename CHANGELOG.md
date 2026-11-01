@@ -4,6 +4,11 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnement
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-01
+
+### Modifié
+- Vue électricité : quand il y a plusieurs tableaux, ils sont **affichés les uns sous les autres** (titre, pastilles et points à vérifier propres à chacun) au lieu d'onglets. Les liens « Alimenté par » sont surlignés d'un tableau à l'autre. Option de carte `boards_layout: tabs` pour revenir aux onglets ; une carte épinglée sur un tableau (`board:`) garde les onglets.
+
 ## [0.4.0] - 2026-11-01
 
 ### Ajouté

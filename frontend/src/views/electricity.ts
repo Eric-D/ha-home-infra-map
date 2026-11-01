@@ -136,15 +136,17 @@ export interface ElectricityCtx {
   t: Translate;
   lang: string;
   board: Board | null;
+  /** All boards one below the other instead of tabs. */
+  stacked?: boolean;
   selectedModuleId: string | null;
-  showWarnings: boolean;
+  /** Warning lists unfolded: all boards (true) or by board id. */
+  showWarnings: boolean | ReadonlySet<string>;
   history: Point[] | null;
   historyRange: [number, number];
-  hasPhoto: boolean;
   onSelectBoard: (id: string) => void;
   onSelectModule: (id: string | null) => void;
-  onToggleWarnings: () => void;
-  onOpenPhoto: () => void;
+  onToggleWarnings: (boardId: string) => void;
+  onOpenPhoto: (boardId: string) => void;
   onMoreInfo: (entityId: string) => void;
 }
 
@@ -437,28 +439,19 @@ export function renderSupply(board: Board, ctx: SupplyCtx): TemplateResult | typ
 }
 
 export function renderElectricity(ctx: ElectricityCtx): TemplateResult {
-  const { t, payload, board } = ctx;
+  const { t, payload } = ctx;
   const boards = payload.model.boards;
-  if (!board) return html`<div class="empty">${t('el.no_board')}</div>`;
-  const stats = boardStats(board, ctx.hass);
-  const total = sumPower(ctx.hass, boardPowerEntities(board));
-  const boardChecks = payload.checks.filter(
-    (c) => c.board_id === board.id && (c.severity === 'warning' || c.code === 'manual'),
-  );
-  // owner's alerts first, then the automatic hints
-  boardChecks.sort((a, b) => Number(b.code === 'manual') - Number(a.code === 'manual'));
-  const alerts = boardChecks.filter((c) => c.code === 'manual').length;
-  const hints = boardChecks.length - alerts;
-  const index = new FeedIndex(boards);
-  let selected: { module: Module; row: Row | null } | null = null;
-  const head = (board.supply ?? []).find((x) => x.id === ctx.selectedModuleId);
-  if (head) selected = { module: head, row: null };
-  for (const row of board.rows) {
-    const m = row.modules.find((x) => x.id === ctx.selectedModuleId);
-    if (m) selected = { module: m, row };
+  if (ctx.stacked && boards.length > 1) {
+    const index = new FeedIndex(boards);
+    return html`${boards.map(
+      (b) => html`<section class="board-section" aria-label=${b.name}>
+        <h3 class="board-title">${[b.name, b.location].filter(Boolean).join(' · ')}</h3>
+        ${renderBoard(b, ctx, index)}
+      </section>`,
+    )}`;
   }
-  const links = linksFor(index, selected ? selected.module.id : null);
-  const boardFeeder = board.fed_by ? index.modules.get(board.fed_by) ?? null : null;
+  const board = ctx.board;
+  if (!board) return html`<div class="empty">${t('el.no_board')}</div>`;
   return html`
     ${boards.length > 1
       ? html`<div class="seg" role="tablist" aria-label=${t('el.board')}>
@@ -469,6 +462,35 @@ export function renderElectricity(ctx: ElectricityCtx): TemplateResult {
           )}
         </div>`
       : nothing}
+    ${renderBoard(board, ctx, new FeedIndex(boards))}
+  `;
+}
+
+/** One board: chips, warnings, supply and rails, detail of its selected module. */
+function renderBoard(board: Board, ctx: ElectricityCtx, index: FeedIndex): TemplateResult {
+  const { t, payload } = ctx;
+  const stats = boardStats(board, ctx.hass);
+  const total = sumPower(ctx.hass, boardPowerEntities(board));
+  const boardChecks = payload.checks.filter(
+    (c) => c.board_id === board.id && (c.severity === 'warning' || c.code === 'manual'),
+  );
+  // owner's alerts first, then the automatic hints
+  boardChecks.sort((a, b) => Number(b.code === 'manual') - Number(a.code === 'manual'));
+  const alerts = boardChecks.filter((c) => c.code === 'manual').length;
+  const hints = boardChecks.length - alerts;
+  const open = ctx.showWarnings === true || (ctx.showWarnings instanceof Set && ctx.showWarnings.has(board.id));
+  const toggle = () => ctx.onToggleWarnings(board.id);
+  let selected: { module: Module; row: Row | null } | null = null;
+  const head = (board.supply ?? []).find((x) => x.id === ctx.selectedModuleId);
+  if (head) selected = { module: head, row: null };
+  for (const row of board.rows) {
+    const m = row.modules.find((x) => x.id === ctx.selectedModuleId);
+    if (m) selected = { module: m, row };
+  }
+  // links cross boards: the selection may be on another board
+  const links = linksFor(index, ctx.selectedModuleId);
+  const boardFeeder = board.fed_by ? index.modules.get(board.fed_by) ?? null : null;
+  return html`
     <div class="chips">
       <span class="chip"><span class="dot"></span>${t('el.rcd_count', { n: stats.rcds })}</span>
       ${stats.unidentified
@@ -481,20 +503,20 @@ export function renderElectricity(ctx: ElectricityCtx): TemplateResult {
         : nothing}
       ${total !== null ? html`<span class="chip num">${t('el.now', { w: formatWatts(total, ctx.lang) })}</span>` : nothing}
       ${alerts
-        ? html`<button class="chip warn" aria-expanded=${ctx.showWarnings ? 'true' : 'false'} @click=${ctx.onToggleWarnings}>
+        ? html`<button class="chip warn" aria-expanded=${open ? 'true' : 'false'} @click=${toggle}>
             <span class="amark-chip">!</span>${t('el.alerts', { n: alerts })}
           </button>`
         : nothing}
       ${hints
-        ? html`<button class="chip warn" aria-expanded=${ctx.showWarnings ? 'true' : 'false'} @click=${ctx.onToggleWarnings}>
+        ? html`<button class="chip warn" aria-expanded=${open ? 'true' : 'false'} @click=${toggle}>
             <span class="dot warn"></span>${t('el.warnings', { n: hints })}
           </button>`
         : nothing}
-      ${ctx.hasPhoto
-        ? html`<button class="chip" @click=${ctx.onOpenPhoto}><ha-icon icon="mdi:image" style="--mdc-icon-size:16px"></ha-icon>${t('el.photo')}</button>`
+      ${board.photo_path
+        ? html`<button class="chip" @click=${() => ctx.onOpenPhoto(board.id)}><ha-icon icon="mdi:image" style="--mdc-icon-size:16px"></ha-icon>${t('el.photo')}</button>`
         : nothing}
     </div>
-    ${ctx.showWarnings && boardChecks.length
+    ${open && boardChecks.length
       ? html`<div class="form">
           <ul class="warnlist">
             ${boardChecks.map(

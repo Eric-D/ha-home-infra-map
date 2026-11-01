@@ -95,7 +95,7 @@ export class HomeInfraMapCard extends LitElement {
   declare _boardId: string | null;
   declare _moduleId: string | null;
   declare _history: Point[] | null;
-  declare _showWarnings: boolean;
+  declare _showWarnings: ReadonlySet<string>;
   declare _deviceId: string | null;
   declare _sheetTab: 'info' | 'firewall' | 'history';
   declare _switchId: string | null;
@@ -128,7 +128,7 @@ export class HomeInfraMapCard extends LitElement {
     this._boardId = null;
     this._moduleId = null;
     this._history = null;
-    this._showWarnings = false;
+    this._showWarnings = new Set();
     this._deviceId = null;
     this._sheetTab = 'info';
     this._switchId = null;
@@ -248,9 +248,21 @@ export class HomeInfraMapCard extends LitElement {
     return this._payload?.model.boards.find((b) => b.id === this._boardId) ?? null;
   }
 
+  /** Boards one below the other: the default, unless a single board is pinned by `board:`. */
+  private get _stacked(): boolean {
+    return (this._config?.boards_layout ?? (this._config?.board ? 'tabs' : 'stacked')) === 'stacked';
+  }
+
   private _selectModule(id: string | null): void {
     this._moduleId = id;
     this._history = null;
+    if (id && this._stacked) {
+      // the selected module may be on any board: follow it (photo, history)
+      const owner = this._payload?.model.boards.find((b) =>
+        [...(b.supply ?? []), ...b.rows.flatMap((r) => r.modules)].some((m) => m.id === id),
+      );
+      if (owner) this._boardId = owner.id;
+    }
     const module = id ? this._board?.rows.flatMap((r) => r.modules).find((m) => m.id === id) : undefined;
     const entity = module?.power_entity_id;
     if (!entity || !this.hass) return;
@@ -366,7 +378,10 @@ export class HomeInfraMapCard extends LitElement {
     const board = this._board;
     let title = this._config?.title;
     if (!title) {
-      title = this._view === 'electricity' && board ? [board.name, board.location].filter(Boolean).join(' · ') : t('view.network');
+      const stacked = this._stacked && (this._payload?.model.boards.length ?? 0) > 1;
+      if (this._view !== 'electricity') title = t('view.network');
+      else if (stacked || !board) title = t('view.electricity');
+      else title = [board.name, board.location].filter(Boolean).join(' · ');
     }
     if (this._edit) title = t('edit.title', { name: this._view === 'electricity' ? board?.name ?? t('view.electricity') : t('view.network') });
     return html`<div class="head">
@@ -412,18 +427,25 @@ export class HomeInfraMapCard extends LitElement {
       t: this._t,
       lang: this._lang,
       board: this._board,
+      stacked: this._stacked,
       selectedModuleId: this._moduleId,
       showWarnings: this._showWarnings,
       history: this._history,
       historyRange: [Date.now() - 24 * 3600 * 1000, Date.now()],
-      hasPhoto: !!this._board?.photo_path,
       onSelectBoard: (id) => {
         this._boardId = id;
         this._moduleId = null;
       },
       onSelectModule: (id) => this._selectModule(id),
-      onToggleWarnings: () => (this._showWarnings = !this._showWarnings),
-      onOpenPhoto: () => void this._openPhoto(),
+      onToggleWarnings: (boardId) => {
+        const open = new Set(this._showWarnings);
+        if (!open.delete(boardId)) open.add(boardId);
+        this._showWarnings = open;
+      },
+      onOpenPhoto: (boardId) => {
+        this._boardId = boardId;
+        void this._openPhoto();
+      },
       onMoreInfo: (eid) => moreInfo(this, eid),
     });
   }

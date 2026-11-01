@@ -24,13 +24,35 @@ describe('electricity view', () => {
     showWarnings: false,
     history: [],
     historyRange: [0, 1] as [number, number],
-    hasPhoto: false,
     onSelectBoard: noop,
     onSelectModule: noop,
     onToggleWarnings: noop,
     onOpenPhoto: noop,
     onMoreInfo: noop,
   };
+
+  it('stacks every board one below the other, each with its own chips', () => {
+    const el = mount();
+    render(renderElectricity({ ...ctx, stacked: true }), el);
+    const sections = el.querySelectorAll('.board-section');
+    expect(sections).toHaveLength(payload.model.boards.length);
+    expect([...el.querySelectorAll('.board-title')].map((h) => h.textContent)).toEqual(payload.model.boards.map((b) => [b.name, b.location].filter(Boolean).join(' · ')));
+    expect(el.querySelector('[role="tablist"]')).toBeNull();
+    expect(el.querySelectorAll('.board')).toHaveLength(payload.model.boards.length);
+    // detail of a module of the second board, under that board
+    const second = payload.model.boards[1];
+    const id = second.rows[0].modules[0].id;
+    render(renderElectricity({ ...ctx, stacked: true, selectedModuleId: id }), el);
+    expect(sections[1].querySelector('dl.detail')).not.toBeNull();
+    expect(sections[0].querySelector('.m.sel')).toBeNull();
+  });
+
+  it('keeps the tabs when not stacked', () => {
+    const el = mount();
+    render(renderElectricity(ctx), el);
+    expect(el.querySelector('[role="tablist"]')).not.toBeNull();
+    expect(el.querySelectorAll('.board')).toHaveLength(1);
+  });
 
   it('draws every module on its rail with the mockup classes', () => {
     const el = mount();

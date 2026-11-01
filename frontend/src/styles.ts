@@ -360,6 +360,18 @@ export const cardStyles = css`
     font-weight: 400;
   }
 
+  /* boards one below the other */
+  .board-section + .board-section {
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.25));
+  }
+  .board-title {
+    margin: 0 0 8px;
+    font-size: 1.05em;
+    font-weight: 600;
+  }
+
   /* electrical board */
   .board {
     background: var(--him-rail);

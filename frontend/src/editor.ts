@@ -65,6 +65,12 @@ export class HomeInfraMapCardEditor extends LitElement {
         ['electricity', t('view.electricity')],
         ['network', t('view.network')],
       ])}
+      ${this._boards.length > 1
+        ? sel('boards_layout', t('cfg.boards_layout'), c.boards_layout ?? (c.board ? 'tabs' : 'stacked'), [
+            ['stacked', t('cfg.stacked')],
+            ['tabs', t('cfg.tabs')],
+          ])
+        : nothing}
       ${this._boards.length
         ? sel('board', t('el.board'), c.board, [['', '—'], ...this._boards.map((b): [string, string] => [b.id, b.name])])
         : nothing}

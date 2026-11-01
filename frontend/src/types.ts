@@ -347,6 +347,8 @@ export interface CardConfig {
   type: string;
   view?: CardView;
   board?: string;
+  /** Electricity view with several boards: one below the other (default) or tabs. */
+  boards_layout?: 'stacked' | 'tabs';
   network_view?: NetworkView;
   title?: string;
 }

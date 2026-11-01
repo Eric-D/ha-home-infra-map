@@ -183,6 +183,7 @@ type: custom:home-infra-map-card
 view: network          # electricity | network
 network_view: switch   # topology | vlan | switch
 # board: <id>          # tableau affiché par défaut (vue électricité)
+# boards_layout: tabs  # plusieurs tableaux : stacked (les uns sous les autres, par défaut) | tabs (onglets)
 ```
 
 ## Entités créées

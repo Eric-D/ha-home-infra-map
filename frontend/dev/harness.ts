@@ -183,6 +183,7 @@ card.setConfig({
   type: 'custom:home-infra-map-card',
   view: (params.get('view') as 'electricity' | 'network') ?? 'electricity',
   network_view: (params.get('network_view') as 'topology' | 'vlan' | 'switch') ?? 'topology',
+  ...(params.get('layout') ? { boards_layout: params.get('layout') as 'stacked' | 'tabs' } : {}),
 });
 card.hass = hass;
 root.appendChild(card);
